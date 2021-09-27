@@ -4,3 +4,8 @@
 *.vvp
 *.kate-swp
 
+/example/ECP5/PHY/fpga/blink.svf
+/example/ECP5/PHY/fpga/blink_out.config
+/example/ECP5/PHY/fpga/yosys.exe.stackdump
+/example/ECP5/PHY/fpga/blink.bit
+/example/ECP5/PHY/fpga/blink.json
