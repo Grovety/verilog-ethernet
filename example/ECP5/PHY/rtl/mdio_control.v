@@ -7,6 +7,8 @@ module mdio_control
       input rxd,
       output reg txd = 0,
 
+      output reg debug = 0,
+
       output wire        mdc_o,
       input  wire        mdio_i,
       output wire        mdio_o,
@@ -26,15 +28,20 @@ reg [4:0] txBit = 0;
 reg [12:0] txDelay = 0;
 reg txReady = 0;
 
+reg rxd1;
+always @(posedge clk125)
+begin
+    rxd1 <= rxd;
+end
+
 // Tx State Machine no needs any state :-)
 // Bit Number is the best state for it!!!
 always @(posedge clk125)
-begin                 
+begin
    if (reset == 1)
    begin
-        txReady <= 0;
-        txd <= 1;
    end else
+		txReady <= 0;
    begin 
         if (txDelay != 0)
               txDelay <= txDelay - 1;
@@ -84,14 +91,14 @@ begin
     if (reset == 1) 
     begin 
        rxState = rxIdle; 
-       mdioCmdValid <= 0;
+		 mdioCmdValid <= 0;
     end else
     begin
        case (rxState)
           rxIdle: begin
                   rxByte <= 4;
                   mdioCmdValid <= 0;
-                  if (rxd == 0)
+                  if (rxd1 == 0)
                   begin
                       rxState <= rxStart;
                       rxDelay <= (BaudRateDivider / 2)-1;
@@ -100,6 +107,7 @@ begin
      rxStart: begin
                      if (rxDelay == 0)
                      begin
+              	      debug <= !debug;
                       rxState <= rxData;
                       rxDelay <= BaudRateDivider-1;
                       rxBit <= 8;
@@ -111,13 +119,15 @@ begin
      rxData: begin
                      if (rxDelay == 0)
                      begin 
+		        debug <= !debug;
                         if (rxBit == 0) 
                         begin
                            rxByte <= rxByte - 1;
                            rxState <= rxStop;
+                           rxDelay <= 1;
                         end else
                         begin
-                            rxShift <= {rxd,rxShift[31:1]};
+                            rxShift <= {rxd1,rxShift[31:1]};
                             rxBit <= rxBit - 1;
                             rxDelay <= BaudRateDivider-1;
                         end
@@ -129,7 +139,8 @@ begin
      rxStop: begin
                      if (rxDelay == 0)
                      begin
-                        if (rxByte === 0)
+		        debug <= !debug;
+                        if (rxByte == 0)
                         begin
                              rxState <= rxProcessingCmd;
                         end else
@@ -149,19 +160,23 @@ begin
                       rxState <= rxIdle;
                      end else
                      begin
-                          if (rxd == 0)
+                          if (rxd1 == 0)
                           begin
                              rxState <= rxStart;
                              rxDelay <= (BaudRateDivider / 2)-1;
+                          end else
+                          begin
+                              rxDelay <= rxDelay - 1;
                           end
+
                      end
      end
      rxProcessingCmd:
      begin
 	       if (mdioCmdReady == 1)
 			 begin
-				mdioCmdValid <= 1;
-				rxState <= rxIdle;
+                            mdioCmdValid <= 1;
+                            rxState <= rxIdle;
 			 end
      end
           default: rxState <= rxIdle;

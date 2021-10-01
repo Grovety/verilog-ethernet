@@ -5,8 +5,8 @@ module blink (
     output wire eth_clocks_tx,
     input wire eth_clocks_rx,
     output wire eth_rst_n,
-    input wire eth_mdio,
-    output wire eth_mdc,
+//    input wire eth_mdio,
+//    output wire eth_mdc,
     input wire eth_rx_ctl,
     input wire [3:0] eth_rx_data,
     output wire eth_tx_ctl,
@@ -51,7 +51,6 @@ DELAYG #(
 );
 
 
-
 wire rst_s;
 wire clk_s;
 
@@ -91,10 +90,6 @@ data_oddr_inst (
     .d2({test_cnt[3], test_cnt[1]}),
     .q(test[1:0])
 );*/
-assign test [1:0] = {rxd,eth_mdc};
-assign test [2] = clk_s;
-assign test [3] = eth_clocks_rx;
-assign test [6:4] = 0;
 assign eth_rst_n = 1;
 //assign test [6:3] = test_cnt [3:0];
 wire clkfb;
@@ -158,6 +153,8 @@ mdio_control mdio(
     .reset (0),
     .rxd (rxd),
     .txd (txd),
+    
+    .debug (debug),
 
     .mdc_o(eth_mdc),
     .mdio_i(mdio_to_us),
@@ -166,5 +163,9 @@ mdio_control mdio(
 
 
 );
+assign test [1:0] = {rxd,debug};
+assign test [2] = clk_s;
+assign test [3] = eth_clocks_rx;
+assign test [6:4] = 0;
 
 endmodule
