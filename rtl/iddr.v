@@ -122,6 +122,25 @@ end else if (TARGET == "ALTERA") begin
     end
 
     assign q1 = q1_delay;
+end else if (TARGET == "LATTICE") begin
+    wire [WIDTH-1:0] d_delay;
+    for (n = 0; n < WIDTH; n = n + 1) begin : iddr
+        DELAYG #(
+           .DEL_MODE("SCLK_ALIGNED"),
+           .DEL_VALUE(7'd80)
+        ) DELAYG_7 (
+           .A(d[n]),
+           .Z(d_delay[n])
+        );
+
+
+        IDDRX1F IDDRX1F_1(
+	     .D(d_delay[n]),
+	     .SCLK(clk),
+	     .Q0(q1[n]),
+	     .Q1(q2[n])
+        );
+    end
 end else begin
     reg [WIDTH-1:0] d_reg_1 = {WIDTH{1'b0}};
     reg [WIDTH-1:0] d_reg_2 = {WIDTH{1'b0}};
