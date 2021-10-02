@@ -34,28 +34,12 @@ wire ethphy_eth_tx_clk_o;
 wire clk;
 wire clk90;
 
-ODDRX1F ODDRX1F(
-	.D0(1'd1),
-	.D1(1'd0),
-	.SCLK(eth_tx_clk),
-	.Q(ethphy_eth_tx_clk_o)
-);
-
-
-DELAYG #(
-	.DEL_MODE("SCLK_ALIGNED"),
-	.DEL_VALUE(1'd0)
-) DELAYG (
-	.A(ethphy_eth_tx_clk_o),
-	.Z(eth_clocks_tx)
-);
-
+wire [3:0] control;
 
 wire rst_s;
 wire clk_s;
 
 assign clk_s = clk_i;
-//pll_12_16 pll_inst (.clki(clk_i), .clko(clk_s), .rst(rst_s));
 rst_gen rst_inst (.clk_i(clk_s), .rst_i(1'b0), .rst_o(rst_s));
 
 reg  [WIDTH-1:0] cpt_s;
@@ -72,14 +56,6 @@ always @(posedge clk_s) begin
         led_o <= ~led_o;
 end
 
-reg [3:0] test_cnt;
-always @(posedge clk_s) 
-begin
-    if (rst_s)
-         test_cnt <= 0;
-    else
-	test_cnt <= test_cnt + 1;
-end
 /*oddr #(
     .TARGET("LATTICE"),
     .WIDTH(2)
@@ -91,7 +67,6 @@ data_oddr_inst (
     .q(test[1:0])
 );*/
 assign eth_rst_n = 1;
-//assign test [6:3] = test_cnt [3:0];
 wire clkfb;
 (* FREQUENCY_PIN_CLKI="25" *)
 (* FREQUENCY_PIN_CLKOP="125" *)
@@ -150,11 +125,11 @@ TRELLIS_IO #(
 
 mdio_control mdio(
     .clk125 (clk),
-    .reset (0),
+    .reset (rst_s),
     .rxd (rxd),
     .txd (txd),
     
-    .debug (debug),
+    .control (control),
 
     .mdc_o(eth_mdc),
     .mdio_i(mdio_to_us),
@@ -163,9 +138,31 @@ mdio_control mdio(
 
 
 );
-assign test [1:0] = {rxd,debug};
+assign test [1:0] = {eth_clocks_rx,eth_clocks_rx};
 assign test [2] = clk_s;
 assign test [3] = eth_clocks_rx;
 assign test [6:4] = 0;
+
+rgmii_phy_if #(
+	.TARGET("LATTICE")
+) rgmii
+(
+    .clk(clk),
+    .clk90(clk90),
+    .rst(rst_s),
+
+    .phy_rgmii_rx_clk(eth_clocks_rx),
+    .phy_rgmii_rxd(eth_rx_data),
+    .phy_rgmii_rx_ctl(eth_rx_ctl),
+    .phy_rgmii_tx_clk(eth_clocks_tx),
+    .phy_rgmii_txd(eth_tx_data),
+    .phy_rgmii_tx_ctl(eth_tx_ctl),
+
+    /*
+     * Control
+     */
+    .speed (control [1:0])
+
+);
 
 endmodule

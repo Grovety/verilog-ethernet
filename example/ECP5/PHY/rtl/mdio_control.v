@@ -7,7 +7,7 @@ module mdio_control
       input rxd,
       output reg txd = 0,
 
-      output reg debug = 0,
+      output reg [3:0]  control = 0,
 
       output wire        mdc_o,
       input  wire        mdio_i,
@@ -173,14 +173,15 @@ begin
      end
      rxProcessingCmd:
      begin
-	       if (mdioCmdReady == 1)
-			 begin
-                            mdioCmdValid <= 1;
-                            rxState <= rxIdle;
-			 end
+             if (mdioCmdReady == 1)
+             begin
+               mdioCmdValid <= 1;
+               rxState <= rxIdle;
+             end
+               control <= rxShift [13:10];
      end
-          default: rxState <= rxIdle;
-       endcase
+     default: rxState <= rxIdle;
+     endcase
     end
 end
 

@@ -116,34 +116,21 @@ end else if (TARGET == "ALTERA") begin
         .dataout(q)
     );
 end else if (TARGET == "LATTICE") begin
+    wire [WIDTH-1:0] temp;
     for (n = 0; n < WIDTH; n = n + 1) begin : oddr
-/*         ODDR #(
-             .DDR_CLK_EDGE("SAME_EDGE"),
-             .SRTYPE("ASYNC")
-         )
-         oddr_inst (
-             .Q(q[n]),
-             .C(clk),
-             .CE(1'b1),
-             .D1(d1[n]),
-             .D2(d2[n]),
-             .R(1'b0),
-             .S(1'b0)
-         );*/
-         wire temp;
          ODDRX1F ODDRX1F_2(
 	     .D0(d1[n]),
 	     .D1(d2[n]),
 	     .SCLK(clk),
              .RST (1'b0),
-	     .Q(temp)
+	     .Q(temp[n])
          );
 
          DELAYG #(
 	    .DEL_MODE("SCLK_ALIGNED"),
 	    .DEL_VALUE(1'd0)
         ) DELAYG_2 (
-	   .A(temp),
+	   .A(temp[n]),
 	   .Z(q[n])
 );
 
