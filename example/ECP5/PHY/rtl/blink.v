@@ -138,7 +138,8 @@ mdio_control mdio(
 
 
 );
-assign test [1:0] = {eth_clocks_rx,eth_clocks_rx};
+wire [1:0] debug;
+assign test [1:0] = debug;
 assign test [2] = clk_s;
 assign test [3] = eth_clocks_rx;
 assign test [6:4] = 0;
@@ -150,6 +151,19 @@ rgmii_phy_if #(
     .clk(clk),
     .clk90(clk90),
     .rst(rst_s),
+
+    .mac_gmii_rx_clk(debug[1]),
+    .mac_gmii_rx_rst(),
+    .mac_gmii_rxd(),
+    .mac_gmii_rx_dv(debug[0]),
+    .mac_gmii_rx_er(),
+    .mac_gmii_tx_clk(),
+    .mac_gmii_tx_rst(),
+    .mac_gmii_tx_clk_en(),
+    .mac_gmii_txd(),
+    .mac_gmii_tx_en(),
+    .mac_gmii_tx_er(),
+
 
     .phy_rgmii_rx_clk(eth_clocks_rx),
     .phy_rgmii_rxd(eth_rx_data),
