@@ -115,7 +115,7 @@ end else if (TARGET == "ALTERA") begin
         .aclr(1'b0),
         .dataout(q)
     );
-end else /*if (TARGET == "LATTICE")*/ begin
+end else if (TARGET == "LATTICE") begin
     wire [WIDTH-1:0] temp;
     for (n = 0; n < WIDTH; n = n + 1) begin : oddr
          ODDRX1F ODDRX1F_2(
@@ -135,7 +135,7 @@ end else /*if (TARGET == "LATTICE")*/ begin
         );
 
      end 
-end/* else begin
+end else begin
     reg [WIDTH-1:0] d_reg_1 = {WIDTH{1'b0}};
     reg [WIDTH-1:0] d_reg_2 = {WIDTH{1'b0}};
 
@@ -155,7 +155,7 @@ end/* else begin
     end
 
     assign q = q_reg;
-end                  */
+end                  
 
 endgenerate
 
