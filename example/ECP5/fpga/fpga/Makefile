@@ -17,7 +17,7 @@ TRELLIS=/usr/local/share/trellis
 all: ${TARGET}.bit
 
 $(TARGET).json: $(OBJS)
-	yosys -p "synth_ecp5 -json $@" $(OBJS)
+	yosys -p "synth_ecp5 -top $(TOP) -json $@" $(OBJS)
 
 $(TARGET)_out.config: $(TARGET).json
 	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(TARGET).lpf --freq 65
