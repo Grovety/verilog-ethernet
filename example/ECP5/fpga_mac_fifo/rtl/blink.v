@@ -34,8 +34,6 @@ wire ethphy_eth_tx_clk_o;
 wire clk;
 wire clk90;
 
-wire [3:0] control;
-
 wire rst_s;
 wire clk_s;
 
@@ -129,7 +127,7 @@ mdio_control mdio(
     .rxd (rxd),
     .txd (txd),
     
-    .control (control),
+    .control (),
 
     .mdc_o(eth_mdc),
     .mdio_i(mdio_to_us),
@@ -139,7 +137,8 @@ mdio_control mdio(
 
 );
 wire [1:0] speed;
-assign test [1:0] = speed;
+wire debug;
+assign test [1:0] = {speed[1],debug};
 assign test [2] = clk_s;
 assign test [3] = eth_clocks_rx;
 assign test [6:4] = 0;
@@ -169,8 +168,8 @@ eth_mac_1g_rgmii_fifo #(
     .tx_axis_tuser(/*tx_axis_tuser*/),
 
     .rx_axis_tdata(/*rx_axis_tdata*/),
-    .rx_axis_tvalid(/*rx_axis_tvalid*/),
-    .rx_axis_tready(/*rx_axis_tready*/),
+    .rx_axis_tvalid(),
+    .rx_axis_tready(1'b1/*rx_axis_tready*/),
     .rx_axis_tlast(/*rx_axis_tlast*/),
     .rx_axis_tuser(/*rx_axis_tuser*/),
 
@@ -188,7 +187,7 @@ eth_mac_1g_rgmii_fifo #(
     .rx_error_bad_fcs(),
     .rx_fifo_overflow(),
     .rx_fifo_bad_frame(),
-    .rx_fifo_good_frame(),
+    .rx_fifo_good_frame(debug),
     .speed(speed),
 
     .ifg_delay(12)
