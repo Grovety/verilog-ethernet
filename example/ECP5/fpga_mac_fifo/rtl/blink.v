@@ -12,7 +12,7 @@ module blink (
     output wire eth_tx_ctl,
     output wire [3:0] eth_tx_data,
 
-    output [6:0] test,
+    output [11:0] test,
 
     input rxd,
     output txd,
@@ -137,11 +137,9 @@ mdio_control mdio(
 
 );
 wire [1:0] speed;
-wire debug;
-assign test [1:0] = {speed[1],debug};
-assign test [2] = clk_s;
-assign test [3] = eth_clocks_rx;
-assign test [6:4] = 0;
+wire [11:0] debug;
+
+assign test = debug;
 
 eth_mac_1g_rgmii_fifo #(
     .TARGET("LATTICE"),
@@ -161,11 +159,11 @@ eth_mac_1g_rgmii_fifo #(
     .logic_clk(clk),
     .logic_rst(rst_s),
 
-    .tx_axis_tdata(/*tx_axis_tdata*/),
-    .tx_axis_tvalid(/*tx_axis_tvalid*/),
+    .tx_axis_tdata(8'h0/*tx_axis_tdata*/),
+    .tx_axis_tvalid(0/*tx_axis_tvalid*/),
     .tx_axis_tready(/*tx_axis_tready*/),
-    .tx_axis_tlast(/*tx_axis_tlast*/),
-    .tx_axis_tuser(/*tx_axis_tuser*/),
+    .tx_axis_tlast(0/*tx_axis_tlast*/),
+    .tx_axis_tuser(0/*tx_axis_tuser*/),
 
     .rx_axis_tdata(/*rx_axis_tdata*/),
     .rx_axis_tvalid(),
@@ -179,6 +177,7 @@ eth_mac_1g_rgmii_fifo #(
     .rgmii_tx_clk(eth_clocks_tx),
     .rgmii_txd(eth_tx_data),
     .rgmii_tx_ctl(eth_tx_ctl),
+    .debug (debug),
     // Empty in original design
     .tx_fifo_overflow(),
     .tx_fifo_bad_frame(),
@@ -187,7 +186,7 @@ eth_mac_1g_rgmii_fifo #(
     .rx_error_bad_fcs(),
     .rx_fifo_overflow(),
     .rx_fifo_bad_frame(),
-    .rx_fifo_good_frame(debug),
+    .rx_fifo_good_frame(),
     .speed(speed),
 
     .ifg_delay(12)

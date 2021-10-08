@@ -6,6 +6,7 @@ OBJS+=../rtl/blink.v
 OBJS+=../rtl/rst_gen.v
 OBJS+=../rtl/mdio_master.v
 OBJS+=../rtl/mdio_control.v
+OBJS+=../rtl/lfsr_yosys.v
 #global files from library
 OBJS+=../../../../rtl/iddr.v
 OBJS+=../../../../rtl/oddr.v
@@ -16,7 +17,7 @@ OBJS+=../../../../lib/axis/rtl/axis_async_fifo.v
 OBJS+=../../../../lib/axis/rtl/axis_async_fifo_adapter.v
 OBJS+=../../../../rtl/axis_gmii_tx.v
 OBJS+=../../../../rtl/axis_gmii_rx.v
-OBJS+=../../../../rtl/lfsr.v
+#OBJS+=../../../../rtl/lfsr.v
 OBJS+=../../../../rtl/eth_mac_1g.v
 OBJS+=../../../../rtl/eth_mac_1g_rgmii.v
 OBJS+=../../../../rtl/eth_mac_1g_rgmii_fifo.v
