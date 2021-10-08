@@ -137,9 +137,9 @@ mdio_control mdio(
 
 );
 wire [1:0] speed;
-wire [11:0] debug;
+//wire [11:0] debug;
 
-assign test = debug;
+assign test = 12'h00;//debug;
 
 eth_mac_1g_rgmii_fifo #(
     .TARGET("LATTICE"),
@@ -177,7 +177,7 @@ eth_mac_1g_rgmii_fifo #(
     .rgmii_tx_clk(eth_clocks_tx),
     .rgmii_txd(eth_tx_data),
     .rgmii_tx_ctl(eth_tx_ctl),
-    .debug (debug),
+//    .debug (debug),
     // Empty in original design
     .tx_fifo_overflow(),
     .tx_fifo_bad_frame(),
