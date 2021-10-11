@@ -139,11 +139,16 @@ mdio_control mdio(
 wire [1:0] speed;
 //wire [11:0] debug;
 
-assign test = 12'h00;//debug;
+
+wire [7:0] bus_data;
+wire bus_tvalid;
+wire bus_tready;
+wire bus_tlast;
+wire bus_tuser;
 
 eth_mac_1g_rgmii_fifo #(
     .TARGET("LATTICE"),
-    .USE_CLK90("TRUE"),
+    .USE_CLK90("FALSE"),
     .ENABLE_PADDING(1),
     .MIN_FRAME_LENGTH(64),
     .TX_FIFO_DEPTH(4096),
@@ -159,17 +164,17 @@ eth_mac_1g_rgmii_fifo #(
     .logic_clk(clk),
     .logic_rst(rst_s),
 
-    .tx_axis_tdata(8'h0/*tx_axis_tdata*/),
-    .tx_axis_tvalid(0/*tx_axis_tvalid*/),
-    .tx_axis_tready(/*tx_axis_tready*/),
-    .tx_axis_tlast(0/*tx_axis_tlast*/),
-    .tx_axis_tuser(0/*tx_axis_tuser*/),
+    .tx_axis_tdata(bus_data^8'hff),
+    .tx_axis_tvalid(bus_tvalid),
+    .tx_axis_tready(bus_tready),
+    .tx_axis_tlast(bus_tlast),
+    .tx_axis_tuser(bus_tuser),
 
-    .rx_axis_tdata(/*rx_axis_tdata*/),
-    .rx_axis_tvalid(),
-    .rx_axis_tready(1'b1/*rx_axis_tready*/),
-    .rx_axis_tlast(/*rx_axis_tlast*/),
-    .rx_axis_tuser(/*rx_axis_tuser*/),
+    .rx_axis_tdata(bus_data),
+    .rx_axis_tvalid(bus_tvalid),
+    .rx_axis_tready(bus_tready),
+    .rx_axis_tlast(bus_tlast),
+    .rx_axis_tuser(bus_tuser),
 
     .rgmii_rx_clk(eth_clocks_rx),
     .rgmii_rxd(eth_rx_data),
@@ -192,5 +197,8 @@ eth_mac_1g_rgmii_fifo #(
     .ifg_delay(12)
 
 );
+assign test[7:0] = bus_data;
+assign test[8] = bus_tvalid;
+assign test[9] = bus_tlast;
 
 endmodule
