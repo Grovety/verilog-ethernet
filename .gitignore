@@ -21,3 +21,14 @@
 /example/ECP5/fpga_phy/fpga/blink.bit
 /example/ECP5/fpga_phy/fpga/blink.json
 /example/ECP5/fpga_phy/fpga/blink.svf
+/example/ECP5/fpga/1.txt
+/example/ECP5/fpga/2.bak
+/example/ECP5/fpga/2.txt
+/example/ECP5/fpga/err.log
+/example/ECP5/fpga/fpga/blink.bit
+/example/ECP5/fpga/fpga/blink.json
+/example/ECP5/fpga/fpga/blink.svf
+/example/ECP5/fpga/fpga/blink_out.config
+/example/ECP5/fpga/rtl/blink.bak
+/example/ECP5/fpga_mac_fifo/err.log
+/example/ECP5/fpga_mac_fifo/rtl/blink.bak
