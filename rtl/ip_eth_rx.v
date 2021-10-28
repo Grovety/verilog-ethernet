@@ -123,7 +123,7 @@ localparam [2:0]
     STATE_READ_PAYLOAD_LAST = 3'd3,
     STATE_WAIT_LAST = 3'd4;
 
-reg [2:0] state_reg = STATE_IDLE, state_next;
+reg [2:0] state_reg /*= STATE_IDLE*/, state_next;
 
 // datapath control signals
 reg store_eth_hdr;
@@ -152,7 +152,7 @@ reg store_last_word;
 reg [5:0] hdr_ptr_reg = 6'd0, hdr_ptr_next;
 reg [15:0] word_count_reg = 16'd0, word_count_next;
 
-reg [15:0] hdr_sum_reg = 16'd0, hdr_sum_next;
+reg [15:0] hdr_sum_reg = 16'd0;//, hdr_sum_next;
 
 reg [7:0] last_word_data_reg = 8'd0;
 
@@ -218,15 +218,31 @@ assign error_payload_early_termination = error_payload_early_termination_reg;
 assign error_invalid_header = error_invalid_header_reg;
 assign error_invalid_checksum = error_invalid_checksum_reg;
 
-function [15:0] add1c16b;
+/*function [15:0] add1c16b;
     input [15:0] a, b;
     reg [16:0] t;
     begin
         t = a+b;
         add1c16b = t[15:0] + t[16];
     end
-endfunction
+endfunction*/
 
+   wire [16:0] cs;
+   reg [7:0] cs_latch;
+   assign cs  = hdr_sum_reg + {cs_latch,s_eth_payload_axis_tdata};
+
+
+   reg idle_now;
+   reg idle_now2;
+   always @(posedge clk) 
+   begin
+        idle_now <= idle_now2;
+
+        if (state_next == STATE_IDLE)
+           idle_now2 <= 1;
+        else
+           idle_now2 <= 0;
+   end
 always @* begin
     state_next = STATE_IDLE;
 
@@ -260,7 +276,7 @@ always @* begin
     hdr_ptr_next = hdr_ptr_reg;
     word_count_next = word_count_reg;
 
-    hdr_sum_next = hdr_sum_reg;
+//    hdr_sum_next = hdr_sum_reg;
 
     m_ip_hdr_valid_next = m_ip_hdr_valid_reg && !m_ip_hdr_ready;
 
@@ -278,7 +294,7 @@ always @* begin
         STATE_IDLE: begin
             // idle state - wait for header
             hdr_ptr_next = 16'd0;
-            hdr_sum_next = 16'd0;
+//            hdr_sum_next = 16'd0;
             s_eth_hdr_ready_next = !m_ip_hdr_valid_next;
 
             if (s_eth_hdr_ready && s_eth_hdr_valid) begin
@@ -300,11 +316,11 @@ always @* begin
                 hdr_ptr_next = hdr_ptr_reg + 6'd1;
                 state_next = STATE_READ_HEADER;
 
-                if (hdr_ptr_reg[0]) begin
+/*                if (hdr_ptr_reg[0]) begin
                     hdr_sum_next = add1c16b(hdr_sum_reg, {8'd0, s_eth_payload_axis_tdata});
                 end else begin
                     hdr_sum_next = add1c16b(hdr_sum_reg, {s_eth_payload_axis_tdata, 8'd0});
-                end
+                end*/
 
                 case (hdr_ptr_reg)
                     6'h00: store_ip_version_ihl = 1'b1;
@@ -331,7 +347,7 @@ always @* begin
                         if (m_ip_version_reg != 4'd4 || m_ip_ihl_reg != 4'd5) begin
                             error_invalid_header_next = 1'b1;
                             state_next = STATE_WAIT_LAST;
-                        end else if (hdr_sum_next != 16'hffff) begin
+                        end else if (cs /*hdr_sum_next*/ != 16'hffff) begin
                             error_invalid_checksum_next = 1'b1;
                             state_next = STATE_WAIT_LAST;
                         end else begin
@@ -458,7 +474,20 @@ always @(posedge clk) begin
     hdr_ptr_reg <= hdr_ptr_next;
     word_count_reg <= word_count_next;
 
-    hdr_sum_reg <= hdr_sum_next;
+
+    if (idle_now)
+    begin
+        hdr_sum_reg <= 0;
+        cs_latch <= 0;
+    end
+    else begin
+       if (hdr_ptr_reg[0]==0)
+              cs_latch <= s_eth_payload_axis_tdata;
+       else
+              hdr_sum_reg <= cs [15:0] + cs [16];
+       end
+ 
+//    hdr_sum_reg <= hdr_sum_next;
 
     // datapath
     if (store_eth_hdr) begin
