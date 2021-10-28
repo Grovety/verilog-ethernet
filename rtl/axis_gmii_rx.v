@@ -89,9 +89,10 @@ localparam [7:0]
 localparam [2:0]
     STATE_IDLE = 3'd0,
     STATE_PAYLOAD = 3'd1,
-    STATE_WAIT_LAST = 3'd2;
+    STATE_WAIT_LAST = 3'd2,
+    STATE_CRC_FIRST = 3'd3;
 
-reg [2:0] state_reg = STATE_IDLE, state_next;
+reg [2:0] state_reg /*= STATE_IDLE*/, state_next;
 
 // datapath control signals
 reg reset_crc;
@@ -151,7 +152,7 @@ lfsr #(
     .STYLE("AUTO")
 )
 eth_crc_8 (
-    .data_in(gmii_rxd_d4),
+    .data_in(gmii_rxd_d3),
     .state_in(crc_state),
     .data_out(),
     .state_out(crc_next)
@@ -186,13 +187,18 @@ always @* begin
                 // idle state - wait for packet
                 reset_crc = 1'b1;
 
-                if (gmii_rx_dv_d4 && !gmii_rx_er_d4 && gmii_rxd_d4 == ETH_SFD) begin
+//                if (gmii_rx_dv_d4 && !gmii_rx_er_d4 && gmii_rxd_d4 == ETH_SFD) begin
+                if (gmii_rx_dv_d3 && !gmii_rx_er_d3 && gmii_rxd_d3 == ETH_SFD) begin
                     ptp_ts_next = ptp_ts;
                     start_packet_next = 1'b1;
-                    state_next = STATE_PAYLOAD;
+                    state_next = STATE_CRC_FIRST;
                 end else begin
                     state_next = STATE_IDLE;
                 end
+            end
+            STATE_CRC_FIRST: begin
+               state_next = STATE_PAYLOAD;
+                update_crc = 1'b1;
             end
             STATE_PAYLOAD: begin
                 // read payload
@@ -214,7 +220,8 @@ always @* begin
                         // error received in FCS bytes
                         m_axis_tuser_next = 1'b1;
                         error_bad_frame_next = 1'b1;
-                    end else if ({gmii_rxd_d0, gmii_rxd_d1, gmii_rxd_d2, gmii_rxd_d3} == ~crc_next) begin
+//                    end else if ({gmii_rxd_d0, gmii_rxd_d1, gmii_rxd_d2, gmii_rxd_d3} == ~crc_next) begin
+                    end else if ({gmii_rxd_d0, gmii_rxd_d1, gmii_rxd_d2, gmii_rxd_d3} == ~crc_state) begin
                         // FCS good
                         m_axis_tuser_next = 1'b0;
                     end else begin

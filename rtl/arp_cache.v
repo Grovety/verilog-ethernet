@@ -141,6 +141,13 @@ initial begin
     end
 end
 
+// Just for test
+reg [31:0] ip_addr_mem_latch;
+always @(posedge clk)
+begin
+	ip_addr_mem_latch <= ip_addr_mem[rd_ptr_reg];
+end
+
 always @* begin
     mem_write = 1'b0;
     store_query = 1'b0;
@@ -161,7 +168,7 @@ always @* begin
     if (query_ip_valid_reg && (~query_request_valid || query_response_ready)) begin
         query_response_valid_next = 1;
         query_ip_valid_next = 0;
-        if (valid_mem[rd_ptr_reg] && ip_addr_mem[rd_ptr_reg] == query_ip_reg) begin
+        if (valid_mem[rd_ptr_reg] && ip_addr_mem_latch/*ip_addr_mem[rd_ptr_reg]*/ == query_ip_reg) begin
             query_response_error_next = 0;
         end else begin
             query_response_error_next = 1;
