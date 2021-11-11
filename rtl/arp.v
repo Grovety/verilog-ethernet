@@ -39,7 +39,7 @@ module arp #
     // tkeep signal width (words per cycle)
     parameter KEEP_WIDTH = (DATA_WIDTH/8),
     // Log2 of ARP cache size
-    parameter CACHE_ADDR_WIDTH = 9,
+    parameter CACHE_ADDR_WIDTH = 11,
     // ARP request retry count
     parameter REQUEST_RETRY_COUNT = 4,
     // ARP request retry interval (in cycles)
