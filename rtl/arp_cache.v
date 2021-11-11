@@ -30,7 +30,7 @@ THE SOFTWARE.
  * ARP cache
  */
 module arp_cache #(
-    parameter CACHE_ADDR_WIDTH = 9
+    parameter CACHE_ADDR_WIDTH = 11
 )
 (
     input  wire        clk,
@@ -45,14 +45,14 @@ module arp_cache #(
 
     output wire        query_response_valid,
     input  wire        query_response_ready,
-    output wire        query_response_error,
-    output wire [47:0] query_response_mac,
+    output reg         query_response_error,
+    output reg  [47:0] query_response_mac,
 
     /*
      * Cache write
      */
     input  wire        write_request_valid,
-    output wire        write_request_ready,
+    output reg         write_request_ready,
     input  wire [31:0] write_request_ip,
     input  wire [47:0] write_request_mac,
 
@@ -62,6 +62,143 @@ module arp_cache #(
     input  wire        clear_cache
 );
 
+assign query_request_ready = 1;
+
+wire [11:0] hash_wr;
+hash_11_bit hash_w (
+     .in_data (write_request_ip),
+	  .out_data (hash_wr)
+);
+
+// Memory
+reg [80:0] ram [(2**CACHE_ADDR_WIDTH)-1:0];
+reg ram_we;
+reg [CACHE_ADDR_WIDTH-1:0] ram_addr_w;
+reg [80:0] ram_data_w;
+
+reg [CACHE_ADDR_WIDTH-1:0] ram_addr_r;
+reg [80:0] ram_last_data_r;
+
+// RAM definition
+always @(posedge clk)
+begin
+      if (ram_we)
+      begin
+          ram [ram_addr_w] <= ram_data_w;
+      end
+		ram_last_data_r <= ram [ram_addr_r];
+end
+
+// Read Datapath
+reg [31:0] ip_latch;
+// Why mismatch? Better to compare with 0!
+reg [3:0] ip_mismatch_1;
+
+wire [11:0] hash_rd;
+hash_11_bit hash_r (
+     .in_data (query_request_ip),
+	  .out_data (hash_rd)
+);
+
+reg [2:0] data_valid;
+reg ip_valid;
+
+always @(posedge clk)
+begin
+     if (rst)
+	  begin
+	      data_valid <= 0;
+	  end else
+	  begin
+	     // Pipeline Stage 1
+	     ip_latch <= query_request_ip;
+		  ram_addr_r <= hash_rd;
+		  
+		  // Pipeline Stage 2
+		  ip_mismatch_1 [3] <= !(ram_last_data_r[79:72] == ip_latch [31:24]);
+		  ip_mismatch_1 [2] <= !(ram_last_data_r[71:64] == ip_latch [23:16]);
+		  ip_mismatch_1 [1] <= !(ram_last_data_r[63:56] == ip_latch [15:8]);
+		  ip_mismatch_1 [0] <= !(ram_last_data_r[55:48] == ip_latch [7:0]);
+		  ip_valid <= ram_last_data_r [80];
+		  
+		  // Pipeline Stage 3
+		  if  ((ip_mismatch_1 [3:0] == 4'b0000) && ip_valid)
+		  begin
+		       query_response_mac <= ram_last_data_r[47:0];
+				 query_response_error <= 0;
+		  end else
+		  begin
+		       query_response_error <= 1;
+		  end
+		  
+		  if (query_request_valid==0)
+		  begin
+		     data_valid <= 0;
+		  end else
+		  begin
+		     data_valid <= {1'b1,data_valid [2:1]};
+		  end
+		  
+	  end
+end
+
+assign query_response_valid = data_valid [0];
+
+// Write FSM
+localparam WR_STATE_IDLE               = 0;
+localparam WR_STATE_CLEAR_CACHE        = 1;
+reg [1:0] wr_state;
+reg [CACHE_ADDR_WIDTH-1:0] addr_reg;
+
+always @(posedge clk)
+begin
+   if (rst == 1)
+   begin
+       write_request_ready <= 0;
+       wr_state <= WR_STATE_CLEAR_CACHE;
+       addr_reg <= {CACHE_ADDR_WIDTH{1'b1}};
+       ram_we <= 0;
+   end else
+   begin
+      case (wr_state)
+         WR_STATE_IDLE: begin
+             if (clear_cache == 1)
+             begin
+                 write_request_ready <= 0;
+                 wr_state <= WR_STATE_CLEAR_CACHE;
+                 addr_reg <= {CACHE_ADDR_WIDTH{1'b1}};
+					  ram_we <= 0;
+             end else 
+             begin
+                  write_request_ready <= 1;
+                  ram_addr_w <= hash_wr;
+                  ram_data_w <= {1'b1,write_request_ip,write_request_mac};
+                  ram_we <= write_request_valid;
+             end
+         end
+         WR_STATE_CLEAR_CACHE: begin
+             ram_addr_w <= addr_reg;
+             ram_data_w <= 0;
+             ram_we <= 1;
+             
+             addr_reg <= addr_reg - 1;
+             if (addr_reg == 0)
+                wr_state <= WR_STATE_IDLE;
+         end
+         default: begin
+             write_request_ready <= 0;
+             wr_state <= WR_STATE_CLEAR_CACHE;
+             addr_reg <= {CACHE_ADDR_WIDTH{1'b1}};
+         end
+       endcase
+   end
+end
+
+
+
+/*Old code
+
+/*
 reg mem_write = 0;
 reg store_query = 0;
 reg store_write = 0;
@@ -147,15 +284,16 @@ reg valid_mem_latch;
 reg ip_match;
 always @(posedge clk)
 begin
-	ip_addr_mem_latch <= ip_addr_mem[rd_ptr_reg];
-	valid_mem_latch <= valid_mem[rd_ptr_reg];
+   ip_addr_mem_latch <= ip_addr_mem[rd_ptr_reg];
+   valid_mem_latch <= valid_mem[rd_ptr_reg];
 
         ip_match <= (ip_addr_mem_latch == query_ip_reg);
+//        ip_match <= (ip_addr_mem_latch[7:0] == query_ip_reg[7:0]);
 /*        if (ip_addr_mem_latch == query_ip_reg)
               ip_match <= 1;
         else
              ip_match <= 0;*/
-end
+/*end
 
 always @* begin
     mem_write = 1'b0;
@@ -177,8 +315,7 @@ always @* begin
     if (query_ip_valid_reg && (~query_request_valid || query_response_ready)) begin
         query_response_valid_next = 1;
         query_ip_valid_next = 0;
-//        if (valid_mem[rd_ptr_reg] && ip_addr_mem[rd_ptr_reg] == query_ip_reg) begin
-        if (valid_mem_latch && ip_match/*ip_addr_mem_latch == query_ip_reg*/) begin
+        if (valid_mem[rd_ptr_reg] && ip_addr_mem[rd_ptr_reg] == query_ip_reg) begin
             query_response_error_next = 0;
         end else begin
             query_response_error_next = 1;
@@ -256,5 +393,5 @@ always @(posedge clk) begin
         mac_addr_mem[wr_ptr_reg] <= write_mac_reg;
     end
 end
-
+*/
 endmodule
