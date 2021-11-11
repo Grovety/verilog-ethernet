@@ -7,6 +7,7 @@ OBJS+=../rtl/rst_gen.v
 OBJS+=../rtl/mdio_master.v
 OBJS+=../rtl/mdio_control.v
 OBJS+=../rtl/lfsr_yosys.v
+OBJS+=../rtl/axistouart.v
 #global files from library
 OBJS+=../../../../rtl/iddr.v
 OBJS+=../../../../rtl/oddr.v
@@ -39,6 +40,7 @@ OBJS+=../../../../rtl/arp_eth_rx.v
 OBJS+=../../../../rtl/arp_eth_tx.v      
 OBJS+=../../../../rtl/eth_arb_mux.v      
 OBJS+=../../../../rtl/eth_mux.v       
+OBJS+=../../../../rtl/hash_11_bit.v
 OBJS+=../../../../lib/axis/rtl/arbiter.v     
 OBJS+=../../../../lib/axis/rtl/priority_encoder.v   
 OBJS+=../../../../lib/axis/rtl/axis_fifo.v    
