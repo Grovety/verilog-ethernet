@@ -117,7 +117,7 @@ localparam [2:0]
     STATE_WRITE_PAYLOAD_LAST = 3'd3,
     STATE_WAIT_LAST = 3'd4;
 
-reg [2:0] state_reg = STATE_IDLE, state_next;
+reg [2:0] state_reg /*= STATE_IDLE*/, state_next;
 
 // datapath control signals
 reg store_ip_hdr;
@@ -126,7 +126,7 @@ reg store_last_word;
 reg [5:0] hdr_ptr_reg = 6'd0, hdr_ptr_next;
 reg [15:0] word_count_reg = 16'd0, word_count_next;
 
-reg [15:0] hdr_sum_reg = 16'd0, hdr_sum_next;
+reg [19:0] hdr_sum_reg = 20'd0, hdr_sum_next;
 
 reg [7:0] last_word_data_reg = 8'd0;
 
@@ -170,15 +170,6 @@ assign m_eth_type = m_eth_type_reg;
 
 assign busy = busy_reg;
 assign error_payload_early_termination = error_payload_early_termination_reg;
-
-function [15:0] add1c16b;
-    input [15:0] a, b;
-    reg [16:0] t;
-    begin
-        t = a+b;
-        add1c16b = t[15:0] + t[16];
-    end
-endfunction
 
 always @* begin
     state_next = STATE_IDLE;
@@ -238,39 +229,39 @@ always @* begin
                     end
                     6'h01: begin
                         m_eth_payload_axis_tdata_int = {ip_dscp_reg, ip_ecn_reg};
-                        hdr_sum_next = {4'd4, 4'd5, ip_dscp_reg, ip_ecn_reg};
+                        hdr_sum_next = {4'd4, 4'd5, ip_dscp_reg, ip_ecn_reg} + ip_length_reg;
                     end
                     6'h02: begin
                         m_eth_payload_axis_tdata_int = ip_length_reg[15: 8];
-                        hdr_sum_next = add1c16b(hdr_sum_reg, ip_length_reg);
+                        hdr_sum_next = hdr_sum_reg + ip_identification_reg;
                     end
                     6'h03: begin
                         m_eth_payload_axis_tdata_int = ip_length_reg[ 7: 0];
-                        hdr_sum_next = add1c16b(hdr_sum_reg, ip_identification_reg);
+                        hdr_sum_next = hdr_sum_reg + {ip_flags_reg, ip_fragment_offset_reg};
                     end
                     6'h04: begin
                         m_eth_payload_axis_tdata_int = ip_identification_reg[15: 8];
-                        hdr_sum_next = add1c16b(hdr_sum_reg, {ip_flags_reg, ip_fragment_offset_reg});
+                        hdr_sum_next = hdr_sum_reg + {ip_ttl_reg, ip_protocol_reg};
                     end
                     6'h05: begin
                         m_eth_payload_axis_tdata_int = ip_identification_reg[ 7: 0];
-                        hdr_sum_next = add1c16b(hdr_sum_reg, {ip_ttl_reg, ip_protocol_reg});
+                        hdr_sum_next = hdr_sum_reg + ip_source_ip_reg[31:16];
                     end
                     6'h06: begin
                         m_eth_payload_axis_tdata_int = {ip_flags_reg, ip_fragment_offset_reg[12:8]};
-                        hdr_sum_next = add1c16b(hdr_sum_reg, ip_source_ip_reg[31:16]);
+                        hdr_sum_next = hdr_sum_reg + ip_source_ip_reg[15:0];
                     end
                     6'h07: begin
                         m_eth_payload_axis_tdata_int = ip_fragment_offset_reg[ 7: 0];
-                        hdr_sum_next = add1c16b(hdr_sum_reg, ip_source_ip_reg[15:0]);
+                        hdr_sum_next = hdr_sum_reg + ip_dest_ip_reg[31:16];
                     end
                     6'h08: begin
                         m_eth_payload_axis_tdata_int = ip_ttl_reg;
-                        hdr_sum_next = add1c16b(hdr_sum_reg, ip_dest_ip_reg[31:16]);
+                        hdr_sum_next = hdr_sum_reg + ip_dest_ip_reg[15:0];
                     end
                     6'h09: begin
                         m_eth_payload_axis_tdata_int = ip_protocol_reg;
-                        hdr_sum_next = add1c16b(hdr_sum_reg, ip_dest_ip_reg[15:0]);
+                        hdr_sum_next = hdr_sum_reg [15:0] + hdr_sum_reg [19:16];
                     end
                     6'h0A: m_eth_payload_axis_tdata_int = ~hdr_sum_reg[15: 8];
                     6'h0B: m_eth_payload_axis_tdata_int = ~hdr_sum_reg[ 7: 0];
@@ -365,6 +356,11 @@ always @* begin
     endcase
 end
 
+reg [1:0]  s_ip_ecn_latch;
+always @(posedge clk) begin
+    s_ip_ecn_latch <= s_ip_ecn;
+end
+
 always @(posedge clk) begin
     if (rst) begin
         state_reg <= STATE_IDLE;
@@ -397,7 +393,7 @@ always @(posedge clk) begin
         m_eth_src_mac_reg <= s_eth_src_mac;
         m_eth_type_reg <= s_eth_type;
         ip_dscp_reg <= s_ip_dscp;
-        ip_ecn_reg <= s_ip_ecn;
+        ip_ecn_reg <= s_ip_ecn_latch;
         ip_length_reg <= s_ip_length;
         ip_identification_reg <= s_ip_identification;
         ip_flags_reg <= s_ip_flags;
