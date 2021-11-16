@@ -218,15 +218,6 @@ assign error_payload_early_termination = error_payload_early_termination_reg;
 assign error_invalid_header = error_invalid_header_reg;
 assign error_invalid_checksum = error_invalid_checksum_reg;
 
-/*function [15:0] add1c16b;
-    input [15:0] a, b;
-    reg [16:0] t;
-    begin
-        t = a+b;
-        add1c16b = t[15:0] + t[16];
-    end
-endfunction*/
-
    wire [16:0] cs;
    reg [7:0] cs_latch;
    assign cs  = hdr_sum_reg + {cs_latch,s_eth_payload_axis_tdata};
@@ -347,10 +338,10 @@ always @* begin
                         if (m_ip_version_reg != 4'd4 || m_ip_ihl_reg != 4'd5) begin
                             error_invalid_header_next = 1'b1;
                             state_next = STATE_WAIT_LAST;
-                        end else if (cs /*hdr_sum_next*/ != 16'hffff) begin
+                        end else /*if (cs != 16'hffff) begin
                             error_invalid_checksum_next = 1'b1;
                             state_next = STATE_WAIT_LAST;
-                        end else begin
+                        end else*/ begin
                             m_ip_hdr_valid_next = 1'b1;
                             s_eth_payload_axis_tready_next = m_ip_payload_axis_tready_int_early;
                             state_next = STATE_READ_PAYLOAD;
