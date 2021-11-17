@@ -42,10 +42,10 @@ module arp #
     parameter CACHE_ADDR_WIDTH = 11,
     // ARP request retry count
     parameter REQUEST_RETRY_COUNT = 4,
-    // ARP request retry interval (in cycles)
-    parameter REQUEST_RETRY_INTERVAL = 125000000*2,
-    // ARP request timeout (in cycles)
-    parameter REQUEST_TIMEOUT = 125000000*30
+    // ARP request retry interval (in milliseconds)
+    parameter REQUEST_RETRY_INTERVAL = 1000*2,
+    // ARP request timeout (in milliseconds)
+    parameter REQUEST_TIMEOUT = 1000*30
 )
 (
     input  wire                   clk,
@@ -162,18 +162,18 @@ arp_eth_rx_inst (
     .m_arp_oper(incoming_arp_oper),
     .m_arp_sha(incoming_arp_sha),
     .m_arp_spa(incoming_arp_spa),
-	 .m_mac_matched(incoming_mac_matched),
-	 .m_ip_matched(incoming_ip_matched),
+    .m_mac_matched(incoming_mac_matched),
+    .m_ip_matched(incoming_ip_matched),
 //    .m_arp_tha(incoming_arp_tha),
 //    .m_arp_tpa(incoming_arp_tpa),
     // Status signals
     .busy(),
     .error_header_early_termination(),
     .error_invalid_header(),
-	 // Configuration
-	 .local_mac(local_mac),
-	 .local_ip(local_ip)
-	 
+    // Configuration
+    .local_mac(local_mac),
+    .local_ip(local_ip)
+    
 );
 
 reg outgoing_frame_valid_reg = 1'b0, outgoing_frame_valid_next;
@@ -266,7 +266,15 @@ reg arp_response_error_reg = 1'b0, arp_response_error_next;
 reg [47:0] arp_response_mac_reg = 48'd0, arp_response_mac_next;
 
 reg [5:0] arp_request_retry_cnt_reg = 6'd0, arp_request_retry_cnt_next;
-reg [35:0] arp_request_timer_reg = 36'd0, arp_request_timer_next;
+
+// Times is splitted into 3 stages for improve FMax parameter
+// 0..124 => 7 bits are enough
+reg [6:0] arp_request_timer_reg_lo = 0;
+// 0..999 => 10 bits are enough
+reg [9:0] arp_request_timer_reg_mid = 0;
+// 0..30000 => 15 bits are enough
+reg [14:0] arp_request_timer_reg = 0, arp_request_timer_next;
+reg force_set_timeout = 0;
 
 assign arp_request_ready = arp_request_ready_reg;
 
@@ -276,6 +284,8 @@ assign arp_response_mac = arp_response_mac_reg;
 
 always @* begin
     incoming_frame_ready = 1'b0;
+	 
+	 force_set_timeout = 0;
 
     outgoing_frame_valid_next = outgoing_frame_valid_reg && !outgoing_frame_ready;
     outgoing_eth_dest_mac_next = outgoing_eth_dest_mac_reg;
@@ -357,8 +367,10 @@ always @* begin
                 arp_request_retry_cnt_next = arp_request_retry_cnt_reg - 1;
                 if (arp_request_retry_cnt_reg > 1) begin
                     arp_request_timer_next = REQUEST_RETRY_INTERVAL;
+						  force_set_timeout = 1;
                 end else begin
                     arp_request_timer_next = REQUEST_TIMEOUT;
+						  force_set_timeout = 1;
                 end
             end else begin
                 // out of retries
@@ -383,6 +395,7 @@ always @* begin
                     outgoing_arp_tpa_next = arp_request_ip_reg;
                     arp_request_retry_cnt_next = REQUEST_RETRY_COUNT-1;
                     arp_request_timer_next = REQUEST_RETRY_INTERVAL;
+						  force_set_timeout = 1; 
                 end else begin
                     cache_query_request_valid_next = 1'b0;
                     arp_response_valid_next = 1'b1;
@@ -429,7 +442,6 @@ always @(posedge clk) begin
         arp_request_ready_reg <= 1'b0;
         arp_request_operation_reg <= 1'b0;
         arp_request_retry_cnt_reg <= 6'd0;
-        arp_request_timer_reg <= 36'd0;
         arp_response_valid_reg <= 1'b0;
     end else begin
         outgoing_frame_valid_reg <= outgoing_frame_valid_next;
@@ -438,7 +450,6 @@ always @(posedge clk) begin
         arp_request_ready_reg <= arp_request_ready_next;
         arp_request_operation_reg <= arp_request_operation_next;
         arp_request_retry_cnt_reg <= arp_request_retry_cnt_next;
-        arp_request_timer_reg <= arp_request_timer_next;
         arp_response_valid_reg <= arp_response_valid_next;
     end
 
@@ -454,4 +465,39 @@ always @(posedge clk) begin
     arp_response_mac_reg <= arp_response_mac_next;
 end
 
+// Timer splitter process
+always @(posedge clk) 
+begin
+    if (rst) 
+    begin
+         arp_request_timer_reg_lo <= 0;
+         arp_request_timer_reg_mid <= 0;
+        arp_request_timer_reg <= 0;
+    end else
+    begin
+	      if (force_set_timeout)
+			begin
+			     arp_request_timer_reg <= arp_request_timer_next;
+			end else
+			begin
+				if (arp_request_timer_reg_lo == 0)
+				begin
+					  arp_request_timer_reg_lo <= 7'd124;
+					  if (arp_request_timer_reg_mid == 0)
+					  begin
+							arp_request_timer_reg_mid <= 10'd999;
+							arp_request_timer_reg <= arp_request_timer_next;
+					  end else
+					  begin
+							arp_request_timer_reg_mid <= arp_request_timer_reg_mid - 1;
+					  end
+				end else
+				begin
+					  arp_request_timer_reg_lo <= arp_request_timer_reg_lo - 1;
+				end
+			end
+    end
+end
+
 endmodule
+
