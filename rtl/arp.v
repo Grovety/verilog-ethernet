@@ -286,8 +286,8 @@ assign arp_response_mac = arp_response_mac_reg;
 
 always @* begin
     incoming_frame_ready = 1'b0;
-	 
-	 force_set_timeout = 0;
+    
+    force_set_timeout = 0;
 
     outgoing_frame_valid_next = outgoing_frame_valid_reg && !outgoing_frame_ready;
     outgoing_eth_dest_mac_next = outgoing_eth_dest_mac_reg;
@@ -315,7 +315,7 @@ always @* begin
     incoming_frame_ready = outgoing_frame_ready;
     if (incoming_frame_valid && incoming_frame_ready) begin
         if (incomimg_eth_thisIsArpIncomingPkt
-		  /*incoming_eth_type == 16'h0806 && incoming_arp_htype == 16'h0001 && incoming_arp_ptype == 16'h0800*/) begin
+        /*incoming_eth_type == 16'h0806 && incoming_arp_htype == 16'h0001 && incoming_arp_ptype == 16'h0800*/) begin
             // store sender addresses in cache
             cache_write_request_valid_next = 1'b1;
             cache_write_request_ip_next = incoming_arp_spa;
@@ -370,10 +370,10 @@ always @* begin
                 arp_request_retry_cnt_next = arp_request_retry_cnt_reg - 1;
                 if (arp_request_retry_cnt_reg > 1) begin
                     arp_request_timer_next = REQUEST_RETRY_INTERVAL;
-						  force_set_timeout = 1;
+                    force_set_timeout = 1;
                 end else begin
                     arp_request_timer_next = REQUEST_TIMEOUT;
-						  force_set_timeout = 1;
+                    force_set_timeout = 1;
                 end
             end else begin
                 // out of retries
@@ -398,7 +398,7 @@ always @* begin
                     outgoing_arp_tpa_next = arp_request_ip_reg;
                     arp_request_retry_cnt_next = REQUEST_RETRY_COUNT-1;
                     arp_request_timer_next = REQUEST_RETRY_INTERVAL;
-						  force_set_timeout = 1; 
+                    force_set_timeout = 1; 
                 end else begin
                     cache_query_request_valid_next = 1'b0;
                     arp_response_valid_next = 1'b1;
@@ -468,6 +468,7 @@ always @(posedge clk) begin
     arp_response_mac_reg <= arp_response_mac_next;
 end
 
+reg [16:0] latch_timeout_timer;
 // Timer splitter process
 always @(posedge clk) 
 begin
@@ -478,27 +479,35 @@ begin
         arp_request_timer_reg <= 0;
     end else
     begin
-	      if (force_set_timeout)
-			begin
-			     arp_request_timer_reg <= arp_request_timer_next;
-			end else
-			begin
-				if (arp_request_timer_reg_lo == 0)
-				begin
-					  arp_request_timer_reg_lo <= 7'd124;
-					  if (arp_request_timer_reg_mid == 0)
-					  begin
-							arp_request_timer_reg_mid <= 10'd999;
-							arp_request_timer_reg <= arp_request_timer_next;
-					  end else
-					  begin
-							arp_request_timer_reg_mid <= arp_request_timer_reg_mid - 1;
-					  end
-				end else
-				begin
-					  arp_request_timer_reg_lo <= arp_request_timer_reg_lo - 1;
-				end
-			end
+         // This is also pipelining step!!!
+         if (force_set_timeout)
+         begin
+              latch_timeout_timer [15:0] <= arp_request_timer_next;
+              latch_timeout_timer [16] <= 1;
+         end 
+         
+         if (latch_timeout_timer [16])
+         begin
+              arp_request_timer_reg <= latch_timeout_timer [15:0];
+              latch_timeout_timer [16] <= 0;
+         end else
+         begin
+            if (arp_request_timer_reg_lo == 0)
+            begin
+                 arp_request_timer_reg_lo <= 7'd124;
+                 if (arp_request_timer_reg_mid == 0)
+                 begin
+                     arp_request_timer_reg_mid <= 10'd999;
+                     arp_request_timer_reg <= arp_request_timer_next;
+                 end else
+                 begin
+                     arp_request_timer_reg_mid <= arp_request_timer_reg_mid - 1;
+                 end
+            end else
+            begin
+                 arp_request_timer_reg_lo <= arp_request_timer_reg_lo - 1;
+            end
+         end
     end
 end
 

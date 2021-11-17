@@ -67,7 +67,7 @@ assign query_request_ready = 1;
 wire [11:0] hash_wr;
 hash_11_bit hash_w (
      .in_data (write_request_ip),
-	  .out_data (hash_wr)
+     .out_data (hash_wr)
 );
 
 // Memory
@@ -78,6 +78,7 @@ reg [80:0] ram_data_w;
 
 reg [CACHE_ADDR_WIDTH-1:0] ram_addr_r;
 reg [80:0] ram_last_data_r;
+reg [80:0] ram_last_data_r2;
 
 // RAM definition
 always @(posedge clk)
@@ -86,7 +87,8 @@ begin
       begin
           ram [ram_addr_w] <= ram_data_w;
       end
-		ram_last_data_r <= ram [ram_addr_r];
+      ram_last_data_r <= ram [ram_addr_r];
+      ram_last_data_r2 <= ram_last_data_r;
 end
 
 // Read Datapath
@@ -97,53 +99,53 @@ reg [7:0] ip_mismatch_1;
 wire [11:0] hash_rd;
 hash_11_bit hash_r (
      .in_data (query_request_ip),
-	  .out_data (hash_rd)
+     .out_data (hash_rd)
 );
 
-reg [2:0] data_valid;
+reg [3:0] data_valid;
 reg ip_valid;
 
 always @(posedge clk)
 begin
      if (rst)
-	  begin
-	      data_valid <= 0;
-	  end else
-	  begin
-	     // Pipeline Stage 1
-	     ip_latch <= query_request_ip;
-		  ram_addr_r <= hash_rd;
-		  
-		  // Pipeline Stage 2
-		  ip_mismatch_1 [7] <= !(ram_last_data_r[79:76] == ip_latch [31:28]);
-		  ip_mismatch_1 [6] <= !(ram_last_data_r[75:72] == ip_latch [27:24]);
-		  ip_mismatch_1 [5] <= !(ram_last_data_r[71:68] == ip_latch [23:20]);
-		  ip_mismatch_1 [4] <= !(ram_last_data_r[67:64] == ip_latch [19:16]);
-		  ip_mismatch_1 [3] <= !(ram_last_data_r[63:60] == ip_latch [15:12]);
-		  ip_mismatch_1 [2] <= !(ram_last_data_r[59:56] == ip_latch [11:8]);
-		  ip_mismatch_1 [1] <= !(ram_last_data_r[55:52] == ip_latch [7:4]);
-		  ip_mismatch_1 [0] <= !(ram_last_data_r[51:48] == ip_latch [3:0]);
-		  ip_valid <= ram_last_data_r [80];
-		  
-		  // Pipeline Stage 3
-		  if  ((ip_mismatch_1 [7:0] == 8'b00000000) && ip_valid)
-		  begin
-		       query_response_mac <= ram_last_data_r[47:0];
-				 query_response_error <= 0;
-		  end else
-		  begin
-		       query_response_error <= 1;
-		  end
-		  
-		  if (query_request_valid==0)
-		  begin
-		     data_valid <= 0;
-		  end else
-		  begin
-		     data_valid <= {1'b1,data_valid [2:1]};
-		  end
-		  
-	  end
+     begin
+         data_valid <= 0;
+     end else
+     begin
+        // Pipeline Stage 1
+        ip_latch <= query_request_ip;
+        ram_addr_r <= hash_rd;
+        
+        // Pipeline Stage 2
+        ip_mismatch_1 [7] <= !(ram_last_data_r2[79:76] == ip_latch [31:28]);
+        ip_mismatch_1 [6] <= !(ram_last_data_r2[75:72] == ip_latch [27:24]);
+        ip_mismatch_1 [5] <= !(ram_last_data_r2[71:68] == ip_latch [23:20]);
+        ip_mismatch_1 [4] <= !(ram_last_data_r2[67:64] == ip_latch [19:16]);
+        ip_mismatch_1 [3] <= !(ram_last_data_r2[63:60] == ip_latch [15:12]);
+        ip_mismatch_1 [2] <= !(ram_last_data_r2[59:56] == ip_latch [11:8]);
+        ip_mismatch_1 [1] <= !(ram_last_data_r2[55:52] == ip_latch [7:4]);
+        ip_mismatch_1 [0] <= !(ram_last_data_r2[51:48] == ip_latch [3:0]);
+        ip_valid <= ram_last_data_r2 [80];
+        
+        // Pipeline Stage 3
+        if  ((ip_mismatch_1 [7:0] == 8'b00000000) && ip_valid)
+        begin
+             query_response_mac <= ram_last_data_r2[47:0];
+             query_response_error <= 0;
+        end else
+        begin
+             query_response_error <= 1;
+        end
+        
+        if (query_request_valid==0)
+        begin
+           data_valid <= 0;
+        end else
+        begin
+           data_valid <= {1'b1,data_valid [3:1]};
+        end
+        
+     end
 end
 
 assign query_response_valid = data_valid [0];
@@ -171,7 +173,7 @@ begin
                  write_request_ready <= 0;
                  wr_state <= WR_STATE_CLEAR_CACHE;
                  addr_reg <= {CACHE_ADDR_WIDTH{1'b1}};
-					  ram_we <= 0;
+                 ram_we <= 0;
              end else 
              begin
                   write_request_ready <= 1;
