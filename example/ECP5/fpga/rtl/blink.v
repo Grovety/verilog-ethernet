@@ -22,7 +22,9 @@ module blink #
     output txd,
 
     output eth_mdc,
-    inout  eth_mdio
+    inout  eth_mdio,
+
+    output txdebug
 
 );
 localparam MAX = 12_500_000;
@@ -118,21 +120,22 @@ EHXPLLL #(
 	);
 
 
-/*Pll2 clocker (
-    .CLKI(clk_i),
-    .CLKOP(clk),
-    .CLKOS(clk90)
-);*/
+//Pll2 clocker (
+//    .CLKI(clk_i),
+//    .CLKOP(clk),
+//    .CLKOS(clk90)
+//);
+/*
 wire mdio_to_us;
 wire mdio_from_us;
 wire mdio_t;
 
-/*BB noga (
-	.B(eth_mdio),
-	.I(mdio_from_us),
-	.T(mdio_t),
-	.O(mdio_to_us)
-);*/
+//BB noga (
+//	.B(eth_mdio),
+//	.I(mdio_from_us),
+//	.T(mdio_t),
+//	.O(mdio_to_us)
+//);
 TRELLIS_IO #(
 	.DIR("BIDIR")
 ) TRELLIS_IO (
@@ -157,7 +160,7 @@ mdio_control mdio(
 
 
 );
-
+*/
 // AXI between MAC and Ethernet modules
 wire [7:0] rx_axis_tdata;
 wire rx_axis_tvalid;
@@ -294,8 +297,9 @@ wire tx_fifo_udp_payload_axis_tuser;
 
 // Configuration
 wire [47:0] local_mac   = 48'h02_00_00_00_00_00;
-wire [31:0] local_ip    = {8'd192, 8'd168, 8'd0,   8'd128};
-wire [31:0] gateway_ip  = {8'd192, 8'd168, 8'd0,   8'd1};
+//wire [47:0] local_mac   = 48'h12_34_56_78_9a_bc;
+wire [31:0] local_ip    = {8'd192, 8'd168, 8'd2,   8'd128};
+wire [31:0] gateway_ip  = {8'd192, 8'd168, 8'd2,   8'd1};
 wire [31:0] subnet_mask = {8'd255, 8'd255, 8'd255, 8'd0};
 
 // IP ports not used
@@ -469,7 +473,9 @@ eth_axis_tx_inst (
     .busy()
 );
   
-udp_complete
+udp_complete #(
+    .UDP_CHECKSUM_GEN_ENABLE (0)
+)
 udp_complete_inst (
     .clk(clk),
     .rst(rst),
@@ -616,7 +622,7 @@ udp_payload_fifo (
     .rst(rst),
 
     // AXI input
-    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata),
+    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata+8'h01),
     .s_axis_tkeep(0),
     .s_axis_tvalid(rx_fifo_udp_payload_axis_tvalid),
     .s_axis_tready(rx_fifo_udp_payload_axis_tready),
@@ -693,8 +699,74 @@ udp_payload_fifo (
     .ifg_delay(12)
 
 );*/
-assign test[11:2] = 0;
-assign test[1] = 0;
-assign test[0] = rx_axis_tvalid;
+/*
+wire [7:0] dbg_axis_tdata;
+wire dbg_axis_tvalid;
+wire dbg_axis_tready;
 
+axis_fifo #(
+    .DEPTH(1024),
+    .DATA_WIDTH(8),
+    .KEEP_ENABLE(0),
+    .ID_ENABLE(0),
+    .DEST_ENABLE(0),
+    .USER_ENABLE(0),
+    .USER_WIDTH(0),
+    .FRAME_FIFO(0)
+)
+debug_fifo (
+    .clk(clk),
+    .rst(rst),
+
+    // AXI input
+    .s_axis_tdata(rx_axis_tdata),
+    .s_axis_tkeep(0),
+    .s_axis_tvalid(rx_axis_tvalid&rx_axis_tready),
+    .s_axis_tready(),
+    .s_axis_tlast(rx_axis_tlast),
+    .s_axis_tid(0),
+    .s_axis_tdest(0),
+    .s_axis_tuser(0),
+
+    // AXI output
+    .m_axis_tdata(dbg_axis_tdata),
+    .m_axis_tkeep(),
+    .m_axis_tvalid(dbg_axis_tvalid),
+    .m_axis_tready(dbg_axis_tready),
+    .m_axis_tlast(),
+    .m_axis_tid(),
+    .m_axis_tdest(),
+    .m_axis_tuser(),
+
+    // Status
+    .status_overflow(),
+    .status_bad_frame(),
+    .status_good_frame()
+);
+
+
+
+axistouart dbgUart (
+    .clk125 (clk),
+    .reset (rst_s),
+    .txd (txdebug),
+    .axis_tdata(dbg_axis_tdata),
+    .axis_valid(dbg_axis_tvalid),
+    .axis_tready(dbg_axis_tready)
+);
+*/
+/*assign test[11] = rx_axis_tvalid & clk;
+assign test[10] = rx_axis_tlast;
+assign test[9] = rx_axis_tready;
+assign test[8] = rx_axis_tvalid;
+//assign test[7:0] = rx_axis_tdata[7:0];
+assign test[7] = 0;
+assign test[6] = 0;
+assign test[5] = 0;
+assign test[4] = 0;
+assign test[3] = 0;
+assign test[2] = tx_axis_tlast;
+assign test[1] = tx_axis_tready;
+assign test[0] = tx_axis_tvalid;
+*/
 endmodule
