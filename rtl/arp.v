@@ -275,8 +275,11 @@ reg [6:0] arp_request_timer_reg_lo = 0;
 // 0..999 => 10 bits are enough
 reg [9:0] arp_request_timer_reg_mid = 0;
 // 0..30000 => 15 bits are enough
-reg [14:0] arp_request_timer_reg = 0, arp_request_timer_next;
-reg force_set_timeout = 0;
+reg [14:0] arp_request_timer_reg = 0;
+reg arp_request_timer_dec = 0;
+
+reg [1:0] force_set_request_timeout = 0;
+reg [1:0] force_set_request_retry_interval = 0;
 
 assign arp_request_ready = arp_request_ready_reg;
 
@@ -287,7 +290,8 @@ assign arp_response_mac = arp_response_mac_reg;
 always @* begin
     incoming_frame_ready = 1'b0;
     
-    force_set_timeout = 0;
+    force_set_request_timeout [0] = 0;
+	 force_set_request_retry_interval [0] = 0;
 
     outgoing_frame_valid_next = outgoing_frame_valid_reg && !outgoing_frame_ready;
     outgoing_eth_dest_mac_next = outgoing_eth_dest_mac_reg;
@@ -306,7 +310,8 @@ always @* begin
     arp_request_ip_next = arp_request_ip_reg;
     arp_request_operation_next = arp_request_operation_reg;
     arp_request_retry_cnt_next = arp_request_retry_cnt_reg;
-    arp_request_timer_next = arp_request_timer_reg;
+	 arp_request_timer_dec = 0;
+//    arp_request_timer_next = arp_request_timer_reg;
     arp_response_valid_next = arp_response_valid_reg && !arp_response_ready;
     arp_response_error_next = 1'b0;
     arp_response_mac_next = 48'd0;
@@ -348,7 +353,8 @@ always @* begin
     if (arp_request_operation_reg) begin
         arp_request_ready_next = 1'b0;
         cache_query_request_valid_next = 1'b1;
-        arp_request_timer_next = arp_request_timer_reg - 1;
+//        arp_request_timer_next = arp_request_timer_reg - 1;
+		  arp_request_timer_dec = 1;
         // if we got a response, it will go in the cache, so when the query succeds, we're done
         if (cache_query_response_valid && !cache_query_response_error) begin
             arp_request_operation_next = 1'b0;
@@ -369,11 +375,9 @@ always @* begin
                 outgoing_arp_tpa_next = arp_request_ip_reg;
                 arp_request_retry_cnt_next = arp_request_retry_cnt_reg - 1;
                 if (arp_request_retry_cnt_reg > 1) begin
-                    arp_request_timer_next = REQUEST_RETRY_INTERVAL;
-                    force_set_timeout = 1;
+					      force_set_request_retry_interval [0] = 1;
                 end else begin
-                    arp_request_timer_next = REQUEST_TIMEOUT;
-                    force_set_timeout = 1;
+					     force_set_request_timeout [0] = 1;
                 end
             end else begin
                 // out of retries
@@ -397,8 +401,7 @@ always @* begin
                     outgoing_arp_tha_next = 48'h000000000000;
                     outgoing_arp_tpa_next = arp_request_ip_reg;
                     arp_request_retry_cnt_next = REQUEST_RETRY_COUNT-1;
-                    arp_request_timer_next = REQUEST_RETRY_INTERVAL;
-                    force_set_timeout = 1; 
+						  force_set_request_retry_interval [0] = 1;
                 end else begin
                     cache_query_request_valid_next = 1'b0;
                     arp_response_valid_next = 1'b1;
@@ -479,18 +482,13 @@ begin
         arp_request_timer_reg <= 0;
     end else
     begin
-         // This is also pipelining step!!!
-         if (force_set_timeout)
-         begin
-              latch_timeout_timer [15:0] <= arp_request_timer_next;
-              latch_timeout_timer [16] <= 1;
-         end 
-         
-         if (latch_timeout_timer [16])
-         begin
-              arp_request_timer_reg <= latch_timeout_timer [15:0];
-              latch_timeout_timer [16] <= 0;
-         end else
+			if (force_set_request_timeout [1])
+			begin
+				 arp_request_timer_reg <= REQUEST_TIMEOUT;
+			end else if (force_set_request_retry_interval [1])
+			begin
+				 arp_request_timer_reg <= REQUEST_RETRY_INTERVAL;
+			end else
          begin
             if (arp_request_timer_reg_lo == 0)
             begin
@@ -498,7 +496,10 @@ begin
                  if (arp_request_timer_reg_mid == 0)
                  begin
                      arp_request_timer_reg_mid <= 10'd999;
-                     arp_request_timer_reg <= arp_request_timer_next;
+							if (arp_request_timer_dec)
+							begin
+								arp_request_timer_reg <= arp_request_timer_reg - 1;
+							end
                  end else
                  begin
                      arp_request_timer_reg_mid <= arp_request_timer_reg_mid - 1;
@@ -508,6 +509,8 @@ begin
                  arp_request_timer_reg_lo <= arp_request_timer_reg_lo - 1;
             end
          end
+			force_set_request_timeout [1] <= force_set_request_timeout [0];
+			force_set_request_retry_interval [1] <= force_set_request_retry_interval[0];
     end
 end
 
