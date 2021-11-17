@@ -65,9 +65,10 @@ module arp_eth_rx #
     input  wire                   m_frame_ready,
     output wire [47:0]            m_eth_dest_mac,
     output wire [47:0]            m_eth_src_mac,
-    output wire [15:0]            m_eth_type,
-    output wire [15:0]            m_arp_htype,
-    output wire [15:0]            m_arp_ptype,
+//    output wire [15:0]            m_eth_type,
+//    output wire [15:0]            m_arp_htype,
+//    output wire [15:0]            m_arp_ptype,
+    output reg                    m_eth_thisIsArpIncomingPkt,
     output wire [7:0]             m_arp_hlen,
     output wire [7:0]             m_arp_plen,
     output wire [15:0]            m_arp_oper,
@@ -158,6 +159,8 @@ reg [31:0] m_arp_spa_reg = 32'd0, m_arp_spa_next;
 
 reg [3:0] ip_matched;
 reg [5:0] mac_matched;
+
+reg [5:0] eth_thisIsArpIncomingPkt;
 
 
 reg busy_reg = 1'b0;
@@ -290,6 +293,7 @@ always @* begin
     end
 end
 
+// Real Pipeline
 always @(posedge clk) 
 begin
     if (rst) begin
@@ -299,6 +303,14 @@ begin
 	 begin
 		 if (s_eth_payload_axis_tready && s_eth_payload_axis_tvalid) begin
 			  if (read_arp_header_reg) begin
+					if (ptr_reg == 0)
+  				        eth_thisIsArpIncomingPkt[5] <= (s_eth_payload_axis_tdata == 8'h00);
+					if (ptr_reg == 1)
+						  eth_thisIsArpIncomingPkt[4] <= (s_eth_payload_axis_tdata == 8'h01);
+					if (ptr_reg == 2)
+						  eth_thisIsArpIncomingPkt[3] <= (s_eth_payload_axis_tdata == 8'h08);
+					if (ptr_reg == 3)
+						  eth_thisIsArpIncomingPkt[2] <= (s_eth_payload_axis_tdata == 8'h00);
 					if (ptr_reg == 18)
 						  mac_matched[5] <= (s_eth_payload_axis_tdata == local_mac[5*8 +: 8]);
 					if (ptr_reg == 19)
@@ -322,7 +334,11 @@ begin
 			end
 		end		
 		m_ip_matched <= (ip_matched[0] & ip_matched [1] & ip_matched [2] & ip_matched [3]);
-		m_mac_matched <= (mac_matched[0] & mac_matched [1] & ip_matched [2] & ip_matched [3]);
+		m_mac_matched <= (mac_matched[0] & mac_matched [1] & mac_matched [2] & mac_matched [3] & mac_matched [4] & mac_matched [5]);
+		
+		m_eth_thisIsArpIncomingPkt <= eth_thisIsArpIncomingPkt[0] & eth_thisIsArpIncomingPkt[1]  
+		                            & eth_thisIsArpIncomingPkt[2] & eth_thisIsArpIncomingPkt[3]  
+										    & eth_thisIsArpIncomingPkt[4] & eth_thisIsArpIncomingPkt[5];
    end	
 end
 
@@ -356,6 +372,8 @@ always @(posedge clk) begin
         m_eth_dest_mac_reg <= s_eth_dest_mac;
         m_eth_src_mac_reg <= s_eth_src_mac;
         m_eth_type_reg <= s_eth_type;
+		  eth_thisIsArpIncomingPkt[1] <= (s_eth_type [15:8] == 8'h08);
+		  eth_thisIsArpIncomingPkt[0] <= (s_eth_type [7:0] == 8'h06);
     end
 
     if (rst) begin

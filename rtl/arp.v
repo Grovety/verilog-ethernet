@@ -112,9 +112,10 @@ wire incoming_frame_valid;
 reg incoming_frame_ready;
 wire [47:0] incoming_eth_dest_mac;
 wire [47:0] incoming_eth_src_mac;
-wire [15:0] incoming_eth_type;
-wire [15:0] incoming_arp_htype;
-wire [15:0] incoming_arp_ptype;
+//wire [15:0] incoming_eth_type;
+//wire [15:0] incoming_arp_htype;
+//wire [15:0] incoming_arp_ptype;
+wire incomimg_eth_thisIsArpIncomingPkt;
 wire [7:0]  incoming_arp_hlen;
 wire [7:0]  incoming_arp_plen;
 wire [15:0] incoming_arp_oper;
@@ -154,9 +155,10 @@ arp_eth_rx_inst (
     .m_frame_ready(incoming_frame_ready),
     .m_eth_dest_mac(incoming_eth_dest_mac),
     .m_eth_src_mac(incoming_eth_src_mac),
-    .m_eth_type(incoming_eth_type),
-    .m_arp_htype(incoming_arp_htype),
-    .m_arp_ptype(incoming_arp_ptype),
+//    .m_eth_type(incoming_eth_type),
+//    .m_arp_htype(incoming_arp_htype),
+//    .m_arp_ptype(incoming_arp_ptype),
+    .m_eth_thisIsArpIncomingPkt (incomimg_eth_thisIsArpIncomingPkt),
     .m_arp_hlen(incoming_arp_hlen),
     .m_arp_plen(incoming_arp_plen),
     .m_arp_oper(incoming_arp_oper),
@@ -312,7 +314,8 @@ always @* begin
     // manage incoming frames
     incoming_frame_ready = outgoing_frame_ready;
     if (incoming_frame_valid && incoming_frame_ready) begin
-        if (incoming_eth_type == 16'h0806 && incoming_arp_htype == 16'h0001 && incoming_arp_ptype == 16'h0800) begin
+        if (incomimg_eth_thisIsArpIncomingPkt
+		  /*incoming_eth_type == 16'h0806 && incoming_arp_htype == 16'h0001 && incoming_arp_ptype == 16'h0800*/) begin
             // store sender addresses in cache
             cache_write_request_valid_next = 1'b1;
             cache_write_request_ip_next = incoming_arp_spa;
