@@ -73,15 +73,24 @@ module arp_eth_rx #
     output wire [15:0]            m_arp_oper,
     output wire [47:0]            m_arp_sha,
     output wire [31:0]            m_arp_spa,
-    output wire [47:0]            m_arp_tha,
-    output wire [31:0]            m_arp_tpa,
+	 output reg                    m_ip_matched,
+	 output reg                    m_mac_matched,
+//    output wire [47:0]            m_arp_tha,
+//    output wire [31:0]            m_arp_tpa,
 
     /*
      * Status signals
      */
     output wire                   busy,
     output wire                   error_header_early_termination,
-    output wire                   error_invalid_header
+    output wire                   error_invalid_header,
+	 
+    /*
+     * Configuration
+     */
+    input  wire [47:0]            local_mac,
+    input  wire [31:0]            local_ip
+	 
 );
 
 parameter CYCLE_COUNT = (28+KEEP_WIDTH-1)/KEEP_WIDTH;
@@ -89,6 +98,7 @@ parameter CYCLE_COUNT = (28+KEEP_WIDTH-1)/KEEP_WIDTH;
 parameter PTR_WIDTH = $clog2(CYCLE_COUNT);
 
 parameter OFFSET = 28 % KEEP_WIDTH;
+
 
 // bus width assertions
 initial begin
@@ -143,8 +153,12 @@ reg [7:0]  m_arp_plen_reg = 8'd0, m_arp_plen_next;
 reg [15:0] m_arp_oper_reg = 16'd0, m_arp_oper_next;
 reg [47:0] m_arp_sha_reg = 48'd0, m_arp_sha_next;
 reg [31:0] m_arp_spa_reg = 32'd0, m_arp_spa_next;
-reg [47:0] m_arp_tha_reg = 48'd0, m_arp_tha_next;
-reg [31:0] m_arp_tpa_reg = 32'd0, m_arp_tpa_next;
+//reg [47:0] m_arp_tha_reg = 48'd0, m_arp_tha_next;
+//reg [31:0] m_arp_tpa_reg = 32'd0, m_arp_tpa_next;
+
+reg [3:0] ip_matched;
+reg [5:0] mac_matched;
+
 
 reg busy_reg = 1'b0;
 reg error_header_early_termination_reg = 1'b0, error_header_early_termination_next;
@@ -164,8 +178,8 @@ assign m_arp_plen = m_arp_plen_reg;
 assign m_arp_oper = m_arp_oper_reg;
 assign m_arp_sha = m_arp_sha_reg;
 assign m_arp_spa = m_arp_spa_reg;
-assign m_arp_tha = m_arp_tha_reg;
-assign m_arp_tpa = m_arp_tpa_reg;
+//assign m_arp_tha = m_arp_tha_reg;
+//assign m_arp_tpa = m_arp_tpa_reg;
 
 assign busy = busy_reg;
 assign error_header_early_termination = error_header_early_termination_reg;
@@ -190,8 +204,8 @@ always @* begin
     m_arp_oper_next = m_arp_oper_reg;
     m_arp_sha_next = m_arp_sha_reg;
     m_arp_spa_next = m_arp_spa_reg;
-    m_arp_tha_next = m_arp_tha_reg;
-    m_arp_tpa_next = m_arp_tpa_reg;
+//    m_arp_tha_next = m_arp_tha_reg;
+//    m_arp_tpa_next = m_arp_tpa_reg;
 
     error_header_early_termination_next = 1'b0;
     error_invalid_header_next = 1'b0;
@@ -233,16 +247,16 @@ always @* begin
             `_HEADER_FIELD_(15, m_arp_spa_next[2*8 +: 8])
             `_HEADER_FIELD_(16, m_arp_spa_next[1*8 +: 8])
             `_HEADER_FIELD_(17, m_arp_spa_next[0*8 +: 8])
-            `_HEADER_FIELD_(18, m_arp_tha_next[5*8 +: 8])
-            `_HEADER_FIELD_(19, m_arp_tha_next[4*8 +: 8])
-            `_HEADER_FIELD_(20, m_arp_tha_next[3*8 +: 8])
-            `_HEADER_FIELD_(21, m_arp_tha_next[2*8 +: 8])
-            `_HEADER_FIELD_(22, m_arp_tha_next[1*8 +: 8])
-            `_HEADER_FIELD_(23, m_arp_tha_next[0*8 +: 8])
-            `_HEADER_FIELD_(24, m_arp_tpa_next[3*8 +: 8])
-            `_HEADER_FIELD_(25, m_arp_tpa_next[2*8 +: 8])
-            `_HEADER_FIELD_(26, m_arp_tpa_next[1*8 +: 8])
-            `_HEADER_FIELD_(27, m_arp_tpa_next[0*8 +: 8])
+//            `_HEADER_FIELD_(18, m_arp_tha_next[5*8 +: 8])
+//            `_HEADER_FIELD_(19, m_arp_tha_next[4*8 +: 8])
+//            `_HEADER_FIELD_(20, m_arp_tha_next[3*8 +: 8])
+//            `_HEADER_FIELD_(21, m_arp_tha_next[2*8 +: 8])
+//            `_HEADER_FIELD_(22, m_arp_tha_next[1*8 +: 8])
+//            `_HEADER_FIELD_(23, m_arp_tha_next[0*8 +: 8])
+//            `_HEADER_FIELD_(24, m_arp_tpa_next[3*8 +: 8])
+//            `_HEADER_FIELD_(25, m_arp_tpa_next[2*8 +: 8])
+//            `_HEADER_FIELD_(26, m_arp_tpa_next[1*8 +: 8])
+//            `_HEADER_FIELD_(27, m_arp_tpa_next[0*8 +: 8])
 
             if (ptr_reg == 27/KEEP_WIDTH && (!KEEP_ENABLE || s_eth_payload_axis_tkeep[27%KEEP_WIDTH])) begin
                 read_arp_header_next = 1'b0;
@@ -276,6 +290,42 @@ always @* begin
     end
 end
 
+always @(posedge clk) 
+begin
+    if (rst) begin
+	      ip_matched <= 0;
+			mac_matched <= 0;
+    end else
+	 begin
+		 if (s_eth_payload_axis_tready && s_eth_payload_axis_tvalid) begin
+			  if (read_arp_header_reg) begin
+					if (ptr_reg == 18)
+						  mac_matched[5] <= (s_eth_payload_axis_tdata == local_mac[5*8 +: 8]);
+					if (ptr_reg == 19)
+						  mac_matched[4] <= (s_eth_payload_axis_tdata == local_mac[4*8 +: 8]);
+					if (ptr_reg == 20)
+						  mac_matched[3] <= (s_eth_payload_axis_tdata == local_mac[3*8 +: 8]);
+					if (ptr_reg == 21)
+						  mac_matched[2] <= (s_eth_payload_axis_tdata == local_mac[2*8 +: 8]);
+					if (ptr_reg == 22)
+						  mac_matched[1] <= (s_eth_payload_axis_tdata == local_mac[1*8 +: 8]);
+					if (ptr_reg == 23)
+						  mac_matched[0] <= (s_eth_payload_axis_tdata == local_mac[0*8 +: 8]);
+					if (ptr_reg == 24)
+						  ip_matched[3] <= (s_eth_payload_axis_tdata == local_ip[3*8 +: 8]);
+					if (ptr_reg == 25)
+						  ip_matched[2] <= (s_eth_payload_axis_tdata == local_ip[2*8 +: 8]);
+					if (ptr_reg == 26)
+						  ip_matched[1] <= (s_eth_payload_axis_tdata == local_ip[1*8 +: 8]);
+					if (ptr_reg == 27)
+						  ip_matched[0] <= (s_eth_payload_axis_tdata == local_ip[0*8 +: 8]);
+			end
+		end		
+		m_ip_matched <= (ip_matched[0] & ip_matched [1] & ip_matched [2] & ip_matched [3]);
+		m_mac_matched <= (mac_matched[0] & mac_matched [1] & ip_matched [2] & ip_matched [3]);
+   end	
+end
+
 always @(posedge clk) begin
     read_eth_header_reg <= read_eth_header_next;
     read_arp_header_reg <= read_arp_header_next;
@@ -293,8 +343,8 @@ always @(posedge clk) begin
     m_arp_oper_reg <= m_arp_oper_next;
     m_arp_sha_reg <= m_arp_sha_next;
     m_arp_spa_reg <= m_arp_spa_next;
-    m_arp_tha_reg <= m_arp_tha_next;
-    m_arp_tpa_reg <= m_arp_tpa_next;
+//    m_arp_tha_reg <= m_arp_tha_next;
+//    m_arp_tpa_reg <= m_arp_tpa_next;
 
     error_header_early_termination_reg <= error_header_early_termination_next;
     error_invalid_header_reg <= error_invalid_header_next;

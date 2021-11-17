@@ -120,8 +120,11 @@ wire [7:0]  incoming_arp_plen;
 wire [15:0] incoming_arp_oper;
 wire [47:0] incoming_arp_sha;
 wire [31:0] incoming_arp_spa;
-wire [47:0] incoming_arp_tha;
-wire [31:0] incoming_arp_tpa;
+//wire [47:0] incoming_arp_tha;
+//wire [31:0] incoming_arp_tpa;
+wire incoming_mac_matched;
+wire incoming_ip_matched;
+
 
 /*
  * ARP frame processing
@@ -159,12 +162,18 @@ arp_eth_rx_inst (
     .m_arp_oper(incoming_arp_oper),
     .m_arp_sha(incoming_arp_sha),
     .m_arp_spa(incoming_arp_spa),
-    .m_arp_tha(incoming_arp_tha),
-    .m_arp_tpa(incoming_arp_tpa),
+	 .m_mac_matched(incoming_mac_matched),
+	 .m_ip_matched(incoming_ip_matched),
+//    .m_arp_tha(incoming_arp_tha),
+//    .m_arp_tpa(incoming_arp_tpa),
     // Status signals
     .busy(),
     .error_header_early_termination(),
-    .error_invalid_header()
+    .error_invalid_header(),
+	 // Configuration
+	 .local_mac(local_mac),
+	 .local_ip(local_ip)
+	 
 );
 
 reg outgoing_frame_valid_reg = 1'b0, outgoing_frame_valid_next;
@@ -300,7 +309,7 @@ always @* begin
             cache_write_request_mac_next = incoming_arp_sha;
             if (incoming_arp_oper == ARP_OPER_ARP_REQUEST) begin
                 // ARP request
-                if (incoming_arp_tpa == local_ip) begin
+                if (incoming_ip_matched) begin
                     // send reply frame to valid incoming request
                     outgoing_frame_valid_next = 1'b1;
                     outgoing_eth_dest_mac_next = incoming_eth_src_mac;
@@ -310,7 +319,7 @@ always @* begin
                 end
             end else if (incoming_arp_oper == ARP_OPER_INARP_REQUEST) begin
                 // INARP request
-                if (incoming_arp_tha == local_mac) begin
+                if (incoming_mac_matched) begin
                     // send reply frame to valid incoming request
                     outgoing_frame_valid_next = 1'b1;
                     outgoing_eth_dest_mac_next = incoming_eth_src_mac;
