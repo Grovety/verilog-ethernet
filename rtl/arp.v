@@ -365,7 +365,7 @@ always @* begin
         end
         // timer timeout
         if (arp_request_timer_reg == 0) begin
-            if (arp_request_retry_cnt_reg > 0) begin
+            if (arp_request_retry_cnt_reg != 0) begin
                 // have more retries
                 // send ARP request frame
                 outgoing_frame_valid_next = 1'b1;
