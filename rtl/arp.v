@@ -87,6 +87,9 @@ module arp #
     input  wire                   arp_request_valid,
     output wire                   arp_request_ready,
     input  wire [31:0]            arp_request_ip,
+    input  wire                   arp_request_ip_is_broadcast,
+    input  wire                   arp_request_ip_is_subnet_broadcast,
+    input  wire                   arp_request_request_is_local,
     output wire                   arp_response_valid,
     input  wire                   arp_response_ready,
     output wire                   arp_response_error,
@@ -410,15 +413,18 @@ always @* begin
                 end
             end
         end else if (arp_request_valid && arp_request_ready) begin
-            if (arp_request_ip == 32'hffffffff) begin
+//            if (arp_request_ip == 32'hffffffff) begin
+            if (arp_request_ip_is_broadcast) begin
                 // broadcast address; use broadcast MAC address
                 arp_response_valid_next = 1'b1;
                 arp_response_error_next = 1'b0;
                 arp_response_mac_next = 48'hffffffffffff;
-            end else if (((arp_request_ip ^ gateway_ip) & subnet_mask) == 0) begin
+//            end else if (((arp_request_ip ^ gateway_ip) & subnet_mask) == 0) begin
+            end else if (arp_request_request_is_local) begin
                 // within subnet
                 // (no bits differ between request IP and gateway IP where subnet mask is set)
-                if (~(arp_request_ip | subnet_mask) == 0) begin
+//                if (~(arp_request_ip | subnet_mask) == 0) begin
+                if (arp_request_ip_is_subnet_broadcast) begin
                     // broadcast address; use broadcast MAC address
                     // (all bits in request IP set where subnet mask is clear)
                     arp_response_valid_next = 1'b1;

@@ -112,6 +112,10 @@ module ip_complete #(
     output wire        m_ip_payload_axis_tlast,
     output wire        m_ip_payload_axis_tuser,
 
+    output wire        m_ip_addr_is_broadcast,
+    output wire        m_ip_addr_is_subnet_broadcast,
+    output wire        m_ip_request_is_local,
+
     /*
      * Status
      */
@@ -350,6 +354,10 @@ ip_inst (
     .m_ip_payload_axis_tready(m_ip_payload_axis_tready),
     .m_ip_payload_axis_tlast(m_ip_payload_axis_tlast),
     .m_ip_payload_axis_tuser(m_ip_payload_axis_tuser),
+  
+    .m_ip_addr_is_broadcast(m_ip_addr_is_broadcast),
+    .m_ip_addr_is_subnet_broadcast(m_ip_addr_is_subnet_broadcast),
+    .m_ip_request_is_local(m_ip_request_is_local),
     // IP frame input
     .s_ip_hdr_valid(s_ip_hdr_valid),
     .s_ip_hdr_ready(s_ip_hdr_ready),
@@ -384,7 +392,9 @@ ip_inst (
     .tx_error_arp_failed(tx_error_arp_failed),
     // Configuration
     .local_mac(local_mac),
-    .local_ip(local_ip)
+    .local_ip(local_ip),
+    .gateway_ip(gateway_ip),
+    .subnet_mask(subnet_mask)
 );
 
 /*
@@ -425,6 +435,9 @@ arp_inst (
     .arp_request_valid(arp_request_valid),
     .arp_request_ready(arp_request_ready),
     .arp_request_ip(arp_request_ip),
+    .arp_request_ip_is_broadcast(m_ip_addr_is_broadcast),
+    .arp_request_ip_is_subnet_broadcast(m_ip_addr_is_subnet_broadcast),
+    .arp_request_request_is_local(m_ip_request_is_local),
     .arp_response_valid(arp_response_valid),
     .arp_response_ready(arp_response_ready),
     .arp_response_error(arp_response_error),

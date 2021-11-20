@@ -118,6 +118,10 @@ module ip
     output wire        m_ip_payload_axis_tlast,
     output wire        m_ip_payload_axis_tuser,
 
+    output wire        m_ip_addr_is_broadcast,
+    output wire        m_ip_addr_is_subnet_broadcast,
+    output wire        m_ip_request_is_local,
+
     /*
      * Status
      */
@@ -134,7 +138,9 @@ module ip
      * Configuration
      */
     input  wire [47:0] local_mac,
-    input  wire [31:0] local_ip
+    input  wire [31:0] local_ip,
+    input  wire [31:0] gateway_ip,
+    input  wire [31:0] subnet_mask
 );
 
 localparam [1:0]
@@ -142,7 +148,7 @@ localparam [1:0]
     STATE_ARP_QUERY = 2'd1,
     STATE_WAIT_PACKET = 2'd2;
 
-reg [1:0] state_reg = STATE_IDLE, state_next;
+reg [1:0] state_reg /*= STATE_IDLE*/, state_next;
 
 reg outgoing_ip_hdr_valid_reg = 1'b0, outgoing_ip_hdr_valid_next;
 wire outgoing_ip_hdr_ready;
@@ -191,12 +197,18 @@ ip_eth_rx_inst (
     .m_ip_payload_axis_tready(m_ip_payload_axis_tready),
     .m_ip_payload_axis_tlast(m_ip_payload_axis_tlast),
     .m_ip_payload_axis_tuser(m_ip_payload_axis_tuser),
+    .m_ip_addr_is_broadcast(m_ip_addr_is_broadcast),
+    .m_ip_request_is_local(m_ip_request_is_local),
+    .m_ip_addr_is_subnet_broadcast(m_ip_addr_is_subnet_broadcast),
     // Status signals
     .busy(rx_busy),
     .error_header_early_termination(rx_error_header_early_termination),
     .error_payload_early_termination(rx_error_payload_early_termination),
     .error_invalid_header(rx_error_invalid_header),
-    .error_invalid_checksum(rx_error_invalid_checksum)
+    .error_invalid_checksum(rx_error_invalid_checksum),
+    .gateway_ip(gateway_ip),
+    .subnet_mask(subnet_mask)
+
 );
 
 ip_eth_tx
