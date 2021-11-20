@@ -270,7 +270,7 @@ reg arp_response_valid_reg = 1'b0, arp_response_valid_next;
 reg arp_response_error_reg = 1'b0, arp_response_error_next;
 reg [47:0] arp_response_mac_reg = 48'd0, arp_response_mac_next;
 
-reg [5:0] arp_request_retry_cnt_reg = 6'd0, arp_request_retry_cnt_next;
+reg [3:0] arp_request_retry_cnt_reg = 4'd0, arp_request_retry_cnt_next;
 
 // Times is splitted into 3 stages for improve FMax parameter
 // 0..124 => 7 bits are enough
