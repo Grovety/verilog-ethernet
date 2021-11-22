@@ -118,23 +118,22 @@ end else if (TARGET == "ALTERA") begin
 end else if (TARGET == "LATTICE") begin
     wire [WIDTH-1:0] temp;
     for (n = 0; n < WIDTH; n = n + 1) begin : oddr
-         ODDRX1F ODDRX1F_2(
-	     .D0(d1[n]),
-	     .D1(d2[n]),
-	     .SCLK(clk),
-             .RST (1'b0),
-	     .Q(temp[n])
-         );
-
-         DELAYG #(
-	    .DEL_MODE("SCLK_ALIGNED"),
-	    .DEL_VALUE(1'd0)
-        ) DELAYG_2 (
-	   .A(temp[n]),
-	   .Z(q[n])
+        ODDRX1F ODDRX1F_2(
+	        .D0(d1[n]),
+	        .D1(d2[n]),
+	        .SCLK(clk),
+            .RST (1'b0),
+	        .Q(temp[n])
         );
-
-     end 
+        DELAYG #(
+	        .DEL_MODE("SCLK_ALIGNED"),
+	        .DEL_VALUE(1'd0)
+        ) 
+        DELAYG_2 (
+	        .A(temp[n]),
+	        .Z(q[n])
+        );
+    end 
 end else begin
     reg [WIDTH-1:0] d_reg_1 = {WIDTH{1'b0}};
     reg [WIDTH-1:0] d_reg_2 = {WIDTH{1'b0}};
