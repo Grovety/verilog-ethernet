@@ -1,32 +1,24 @@
-module blink #
-(
+module blink #(
     parameter TARGET = "LATTICE"
 )
 (
-    input      clk_i,
-    output reg led_o,
-
-    output wire eth_clocks_tx,
-    input wire eth_clocks_rx,
-    output wire eth_rst_n,
-//    input wire eth_mdio,
-//    output wire eth_mdc,
-    input wire eth_rx_ctl,
-    input wire [3:0] eth_rx_data,
-    output wire eth_tx_ctl,
-    output wire [3:0] eth_tx_data,
-
-    output [11:0] test,
-
-    input rxd,
-    output txd,
-
-    output eth_mdc,
-    inout  eth_mdio,
-
-    output txdebug
-
+    input              clk_i,
+    output reg         led_o,
+    output wire        eth_clocks_tx,
+    input  wire        eth_clocks_rx,
+    output wire        eth_rst_n,
+    input  wire        eth_rx_ctl,
+    input  wire [3:0]  eth_rx_data,
+    output wire        eth_tx_ctl,
+    output wire [3:0]  eth_tx_data,
+    output      [11:0] test,
+    input              rxd,
+    output             txd,
+    output             eth_mdc,
+    inout              eth_mdio,
+    output             txdebug
 );
+
 localparam MAX = 12_500_000;
 localparam WIDTH = $clog2(MAX);
 
@@ -52,29 +44,18 @@ rst_gen rst_inst (.clk_i(clk_s), .rst_i(1'b0), .rst_o(rst_s));
 reg  [WIDTH-1:0] cpt_s;
 wire [WIDTH-1:0] cpt_next_s = cpt_s + 1'b1;
 
-wire             end_s = cpt_s == MAX-1;
+wire end_s = cpt_s == MAX-1;
 
 always @(posedge clk_s) begin
     cpt_s <= (rst_s || end_s) ? {WIDTH{1'b0}} : cpt_next_s;
-
-    if (rst_s)
+    if (rst_s) begin
         led_o <= 1'b0;
-    else if (end_s)
+    end else if (end_s) begin
         led_o <= ~led_o;
+    end
 end
 
-/*oddr #(
-    .TARGET("LATTICE"),
-    .WIDTH(2)
-)
-data_oddr_inst (
-    .clk(clk_s),
-    .d1({test_cnt[2], test_cnt[0]}),
-    .d2({test_cnt[3], test_cnt[1]}),
-    .q(test[1:0])
-);*/
 assign eth_rst_n = 1;
-
 
 wire clkfb;
 (* FREQUENCY_PIN_CLKI="25" *)
@@ -82,85 +63,44 @@ wire clkfb;
 (* FREQUENCY_PIN_CLKOS="125" *)
 (* ICP_CURRENT="12" *) (* LPF_RESISTOR="8" *) (* MFG_ENABLE_FILTEROPAMP="1" *) (* MFG_GMCREF_SEL="2" *)
 EHXPLLL #(
-        .PLLRST_ENA("DISABLED"),
-        .INTFB_WAKE("DISABLED"),
-        .STDBY_ENABLE("DISABLED"),
-        .DPHASE_SOURCE("DISABLED"),
-        .OUTDIVIDER_MUXA("DIVA"),
-        .OUTDIVIDER_MUXB("DIVB"),
-        .OUTDIVIDER_MUXC("DIVC"),
-        .OUTDIVIDER_MUXD("DIVD"),
-        .CLKI_DIV(1),
-        .CLKOP_ENABLE("ENABLED"),
-        .CLKOP_DIV(5),
-        .CLKOP_CPHASE(2),
-        .CLKOP_FPHASE(0),
-        .CLKOS_ENABLE("ENABLED"),
-        .CLKOS_DIV(5),
-        .CLKOS_CPHASE(3),
-        .CLKOS_FPHASE(2),
-        .FEEDBK_PATH("INT_OP"),
-        .CLKFB_DIV(5)
-    ) pll_i (
-        .RST(1'b0),
-        .STDBY(1'b0),
-        .CLKI(clk_i),
-        .CLKOP(clk),
-        .CLKOS(clk90),
-        .CLKFB(clkfb),
-        .CLKINTFB(clkfb),
-        .PHASESEL0(1'b0),
-        .PHASESEL1(1'b0),
-        .PHASEDIR(1'b1),
-        .PHASESTEP(1'b1),
-        .PHASELOADREG(1'b1),
-        .PLLWAKESYNC(1'b0),
-        .ENCLKOP(1'b0),
-        .LOCK(locked)
-	);
-
-
-//Pll2 clocker (
-//    .CLKI(clk_i),
-//    .CLKOP(clk),
-//    .CLKOS(clk90)
-//);
-/*
-wire mdio_to_us;
-wire mdio_from_us;
-wire mdio_t;
-
-//BB noga (
-//	.B(eth_mdio),
-//	.I(mdio_from_us),
-//	.T(mdio_t),
-//	.O(mdio_to_us)
-//);
-TRELLIS_IO #(
-	.DIR("BIDIR")
-) TRELLIS_IO (
-	.B(eth_mdio),
-	.I(mdio_from_us),
-	.T(mdio_t),
-	.O(mdio_to_us)
+    .PLLRST_ENA("DISABLED"),
+    .INTFB_WAKE("DISABLED"),
+    .STDBY_ENABLE("DISABLED"),
+    .DPHASE_SOURCE("DISABLED"),
+    .OUTDIVIDER_MUXA("DIVA"),
+    .OUTDIVIDER_MUXB("DIVB"),
+    .OUTDIVIDER_MUXC("DIVC"),
+    .OUTDIVIDER_MUXD("DIVD"),
+    .CLKI_DIV(1),
+    .CLKOP_ENABLE("ENABLED"),
+    .CLKOP_DIV(5),
+    .CLKOP_CPHASE(2),
+    .CLKOP_FPHASE(0),
+    .CLKOS_ENABLE("ENABLED"),
+    .CLKOS_DIV(5),
+    .CLKOS_CPHASE(3),
+    .CLKOS_FPHASE(2),
+    .FEEDBK_PATH("INT_OP"),
+    .CLKFB_DIV(5)
+)
+pll_i (
+    .RST(1'b0),
+    .STDBY(1'b0),
+    .CLKI(clk_i),
+    .CLKOP(clk),
+    .CLKOS(clk90),
+    .CLKFB(clkfb),
+    .CLKINTFB(clkfb),
+    .PHASESEL0(1'b0),
+    .PHASESEL1(1'b0),
+    .PHASEDIR(1'b1),
+    .PHASESTEP(1'b1),
+    .PHASELOADREG(1'b1),
+    .PLLWAKESYNC(1'b0),
+    .ENCLKOP(1'b0),
+    .LOCK(locked)
 );
 
-mdio_control mdio(
-    .clk125 (clk),
-    .reset (rst_s),
-    .rxd (rxd),
-    .txd (txd),
-    
-    .control (),
-
-    .mdc_o(eth_mdc),
-    .mdio_i(mdio_to_us),
-    .mdio_o(mdio_from_us),
-    .mdio_t(mdio_t)
-
-
-);
-*/
 // AXI between MAC and Ethernet modules
 wire [7:0] rx_axis_tdata;
 wire rx_axis_tvalid;
@@ -297,7 +237,6 @@ wire tx_fifo_udp_payload_axis_tuser;
 
 // Configuration
 wire [47:0] local_mac   = 48'h02_00_00_00_00_00;
-//wire [47:0] local_mac   = 48'h12_34_56_78_9a_bc;
 wire [31:0] local_ip    = {8'd192, 8'd168, 8'd2,   8'd128};
 wire [31:0] gateway_ip  = {8'd192, 8'd168, 8'd2,   8'd1};
 wire [31:0] subnet_mask = {8'd255, 8'd255, 8'd255, 8'd0};
@@ -368,10 +307,8 @@ assign rx_udp_payload_axis_tready = (rx_fifo_udp_payload_axis_tready && match_co
 assign rx_fifo_udp_payload_axis_tlast = rx_udp_payload_axis_tlast;
 assign rx_fifo_udp_payload_axis_tuser = rx_udp_payload_axis_tuser;
 
-//assign led = sw;
 assign phy0_reset_n = ~rst;
 assign phy1_reset_n = ~rst;
-
 
 eth_mac_1g_rgmii_fifo #(
     .TARGET(TARGET),
@@ -389,26 +326,22 @@ eth_mac_inst (
     .gtx_rst(rst_s),
     .logic_clk(clk),
     .logic_rst(rst_s),
-
     .tx_axis_tdata(tx_axis_tdata),
     .tx_axis_tvalid(tx_axis_tvalid),
     .tx_axis_tready(tx_axis_tready),
     .tx_axis_tlast(tx_axis_tlast),
     .tx_axis_tuser(tx_axis_tuser),
-
     .rx_axis_tdata(rx_axis_tdata),
     .rx_axis_tvalid(rx_axis_tvalid),
     .rx_axis_tready(rx_axis_tready),
     .rx_axis_tlast(rx_axis_tlast),
     .rx_axis_tuser(rx_axis_tuser),
-
     .rgmii_rx_clk(eth_clocks_rx),
     .rgmii_rxd(eth_rx_data),
     .rgmii_rx_ctl(eth_rx_ctl),
     .rgmii_tx_clk(eth_clocks_tx),
     .rgmii_txd(eth_tx_data),
-    .rgmii_tx_ctl(eth_tx_ctl),
-    
+    .rgmii_tx_ctl(eth_tx_ctl),    
     .tx_fifo_overflow(),
     .tx_fifo_bad_frame(),
     .tx_fifo_good_frame(),
@@ -418,7 +351,6 @@ eth_mac_inst (
     .rx_fifo_bad_frame(),
     .rx_fifo_good_frame(),
     .speed(),
-
     .ifg_delay(12)
 );
 
@@ -620,7 +552,6 @@ axis_fifo #(
 udp_payload_fifo (
     .clk(clk),
     .rst(rst),
-
     // AXI input
     .s_axis_tdata(rx_fifo_udp_payload_axis_tdata+8'h01),
     .s_axis_tkeep(0),
@@ -630,7 +561,6 @@ udp_payload_fifo (
     .s_axis_tid(0),
     .s_axis_tdest(0),
     .s_axis_tuser(rx_fifo_udp_payload_axis_tuser),
-
     // AXI output
     .m_axis_tdata(tx_fifo_udp_payload_axis_tdata),
     .m_axis_tkeep(),
@@ -640,133 +570,10 @@ udp_payload_fifo (
     .m_axis_tid(),
     .m_axis_tdest(),
     .m_axis_tuser(tx_fifo_udp_payload_axis_tuser),
-
     // Status
     .status_overflow(),
     .status_bad_frame(),
     .status_good_frame()
 );
 
-
-/*eth_mac_1g_rgmii_fifo #(
-    .TARGET("LATTICE"),
-    .USE_CLK90("FALSE"),
-    .ENABLE_PADDING(1),
-    .MIN_FRAME_LENGTH(64),
-    .TX_FIFO_DEPTH(4096),
-    .TX_FRAME_FIFO(1),
-    .RX_FIFO_DEPTH(4096),
-    .RX_FRAME_FIFO(1)
-
-) eth_mac_inst
-(
-    .gtx_clk(clk),
-    .gtx_clk90(clk90),
-    .gtx_rst(rst_s),
-    .logic_clk(clk),
-    .logic_rst(rst_s),
-
-    .tx_axis_tdata(bus_data^8'hff),
-    .tx_axis_tvalid(bus_tvalid),
-    .tx_axis_tready(bus_tready),
-    .tx_axis_tlast(bus_tlast),
-    .tx_axis_tuser(bus_tuser),
-
-    .rx_axis_tdata(bus_data),
-    .rx_axis_tvalid(bus_tvalid),
-    .rx_axis_tready(bus_tready),
-    .rx_axis_tlast(bus_tlast),
-    .rx_axis_tuser(bus_tuser),
-
-    .rgmii_rx_clk(eth_clocks_rx),
-    .rgmii_rxd(eth_rx_data),
-    .rgmii_rx_ctl(eth_rx_ctl),
-    .rgmii_tx_clk(eth_clocks_tx),
-    .rgmii_txd(eth_tx_data),
-    .rgmii_tx_ctl(eth_tx_ctl),
-//    .debug (debug),
-    // Empty in original design
-    .tx_fifo_overflow(),
-    .tx_fifo_bad_frame(),
-    .tx_fifo_good_frame(),
-    .rx_error_bad_frame(),
-    .rx_error_bad_fcs(),
-    .rx_fifo_overflow(),
-    .rx_fifo_bad_frame(),
-    .rx_fifo_good_frame(),
-    .speed(),
-
-    .ifg_delay(12)
-
-);*/
-/*
-wire [7:0] dbg_axis_tdata;
-wire dbg_axis_tvalid;
-wire dbg_axis_tready;
-
-axis_fifo #(
-    .DEPTH(1024),
-    .DATA_WIDTH(8),
-    .KEEP_ENABLE(0),
-    .ID_ENABLE(0),
-    .DEST_ENABLE(0),
-    .USER_ENABLE(0),
-    .USER_WIDTH(0),
-    .FRAME_FIFO(0)
-)
-debug_fifo (
-    .clk(clk),
-    .rst(rst),
-
-    // AXI input
-    .s_axis_tdata(rx_axis_tdata),
-    .s_axis_tkeep(0),
-    .s_axis_tvalid(rx_axis_tvalid&rx_axis_tready),
-    .s_axis_tready(),
-    .s_axis_tlast(rx_axis_tlast),
-    .s_axis_tid(0),
-    .s_axis_tdest(0),
-    .s_axis_tuser(0),
-
-    // AXI output
-    .m_axis_tdata(dbg_axis_tdata),
-    .m_axis_tkeep(),
-    .m_axis_tvalid(dbg_axis_tvalid),
-    .m_axis_tready(dbg_axis_tready),
-    .m_axis_tlast(),
-    .m_axis_tid(),
-    .m_axis_tdest(),
-    .m_axis_tuser(),
-
-    // Status
-    .status_overflow(),
-    .status_bad_frame(),
-    .status_good_frame()
-);
-
-
-
-axistouart dbgUart (
-    .clk125 (clk),
-    .reset (rst_s),
-    .txd (txdebug),
-    .axis_tdata(dbg_axis_tdata),
-    .axis_valid(dbg_axis_tvalid),
-    .axis_tready(dbg_axis_tready)
-);
-*/
-/*assign test[11] = rx_axis_tvalid & clk;
-assign test[10] = rx_axis_tlast;
-assign test[9] = rx_axis_tready;
-assign test[8] = rx_axis_tvalid;
-//assign test[7:0] = rx_axis_tdata[7:0];
-assign test[7] = 0;
-assign test[6] = 0;
-assign test[5] = 0;
-assign test[4] = 0;
-assign test[3] = 0;
-assign test[2] = tx_axis_tlast;
-assign test[1] = tx_axis_tready;
-assign test[0] = tx_axis_tvalid;
-*/
 endmodule

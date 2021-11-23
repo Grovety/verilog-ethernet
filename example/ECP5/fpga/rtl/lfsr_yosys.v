@@ -1,4 +1,3 @@
-
 // Language: Verilog 2001
 
 `timescale 1ns / 1ps
@@ -6,8 +5,7 @@
 /*
  * Parametrizable combinatorial parallel LFSR/CRC
  */
-module lfsr #
-(
+module lfsr #(
     // width of LFSR
     parameter LFSR_WIDTH = 31,
     // LFSR polynomial
@@ -30,20 +28,18 @@ module lfsr #
     output wire [LFSR_WIDTH-1:0] state_out
 );
 
-    wire [31:0] c;
-    wire [7:0] d;
-
-    wire [31:0] newcrc;
+wire [31:0] c;
+wire [7:0] d;
+wire [31:0] newcrc;
 generate
     genvar n;
     for (n = 0; n < 32; n = n + 1) begin : cross
-      assign c[n] = state_in [31-n];
-      assign state_out [n] = newcrc [31-n];
+        assign c[n] = state_in [31-n];
+        assign state_out [n] = newcrc [31-n];
     end
 endgenerate
 
     assign {d[7],d[6],d[5],d[4],d[3],d[2],d[1],d[0]} = {data_in[0],data_in[1],data_in[2],data_in[3],data_in[4],data_in[5],data_in[6],data_in[7]};
-
 
     assign newcrc[0] = d[6] ^ d[0] ^ c[24] ^ c[30];
     assign newcrc[1] = d[7] ^ d[6] ^ d[1] ^ d[0] ^ c[24] ^ c[25] ^ c[30] ^ c[31];
