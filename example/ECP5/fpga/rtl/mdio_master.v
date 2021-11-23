@@ -67,9 +67,9 @@ module mdio_master (
 );
 
 localparam [1:0]
-STATE_IDLE = 2'd0,
-STATE_PREAMBLE = 2'd1,
-STATE_TRANSFER = 2'd2;
+    STATE_IDLE = 2'd0,
+    STATE_PREAMBLE = 2'd1,
+    STATE_TRANSFER = 2'd2;
 
 reg [1:0] state_reg = STATE_IDLE, state_next;
 
