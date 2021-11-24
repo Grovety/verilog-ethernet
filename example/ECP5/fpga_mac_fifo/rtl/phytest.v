@@ -1,4 +1,4 @@
-module phytest
-(
+module phytest (
 );
+
 endmodule
