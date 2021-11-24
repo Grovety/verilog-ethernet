@@ -622,7 +622,7 @@ udp_payload_fifo (
     .rst(rst),
 
     // AXI input
-    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata+8'h01),
+    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata/*+8'h01*/),
     .s_axis_tkeep(0),
     .s_axis_tvalid(rx_fifo_udp_payload_axis_tvalid),
     .s_axis_tready(rx_fifo_udp_payload_axis_tready),
