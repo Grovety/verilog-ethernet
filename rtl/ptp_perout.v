@@ -83,7 +83,7 @@ localparam [2:0]
     STATE_UPDATE_FALL_2 = 3'd4,
     STATE_WAIT_EDGE = 3'd5;
 
-reg [2:0] state_reg = STATE_IDLE, state_next;
+reg [2:0] state_reg /*= STATE_IDLE*/, state_next;
 
 reg [47:0] time_s_reg = 0;
 reg [30:0] time_ns_reg = 0;

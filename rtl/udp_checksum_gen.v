@@ -148,7 +148,7 @@ localparam [2:0]
     STATE_SUM_PAYLOAD = 3'd4,
     STATE_FINISH_SUM = 3'd5;
 
-reg [2:0] state_reg = STATE_IDLE, state_next;
+reg [2:0] state_reg /*= STATE_IDLE*/, state_next;
 
 // datapath control signals
 reg store_udp_hdr;
