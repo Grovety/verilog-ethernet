@@ -10,7 +10,7 @@ LOCATE COMP "eth_rst_n" SITE "R6";
 IOBUF PORT "eth_rst_n" IO_TYPE=LVCMOS33;
 LOCATE COMP "eth_mdio" SITE "T4";
 IOBUF PORT "eth_mdio" IO_TYPE=LVCMOS33;
-LOCATE COMP "eth_mdc" SITE "P5";
+LOCATE COMP "eth_mdc" SITE "R5";
 IOBUF PORT "eth_mdc" IO_TYPE=LVCMOS33;
 LOCATE COMP "eth_rx_ctl" SITE "J2";
 IOBUF PORT "eth_rx_ctl" IO_TYPE=LVCMOS33;
