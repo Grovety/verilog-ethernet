@@ -63,7 +63,7 @@ localparam [1:0]
     STATE_IDLE = 2'd0,
     STATE_PAYLOAD = 2'd1;
 
-reg [1:0] state_reg = STATE_IDLE, state_next;
+reg [1:0] state_reg /*= STATE_IDLE*/, state_next;
 
 // datapath control signals
 reg reset_crc;

@@ -141,7 +141,7 @@ localparam [2:0]
     STATE_WRITE_PAYLOAD_LAST = 3'd3,
     STATE_WAIT_LAST = 3'd4;
 
-reg [2:0] state_reg = STATE_IDLE, state_next;
+reg [2:0] state_reg /*= STATE_IDLE*/, state_next;
 
 // datapath control signals
 reg store_udp_hdr;
