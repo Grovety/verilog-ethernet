@@ -2,7 +2,7 @@ LOCATE COMP "clk_i" SITE "P6";
 IOBUF PORT "clk_i" IO_TYPE=LVCMOS33;
 FREQUENCY PORT "clk_i" 25 MHZ;
 
-LOCATE COMP "eth_clocks_tx" SITE "L2";
+LOCATE COMP "eth_clocks_tx" SITE "L1";
 IOBUF PORT "eth_clocks_tx" IO_TYPE=LVCMOS33;
 LOCATE COMP "eth_clocks_rx" SITE "J1";
 IOBUF PORT "eth_clocks_rx" IO_TYPE=LVCMOS33;
