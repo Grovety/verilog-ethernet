@@ -1,3 +1,5 @@
+BOARD=ecp5_v7
+
 # Targets
 TARGETS:=
 
