@@ -1,5 +1,7 @@
 TARGET=blink
 TOP=blink
+# Version of the Colorlight board can be replaced by command line option ex: BOARD=ecp5_v8
+BOARD=ecp5_v7
 
 # local files for target project
 OBJS+=../rtl/blink.v 
@@ -7,7 +9,7 @@ OBJS+=../rtl/rst_gen.v
 OBJS+=../rtl/mdio_master.v
 OBJS+=../rtl/mdio_control.v
 OBJS+=../rtl/lfsr_yosys.v
-OBJS+=../rtl/axistouart.v
+#OBJS+=../rtl/axistouart.v
 #global files from library
 OBJS+=../../../../rtl/iddr.v
 OBJS+=../../../../rtl/oddr.v
@@ -53,7 +55,7 @@ $(TARGET).json: $(OBJS)
 	yosys -p "synth_ecp5 -top $(TOP) -json $@" $(OBJS)
 
 $(TARGET)_out.config: $(TARGET).json
-	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(TARGET).lpf --freq 166
+	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166
 
 $(TARGET).bit: $(TARGET)_out.config
 	ecppack --svf ${TARGET}.svf $< $@
