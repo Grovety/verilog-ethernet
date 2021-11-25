@@ -1,19 +1,3 @@
-###################################################################
-# 
-# Parameters:
-# FPGA_TOP - Top module name
-# SYN_FILES  - space-separated list of source files
-# BOARD - Version of the Colorlight board, possible values 
-# ecp5_v7(by default), ecp5_v8 
-# 
-# Example:
-# 
-# FPGA_TOP = blink
-# SYN_FILES  = rtl/fpga.v rtl/clocks.v
-# BOARD=ecp5_v7
-# 
-###################################################################
-
 # FPGA settings
 FPGA_TOP=fpga
 FPGA_FAMILY = ECP5

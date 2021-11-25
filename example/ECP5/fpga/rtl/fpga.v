@@ -1,4 +1,4 @@
-module blink #(
+module fpga #(
     parameter TARGET = "LATTICE"
 )
 (
