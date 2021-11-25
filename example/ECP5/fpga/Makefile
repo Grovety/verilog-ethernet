@@ -1,4 +1,4 @@
-BOARD=ecp5_v7
+BOARD:=ecp5_v7
 
 # Targets
 TARGETS:=
@@ -13,7 +13,7 @@ all: $(SUBDIRS) $(TARGETS)
 
 .PHONY: $(SUBDIRS)
 $(SUBDIRS):
-	cd $@ && $(MAKE)
+	cd $@ && $(MAKE) BOARD=$(BOARD)
 
 .PHONY: $(SUBDIRS_CLEAN)
 $(SUBDIRS_CLEAN):
