@@ -39,7 +39,7 @@ all: fpga
 fpga: $(FPGA_TOP).bit
 
 clean:
-	rm -f *.svf *.bit *.config *.ys
+	rm -f *.svf *.bit *.config *.ys *.json
 
 ###################################################################
 # Target implementations
