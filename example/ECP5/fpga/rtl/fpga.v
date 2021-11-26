@@ -11,12 +11,8 @@ module fpga #(
     input  wire [3:0]  eth_rx_data,
     output wire        eth_tx_ctl,
     output wire [3:0]  eth_tx_data,
-    output      [11:0] test,
-    input              rxd,
-    output             txd,
     output             eth_mdc,
     inout              eth_mdio,
-    output             txdebug
 );
 
 localparam MAX = 12_500_000;
