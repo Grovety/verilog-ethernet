@@ -16,7 +16,7 @@
 # 
 # FPGA_TOP = fpga
 # FPGA_FAMILY = ECP5
-# FPGA_DEVICE = ECP5-25
+# FPGA_DEVICE = LFE5U-25F-6BG256C
 # SYN_FILES = rtl/fpga.v
 # TRELLIS = /usr/local/share/trellis
 # include ../common/lattice.mk
