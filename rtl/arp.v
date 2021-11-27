@@ -402,7 +402,7 @@ always @* begin
                     outgoing_eth_dest_mac_next = 48'hffffffffffff;
                     outgoing_arp_oper_next = ARP_OPER_ARP_REQUEST;
                     outgoing_arp_tha_next = 48'h000000000000;
-                    outgoing_arp_tpa_next = arp_request_ip_reg;
+                    outgoing_arp_tpa_next = arp_request_ip_reg;		// HERE!!!
                     arp_request_retry_cnt_next = REQUEST_RETRY_COUNT-1;
 						  force_set_request_retry_interval [0] = 1;
                 end else begin
@@ -420,7 +420,7 @@ always @* begin
                 arp_response_error_next = 1'b0;
                 arp_response_mac_next = 48'hffffffffffff;
 //            end else if (((arp_request_ip ^ gateway_ip) & subnet_mask) == 0) begin
-            end else if (arp_request_request_is_local) begin
+            end else if (arp_request_request_is_local==1'b1) begin
                 // within subnet
                 // (no bits differ between request IP and gateway IP where subnet mask is set)
 //                if (~(arp_request_ip | subnet_mask) == 0) begin
@@ -440,7 +440,7 @@ always @* begin
                 // outside of subnet, so look up gateway address
                 cache_query_request_valid_next = 1'b1;
                 cache_query_request_ip_next = gateway_ip;
-                arp_request_ip_next = gateway_ip;
+                arp_request_ip_next = gateway_ip;  // here!!!
             end
         end
     end
@@ -485,7 +485,7 @@ begin
     begin
          arp_request_timer_reg_lo <= 0;
          arp_request_timer_reg_mid <= 0;
-        arp_request_timer_reg <= 0;
+        arp_request_timer_reg <= 15'd10;
     end else
     begin
 			if (force_set_request_timeout [1])
