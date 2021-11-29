@@ -26,7 +26,7 @@ WAVES ?= 0
 COCOTB_HDL_TIMEUNIT = 1ns
 COCOTB_HDL_TIMEPRECISION = 1ps
 
-DUT      = fpga
+DUT      = fpga_core
 TOPLEVEL = $(DUT)
 MODULE   = test_$(DUT)
 VERILOG_SOURCES += ../../rtl/$(DUT).v
@@ -63,6 +63,7 @@ VERILOG_SOURCES += ../../../../../rtl/arp_eth_rx.v
 VERILOG_SOURCES += ../../../../../rtl/arp_eth_tx.v      
 VERILOG_SOURCES += ../../../../../rtl/eth_arb_mux.v      
 VERILOG_SOURCES += ../../../../../rtl/eth_mux.v       
+#Remove this source for original project!!!
 VERILOG_SOURCES += ../../../../../rtl/hash_11_bit.v
 VERILOG_SOURCES += ../../../../../lib/axis/rtl/arbiter.v     
 VERILOG_SOURCES += ../../../../../lib/axis/rtl/priority_encoder.v   

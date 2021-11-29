@@ -95,6 +95,9 @@ async def run_test(dut):
 
     await tb.init()
 
+    t = Timer(20, 'us')
+    await t
+
     tb.log.info("test UDP RX packet")
 
     payload = bytes([x % 256 for x in range(256)])
@@ -169,7 +172,7 @@ eth_rtl_dir = os.path.abspath(os.path.join(lib_dir, 'eth', 'rtl'))
 
 
 def test_fpga(request):
-    dut = "fpga"
+    dut = "fpga_core"
     module = os.path.splitext(os.path.basename(__file__))[0]
     toplevel = dut
 
@@ -208,6 +211,7 @@ def test_fpga(request):
         os.path.join(eth_rtl_dir, "arp_eth_tx.v"),
         os.path.join(eth_rtl_dir, "eth_arb_mux.v"),
         os.path.join(eth_rtl_dir, "eth_mux.v"),
+        # Remove this file from the original Project
         os.path.join(eth_rtl_dir, "hash_11_bit.v"),
         os.path.join(axis_rtl_dir, "arbiter.v"),
         os.path.join(axis_rtl_dir, "priority_encoder.v"),

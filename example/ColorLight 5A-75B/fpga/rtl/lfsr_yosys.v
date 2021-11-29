@@ -33,7 +33,8 @@ wire [7:0] d;
 wire [31:0] newcrc;
 generate
     genvar n;
-    for (n = 0; n < 32; n = n + 1) begin : cross
+//    for (n = 0; n < 32; n = n + 1) begin : cross
+    for (n = 0; n < 32; n = n + 1) begin
         assign c[n] = state_in [31-n];
         assign state_out [n] = newcrc [31-n];
     end
