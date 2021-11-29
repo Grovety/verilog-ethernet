@@ -198,6 +198,7 @@ def test_fpga_core(request):
         os.path.join(eth_rtl_dir, "ip_eth_rx.v"),
         os.path.join(eth_rtl_dir, "ip_eth_tx.v"),
         os.path.join(eth_rtl_dir, "ip_arb_mux.v"),
+        os.path.join(eth_rtl_dir, "hash_11_bit.v"),
         os.path.join(eth_rtl_dir, "arp.v"),
         os.path.join(eth_rtl_dir, "arp_cache.v"),
         os.path.join(eth_rtl_dir, "arp_eth_rx.v"),
