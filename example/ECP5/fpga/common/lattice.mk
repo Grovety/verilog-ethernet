@@ -47,7 +47,7 @@ clean:
 ###################################################################
 
 $(FPGA_TOP).json: $(SYN_FILES)
-	yosys -p "synth_ecp5 -top $(FPGA_TOP) -json $@" $(SYN_FILES)
+	yosys -p "synth_ecp5 -top $(FPGA_TOP) -json $@ -abc2" $(SYN_FILES)
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json
 	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166
