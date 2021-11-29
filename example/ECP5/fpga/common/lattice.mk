@@ -26,6 +26,7 @@
 # phony targets
 .PHONY: clean fpga
 
+BOARD:=ecp5_v7
 
 ###################################################################
 # Main Targets
