@@ -485,7 +485,7 @@ begin
     begin
          arp_request_timer_reg_lo <= 0;
          arp_request_timer_reg_mid <= 0;
-        arp_request_timer_reg <= 15'd10;
+         arp_request_timer_reg[14] <= 1;
     end else
     begin
 			if (force_set_request_timeout [1])

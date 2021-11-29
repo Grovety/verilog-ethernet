@@ -53,6 +53,7 @@ VERILOG_SOURCES += ../../lib/eth/rtl/ip.v
 VERILOG_SOURCES += ../../lib/eth/rtl/ip_eth_rx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/ip_eth_tx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/ip_arb_mux.v
+VERILOG_SOURCES += ../../lib/eth/rtl/hash_11_bit.v
 VERILOG_SOURCES += ../../lib/eth/rtl/arp.v
 VERILOG_SOURCES += ../../lib/eth/rtl/arp_cache.v
 VERILOG_SOURCES += ../../lib/eth/rtl/arp_eth_rx.v
