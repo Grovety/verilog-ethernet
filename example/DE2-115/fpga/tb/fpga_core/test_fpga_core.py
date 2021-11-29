@@ -95,6 +95,10 @@ async def run_test(dut):
 
     await tb.init()
 
+    t = Timer(20, 'us')
+    await t
+
+
     tb.log.info("test UDP RX packet")
 
     payload = bytes([x % 256 for x in range(256)])
