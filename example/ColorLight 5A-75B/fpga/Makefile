@@ -1,4 +1,4 @@
-BOARD:=ecp5_v7
+BOARD:=version_7
 
 # Targets
 TARGETS:=
