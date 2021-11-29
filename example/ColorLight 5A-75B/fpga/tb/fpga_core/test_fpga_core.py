@@ -168,8 +168,8 @@ axis_rtl_dir = os.path.abspath(os.path.join(lib_dir, 'eth', 'lib', 'axis', 'rtl'
 eth_rtl_dir = os.path.abspath(os.path.join(lib_dir, 'eth', 'rtl'))
 
 
-def test_fpga_core(request):
-    dut = "fpga_core"
+def test_fpga(request):
+    dut = "fpga"
     module = os.path.splitext(os.path.basename(__file__))[0]
     toplevel = dut
 
