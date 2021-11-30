@@ -84,7 +84,10 @@ pll_i (
     .LOCK(locked)
 );
 
-fpga_core ethCore0(
+fpga_core #(
+    .TARGET(TARGET)
+) ethCore0
+(
     .rst(rst),
     .clk(clk),
     .clk90(clk90),

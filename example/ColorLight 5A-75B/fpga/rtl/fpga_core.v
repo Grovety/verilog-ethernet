@@ -1,5 +1,5 @@
 module fpga_core #(
-    parameter TARGET = "LATTICE"
+    parameter TARGET = "GENERIC"
 )
 (
     input              clk,

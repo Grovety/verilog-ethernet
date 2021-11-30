@@ -93,6 +93,9 @@ async def run_test(dut):
 
     tb = TB(dut)
 
+    tb.log.info("Hello!")
+
+
     await tb.init()
 
     t = Timer(20, 'us')
@@ -185,8 +188,6 @@ def test_fpga(request):
         os.path.join(eth_rtl_dir, "ssio_ddr_in.v"),
         os.path.join(eth_rtl_dir, "ssio_ddr_out.v"),
         os.path.join(eth_rtl_dir, "rgmii_phy_if.v"),
-        os.path.join(eth_rtl_dir, "axis_async_fifo.v"),
-        os.path.join(eth_rtl_dir, "axis_async_fifo_adapter.v"),
         os.path.join(eth_rtl_dir, "axis_gmii_tx.v"),
         os.path.join(eth_rtl_dir, "axis_gmii_rx.v"),
         os.path.join(eth_rtl_dir, "eth_mac_1g.v"),
@@ -216,6 +217,8 @@ def test_fpga(request):
         os.path.join(axis_rtl_dir, "arbiter.v"),
         os.path.join(axis_rtl_dir, "priority_encoder.v"),
         os.path.join(axis_rtl_dir, "axis_fifo.v"),
+        os.path.join(axis_rtl_dir, "axis_async_fifo.v"),
+        os.path.join(axis_rtl_dir, "axis_async_fifo_adapter.v"),
         os.path.join(axis_rtl_dir, "sync_reset.v"),
     ]
 

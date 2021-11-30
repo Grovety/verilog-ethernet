@@ -64,11 +64,11 @@ VERILOG_SOURCES += ../../lib/eth/rtl/arp_eth_tx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/eth_arb_mux.v      
 VERILOG_SOURCES += ../../lib/eth/rtl/eth_mux.v       
 #Remove this source for original project!!!
-VERILOG_SOURCES += ../../../../../rtl/hash_11_bit.v
-VERILOG_SOURCES += ../../../../../lib/axis/rtl/arbiter.v     
-VERILOG_SOURCES += ../../../../../lib/axis/rtl/priority_encoder.v   
-VERILOG_SOURCES += ../../../../../lib/axis/rtl/axis_fifo.v    
-VERILOG_SOURCES += ../../../../../lib/axis/rtl/sync_reset.v
+VERILOG_SOURCES += ../../rtl/hash_11_bit.v
+VERILOG_SOURCES += ../../lib/axis/rtl/arbiter.v     
+VERILOG_SOURCES += ../../lib/axis/rtl/priority_encoder.v   
+VERILOG_SOURCES += ../../lib/axis/rtl/axis_fifo.v    
+VERILOG_SOURCES += ../../lib/axis/rtl/sync_reset.v
 
 # module parameters
 #export PARAM_A ?= value
