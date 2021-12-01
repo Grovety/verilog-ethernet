@@ -1,19 +1,37 @@
 module fpga_core #(
-    parameter TARGET = "GENERIC"
+    parameter TARGET = "GENERIC",		// For correct simulation! Override by "LATTICE" from parent module!!!
+    parameter USE_CLK90 = "TRUE"                // For correct simulation! Override by "FALSE" from parent module!!!
 )
 (
     input              clk,
     input              rst,
     input              clk90,
-    output wire        eth_clocks_tx,
-    input  wire        eth_clocks_rx,
-    input  wire        eth_rx_ctl,
-    input  wire [3:0]  eth_rx_data,
-    output wire        eth_tx_ctl,
-    output wire [3:0]  eth_tx_data,
-    output             eth_mdc,
-    inout              eth_mdio
+    output wire        phy0_tx_clk,
+    input  wire        phy0_rx_clk,
+    input  wire        phy0_rx_ctl,
+    input  wire [3:0]  phy0_rxd,
+    output wire        phy0_tx_ctl,
+    output wire [3:0]  phy0_txd,
+    output             phy0_mdc,
+    inout              phy0_mdio,
+    output wire        phy0_reset_n,
+    input  wire        phy0_int_n,
+
+// Just for successfull TestBench
+    input  wire       phy1_rx_clk,
+    input  wire [3:0] phy1_rxd,
+    input  wire       phy1_rx_ctl,
+    output wire       phy1_tx_clk,
+    output wire [3:0] phy1_txd,
+    output wire       phy1_tx_ctl,
+    output wire       phy1_reset_n,
+    input  wire       phy1_int_n
+
 );
+
+assign phy0_reset_n = ~rst;
+assign phy1_reset_n = ~rst;
+
 
 // AXI between MAC and Ethernet modules
 wire [7:0] rx_axis_tdata;
@@ -223,7 +241,7 @@ assign rx_fifo_udp_payload_axis_tuser = rx_udp_payload_axis_tuser;
 
 eth_mac_1g_rgmii_fifo #(
     .TARGET(TARGET),
-    .USE_CLK90("FALSE"),
+    .USE_CLK90(USE_CLK90),
     .ENABLE_PADDING(1),
     .MIN_FRAME_LENGTH(64),
     .TX_FIFO_DEPTH(4096),
@@ -247,12 +265,12 @@ eth_mac_inst (
     .rx_axis_tready(rx_axis_tready),
     .rx_axis_tlast(rx_axis_tlast),
     .rx_axis_tuser(rx_axis_tuser),
-    .rgmii_rx_clk(eth_clocks_rx),
-    .rgmii_rxd(eth_rx_data),
-    .rgmii_rx_ctl(eth_rx_ctl),
-    .rgmii_tx_clk(eth_clocks_tx),
-    .rgmii_txd(eth_tx_data),
-    .rgmii_tx_ctl(eth_tx_ctl),    
+    .rgmii_rx_clk(phy0_rx_clk),
+    .rgmii_rxd(phy0_rxd),
+    .rgmii_rx_ctl(phy0_rx_ctl),
+    .rgmii_tx_clk(phy0_tx_clk),
+    .rgmii_txd(phy0_txd),
+    .rgmii_tx_ctl(phy0_tx_ctl),    
     .tx_fifo_overflow(),
     .tx_fifo_bad_frame(),
     .tx_fifo_good_frame(),

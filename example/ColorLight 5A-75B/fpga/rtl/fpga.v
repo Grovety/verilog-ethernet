@@ -85,20 +85,21 @@ pll_i (
 );
 
 fpga_core #(
-    .TARGET(TARGET)
+    .TARGET(TARGET),
+    .USE_CLK90("FALSE")
 ) ethCore0
 (
     .rst(rst),
     .clk(clk),
-    .clk90(clk90),
-    .eth_clocks_tx(eth_clocks_tx),
-    .eth_clocks_rx(eth_clocks_rx),
-    .eth_rx_ctl(eth_rx_ctl),
-    .eth_rx_data(eth_rx_data),
-    .eth_tx_ctl(eth_tx_ctl),
-    .eth_tx_data(eth_tx_data),
-    .eth_mdc(eth_mdc),
-    .eth_mdio(eth_mdio)
+    .clk90(clk90),	
+    .phy0_tx_clk(eth_clocks_tx),
+    .phy0_rx_clk(eth_clocks_rx),
+    .phy0_rx_ctl(eth_rx_ctl),
+    .phy0_rxd(eth_rx_data),
+    .phy0_tx_ctl(eth_tx_ctl),
+    .phy0_txd(eth_tx_data),
+    .phy0_mdc(eth_mdc),
+    .phy0_mdio(eth_mdio)
 );
 
 endmodule

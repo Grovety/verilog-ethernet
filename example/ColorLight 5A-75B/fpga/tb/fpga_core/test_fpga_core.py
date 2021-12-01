@@ -53,8 +53,8 @@ class TB:
         dut.phy0_int_n.setimmediatevalue(1)
         dut.phy1_int_n.setimmediatevalue(1)
 
-        dut.btn.setimmediatevalue(0)
-        dut.sw.setimmediatevalue(0)
+#        dut.btn.setimmediatevalue(0)
+#        dut.sw.setimmediatevalue(0)
 
         dut.clk.setimmediatevalue(0)
         dut.clk90.setimmediatevalue(0)
@@ -93,9 +93,6 @@ async def run_test(dut):
 
     tb = TB(dut)
 
-    tb.log.info("Hello!")
-
-
     await tb.init()
 
     t = Timer(20, 'us')
@@ -105,7 +102,7 @@ async def run_test(dut):
 
     payload = bytes([x % 256 for x in range(256)])
     eth = Ether(src='5a:51:52:53:54:55', dst='02:00:00:00:00:00')
-    ip = IP(src='192.168.1.100', dst='192.168.1.128')
+    ip = IP(src='192.168.2.100', dst='192.168.2.128')
     udp = UDP(sport=5678, dport=1234)
     test_pkt = eth / ip / udp / payload
 
