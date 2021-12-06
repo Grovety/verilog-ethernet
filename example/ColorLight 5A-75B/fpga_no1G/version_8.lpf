@@ -33,8 +33,6 @@ IOBUF PORT "eth_tx_data[2]" IO_TYPE=LVCMOS33;
 LOCATE COMP "eth_tx_data[3]" SITE "R1";
 IOBUF PORT "eth_tx_data[3]" IO_TYPE=LVCMOS33;
 
-#FREQUENCY PORT "eth_rx_clk" 125.0 MHz;
-#FREQUENCY PORT "eth_tx_clk" 125.0 MHz;
 FREQUENCY PORT "eth_clocks_rx" 125.0 MHz;
 FREQUENCY PORT "clk" 125.0 MHz;
 FREQUENCY PORT "clk90" 125.0 MHz;
