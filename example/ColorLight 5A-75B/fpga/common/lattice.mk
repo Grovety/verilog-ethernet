@@ -9,7 +9,7 @@
 # FPGA_FAMILY - FPGA family (e.g. VirtexUltrascale)
 # FPGA_DEVICE - FPGA device (e.g. xcvu095-ffva2104-2-e)
 # BOARD - Version of the Colorlight board, possible values
-# ecp5_v7(by default), ecp5_v8
+# pinout_v7(by default), pinout_v8
 # SYN_FILES - space-separated list of source files
 # 
 # Example:
@@ -26,7 +26,7 @@
 # phony targets
 .PHONY: clean fpga
 
-BOARD:=version_7
+BOARD:=pinout_v7
 
 SYN_FILES_REL = $(patsubst %, ../%, $(SYN_FILES))
 
