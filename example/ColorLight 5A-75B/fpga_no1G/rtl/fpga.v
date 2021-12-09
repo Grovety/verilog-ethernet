@@ -42,49 +42,51 @@ end
 
 assign eth_rst_n = 1;
 
-wire clkfb;
+wire clk125;
+wire clk_system;
+
 (* FREQUENCY_PIN_CLKI="25" *)
 (* FREQUENCY_PIN_CLKOP="125" *)
-(* FREQUENCY_PIN_CLKOS="125" *)
+(* FREQUENCY_PIN_CLKOS="89.2857" *)
 (* ICP_CURRENT="12" *) (* LPF_RESISTOR="8" *) (* MFG_ENABLE_FILTEROPAMP="1" *) (* MFG_GMCREF_SEL="2" *)
 EHXPLLL #(
-    .PLLRST_ENA("DISABLED"),
-    .INTFB_WAKE("DISABLED"),
-    .STDBY_ENABLE("DISABLED"),
-    .DPHASE_SOURCE("DISABLED"),
-    .OUTDIVIDER_MUXA("DIVA"),
-    .OUTDIVIDER_MUXB("DIVB"),
-    .OUTDIVIDER_MUXC("DIVC"),
-    .OUTDIVIDER_MUXD("DIVD"),
-    .CLKI_DIV(1),
-    .CLKOP_ENABLE("ENABLED"),
-    .CLKOP_DIV(5),
-    .CLKOP_CPHASE(2),
-    .CLKOP_FPHASE(0),
-    .CLKOS_ENABLE("ENABLED"),
-    .CLKOS_DIV(5),
-    .CLKOS_CPHASE(3),
-    .CLKOS_FPHASE(2),
-    .FEEDBK_PATH("INT_OP"),
-    .CLKFB_DIV(5)
-)
-pll_i (
-    .RST(1'b0),
-    .STDBY(1'b0),
-    .CLKI(clk_i),
-    .CLKOP(clk),
-    .CLKOS(clk90),
-    .CLKFB(clkfb),
-    .CLKINTFB(clkfb),
-    .PHASESEL0(1'b0),
-    .PHASESEL1(1'b0),
-    .PHASEDIR(1'b1),
-    .PHASESTEP(1'b1),
-    .PHASELOADREG(1'b1),
-    .PLLWAKESYNC(1'b0),
-    .ENCLKOP(1'b0),
-    .LOCK(locked)
-);
+        .PLLRST_ENA("DISABLED"),
+        .INTFB_WAKE("DISABLED"),
+        .STDBY_ENABLE("DISABLED"),
+        .DPHASE_SOURCE("DISABLED"),
+        .OUTDIVIDER_MUXA("DIVA"),
+        .OUTDIVIDER_MUXB("DIVB"),
+        .OUTDIVIDER_MUXC("DIVC"),
+        .OUTDIVIDER_MUXD("DIVD"),
+        .CLKI_DIV(1),
+        .CLKOP_ENABLE("ENABLED"),
+        .CLKOP_DIV(5),
+        .CLKOP_CPHASE(2),
+        .CLKOP_FPHASE(0),
+        .CLKOS_ENABLE("ENABLED"),
+        .CLKOS_DIV(7),
+        .CLKOS_CPHASE(2),
+        .CLKOS_FPHASE(0),
+        .FEEDBK_PATH("CLKOP"),
+        .CLKFB_DIV(5)
+    ) pll_i (
+        .RST(1'b0),
+        .STDBY(1'b0),
+        .CLKI(clk_i),
+        .CLKOP(clk125),
+        .CLKOS(clk_system),
+        .CLKFB(clk125),
+        .CLKINTFB(),
+        .PHASESEL0(1'b0),
+        .PHASESEL1(1'b0),
+        .PHASEDIR(1'b1),
+        .PHASESTEP(1'b1),
+        .PHASELOADREG(1'b1),
+        .PLLWAKESYNC(1'b0),
+        .ENCLKOP(1'b0),
+//        .LOCK(locked)
+	);
+
 
 // MDIO logic needs for disable 1G capability
 
@@ -202,8 +204,9 @@ fpga_core #(
 ) ethCore0
 (
     .rst(rst),
-    .clk(clk),
-    .clk90(clk90),	
+    .clk125(clk125),
+    .clk_system(clk_system),
+    .clk90(clk125),				// Not used in real life, just for testbench
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),
     .phy0_rx_ctl(eth_rx_ctl),

@@ -3,7 +3,8 @@ module fpga_core #(
     parameter USE_CLK90 = "TRUE"                // For correct simulation! Override by "FALSE" from parent module!!!
 )
 (
-    input              clk,
+    input              clk125,
+    input              clk_system,
     input              rst,
     input              clk90,
     output wire        phy0_tx_clk,
@@ -197,7 +198,7 @@ wire no_match = !match_cond;
 reg match_cond_reg = 0;
 reg no_match_reg = 0;
 
-always @(posedge clk) begin
+always @(posedge clk_system) begin
     if (rst) begin
         match_cond_reg <= 0;
         no_match_reg <= 0;
@@ -250,10 +251,10 @@ eth_mac_1g_rgmii_fifo #(
     .RX_FRAME_FIFO(1)
 )
 eth_mac_inst (
-    .gtx_clk(clk),
+    .gtx_clk(clk125),
     .gtx_clk90(clk90),
     .gtx_rst(rst),
-    .logic_clk(clk),
+    .logic_clk(clk_system),
     .logic_rst(rst),
     .tx_axis_tdata(tx_axis_tdata),
     .tx_axis_tvalid(tx_axis_tvalid),
@@ -285,7 +286,7 @@ eth_mac_inst (
 
 eth_axis_rx
 eth_axis_rx_inst (
-    .clk(clk),
+    .clk(clk_system),
     .rst(rst),
     // AXI input
     .s_axis_tdata(rx_axis_tdata),
@@ -311,7 +312,7 @@ eth_axis_rx_inst (
   
 eth_axis_tx
 eth_axis_tx_inst (
-    .clk(clk),
+    .clk(clk_system),
     .rst(rst),
     // Ethernet frame input
     .s_eth_hdr_valid(tx_eth_hdr_valid),
@@ -338,7 +339,7 @@ udp_complete #(
     .UDP_CHECKSUM_GEN_ENABLE (0)
 )
 udp_complete_inst (
-    .clk(clk),
+    .clk(clk_system),
     .rst(rst),
     // Ethernet frame input
     .s_eth_hdr_valid(rx_eth_hdr_valid),
@@ -479,10 +480,10 @@ axis_fifo #(
     .FRAME_FIFO(0)
 )
 udp_payload_fifo (
-    .clk(clk),
+    .clk(clk_system),
     .rst(rst),
     // AXI input
-    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata/*+8'h01*/),
+    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata+8'h01),
     .s_axis_tkeep(0),
     .s_axis_tvalid(rx_fifo_udp_payload_axis_tvalid),
     .s_axis_tready(rx_fifo_udp_payload_axis_tready),

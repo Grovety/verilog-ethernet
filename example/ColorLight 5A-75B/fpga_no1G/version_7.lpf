@@ -34,7 +34,8 @@ LOCATE COMP "eth_tx_data[3]" SITE "L4";
 IOBUF PORT "eth_tx_data[3]" IO_TYPE=LVCMOS33;
 
 FREQUENCY PORT "eth_clocks_rx" 125.0 MHz;
-FREQUENCY PORT "clk" 125.0 MHz;
+FREQUENCY PORT "clk125" 125.0 MHz;
+FREQUENCY PORT "clk_system" 90.0 MHz;
 FREQUENCY PORT "clk90" 125.0 MHz;
 
 LOCATE COMP "led_o" SITE "P11";

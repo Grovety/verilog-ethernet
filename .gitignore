@@ -32,3 +32,5 @@
 /example/ECP5/fpga/rtl/blink.bak
 /example/ECP5/fpga_mac_fifo/err.log
 /example/ECP5/fpga_mac_fifo/rtl/blink.bak
+/example/ColorLight 5A-75B/fpga_no1G/fpga/fpga.json
+/example/ColorLight 5A-75B/fpga_no1G/fpga/fpga_out.config
