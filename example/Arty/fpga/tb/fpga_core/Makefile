@@ -38,6 +38,7 @@ VERILOG_SOURCES += ../../lib/eth/rtl/eth_mac_1g.v
 VERILOG_SOURCES += ../../lib/eth/rtl/axis_gmii_rx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/axis_gmii_tx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/lfsr.v
+VERILOG_SOURCES += ../../lib/eth/rtl/hash_11_bits.v
 VERILOG_SOURCES += ../../lib/eth/rtl/eth_axis_rx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/eth_axis_tx.v
 VERILOG_SOURCES += ../../lib/eth/rtl/udp_complete.v

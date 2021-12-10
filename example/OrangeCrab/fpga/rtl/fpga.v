@@ -8,6 +8,8 @@ module fpga #(
     output reg         rgb_led0_b,
 
     input              rmii_50m,
+
+    output             test
 /*    output wire        eth_clocks_tx,
     input  wire        eth_clocks_rx,
     output wire        eth_rst_n,
@@ -20,6 +22,16 @@ module fpga #(
 );
 
 wire sys_clk;
+
+//assign test = sys_clk;
+
+ODDRX1F ODDRX1F(
+	.D0(1'd1),
+	.D1(1'd0),
+	.SCLK(clk48),
+	.Q(test)
+);
+
 
 localparam MAX = 45_000_000;
 localparam WIDTH = $clog2(MAX);
@@ -48,8 +60,9 @@ always @(posedge sys_clk) begin
 end
 
 assign eth_rst_n = 1;
+
 wire clkfb;
-(* FREQUENCY_PIN_CLKI="50" *)
+(* FREQUENCY_PIN_CLKI="48" *)
 (* FREQUENCY_PIN_CLKOP="90" *)
 (* ICP_CURRENT="12" *) (* LPF_RESISTOR="8" *) (* MFG_ENABLE_FILTEROPAMP="1" *) (* MFG_GMCREF_SEL="2" *)
 EHXPLLL #(
@@ -61,17 +74,17 @@ EHXPLLL #(
         .OUTDIVIDER_MUXB("DIVB"),
         .OUTDIVIDER_MUXC("DIVC"),
         .OUTDIVIDER_MUXD("DIVD"),
-        .CLKI_DIV(5),
+        .CLKI_DIV(8),
         .CLKOP_ENABLE("ENABLED"),
         .CLKOP_DIV(7),
         .CLKOP_CPHASE(3),
         .CLKOP_FPHASE(0),
         .FEEDBK_PATH("INT_OP"),
-        .CLKFB_DIV(9)
+        .CLKFB_DIV(15)
     ) pll_i (
         .RST(1'b0),
         .STDBY(1'b0),
-        .CLKI(rmii_50m),
+        .CLKI(clk48),
         .CLKOP(sys_clk),
         .CLKFB(clkfb),
         .CLKINTFB(clkfb),
@@ -84,7 +97,6 @@ EHXPLLL #(
         .ENCLKOP(1'b0),
         .LOCK(locked)
 	);
-
 /*
 wire clkfb;
 (* FREQUENCY_PIN_CLKI="25" *)
