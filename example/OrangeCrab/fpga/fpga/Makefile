@@ -1,7 +1,7 @@
 # FPGA settings
 FPGA_TOP=fpga
 FPGA_FAMILY = ECP5
-FPGA_DEVICE = LFE5U-25F-6BG256C
+FPGA_DEVICE = LFE5U-25F-CSFBGA285
 
 # Files for synthesis
 SYN_FILES = rtl/fpga.v 
@@ -51,4 +51,4 @@ TRELLIS = /usr/local/share/trellis
 include ../common/lattice.mk
 
 program: ${FPGA_TOP}.svf
-	openocd -f ../config.cfg
+	openocd -f ../vsllink.cfg

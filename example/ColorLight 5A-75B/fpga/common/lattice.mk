@@ -63,7 +63,7 @@ $(FPGA_TOP).ys:
 	echo "synth_ecp5 -top fpga -json fpga.json -abc9" >> $(FPGA_TOP).ys
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json
-	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166
+	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166 --log PlaceAndRoute.log
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
 	ecppack --svf ${FPGA_TOP}.svf $< $@

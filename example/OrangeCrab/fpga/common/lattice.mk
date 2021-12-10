@@ -26,7 +26,7 @@
 # phony targets
 .PHONY: clean fpga
 
-BOARD:=version_7
+BOARD:=orangecrab_r0.2
 
 SYN_FILES_REL = $(patsubst %, ../%, $(SYN_FILES))
 
@@ -49,12 +49,12 @@ clean:
 ###################################################################
 
 $(FPGA_TOP).json: $(SYN_FILES_REL)
-	yosys -p "synth_ecp5 -top $(FPGA_TOP) -json $@ -abc2" $(SYN_FILES_REL)
+	yosys -q -l "Synth.log" -p "synth_ecp5 -top $(FPGA_TOP) -json $@ -abc2" $(SYN_FILES_REL)
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json
-	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166
+	nextpnr-ecp5 --25k --package CSFBGA285 --speed 6 --json $< --textcfg $@ --lpf ../common/$(BOARD).pcf --freq 166 --log PlaceAndRoute.log
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
-	ecppack --svf ${FPGA_TOP}.svf $< $@
+	ecppack --compress --svf ${FPGA_TOP}.svf $< $@
 
 ${FPGA_TOP}.svf : ${FPGA_TOP}.bit
