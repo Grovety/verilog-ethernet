@@ -1,37 +1,23 @@
 module fpga_core #(
     parameter TARGET = "GENERIC",		// For correct simulation! Override by "LATTICE" from parent module!!!
-    parameter USE_CLK90 = "TRUE"                // For correct simulation! Override by "FALSE" from parent module!!!
 )
 (
-    input              clk,
+    input              sys_clk,
     input              rst,
-    input              clk90,
-    output wire        phy0_tx_clk,
-    input  wire        phy0_rx_clk,
-    input  wire        phy0_rx_ctl,
-    input  wire [3:0]  phy0_rxd,
-    output wire        phy0_tx_ctl,
-    output wire [3:0]  phy0_txd,
-    output             phy0_mdc,
-    inout              phy0_mdio,
-    output wire        phy0_reset_n,
-    input  wire        phy0_int_n,
 
-// Just for successfull TestBench
-    input  wire       phy1_rx_clk,
-    input  wire [3:0] phy1_rxd,
-    input  wire       phy1_rx_ctl,
-    output wire       phy1_tx_clk,
-    output wire [3:0] phy1_txd,
-    output wire       phy1_tx_ctl,
-    output wire       phy1_reset_n,
-    input  wire       phy1_int_n
+    output reg         rgb_led0_r,
+    output reg         rgb_led0_b,
 
+
+    input  wire        rmii_clk,
+    input  wire [1:0]  rmii_rxd,
+    input  wire        rmii_rx_crs_dv,
+    output wire [1:0]  rmii_txd,
+    output wire        rmii_tx_en,
+
+    output             rmii_mdc,
+    inout              rmii_mdio
 );
-
-assign phy0_reset_n = ~rst;
-assign phy1_reset_n = ~rst;
-
 
 // AXI between MAC and Ethernet modules
 wire [7:0] rx_axis_tdata;
@@ -197,7 +183,7 @@ wire no_match = !match_cond;
 reg match_cond_reg = 0;
 reg no_match_reg = 0;
 
-always @(posedge clk) begin
+always @(posedge sys_clk) begin
     if (rst) begin
         match_cond_reg <= 0;
         no_match_reg <= 0;
@@ -239,9 +225,11 @@ assign rx_udp_payload_axis_tready = (rx_fifo_udp_payload_axis_tready && match_co
 assign rx_fifo_udp_payload_axis_tlast = rx_udp_payload_axis_tlast;
 assign rx_fifo_udp_payload_axis_tuser = rx_udp_payload_axis_tuser;
 
-eth_mac_1g_rgmii_fifo #(
+wire test_bad_frame;
+
+eth_mac_rmii_fifo #(
     .TARGET(TARGET),
-    .USE_CLK90(USE_CLK90),
+    .CLOCK_INPUT_STYLE("BUFR"),
     .ENABLE_PADDING(1),
     .MIN_FRAME_LENGTH(64),
     .TX_FIFO_DEPTH(4096),
@@ -250,42 +238,57 @@ eth_mac_1g_rgmii_fifo #(
     .RX_FRAME_FIFO(1)
 )
 eth_mac_inst (
-    .gtx_clk(clk),
-    .gtx_clk90(clk90),
-    .gtx_rst(rst),
-    .logic_clk(clk),
-    .logic_rst(rst),
+     .rst(rst),
+     .logic_clk(sys_clk),
+     .logic_rst(rst),
+
     .tx_axis_tdata(tx_axis_tdata),
     .tx_axis_tvalid(tx_axis_tvalid),
     .tx_axis_tready(tx_axis_tready),
     .tx_axis_tlast(tx_axis_tlast),
     .tx_axis_tuser(tx_axis_tuser),
+
     .rx_axis_tdata(rx_axis_tdata),
     .rx_axis_tvalid(rx_axis_tvalid),
     .rx_axis_tready(rx_axis_tready),
     .rx_axis_tlast(rx_axis_tlast),
     .rx_axis_tuser(rx_axis_tuser),
-    .rgmii_rx_clk(phy0_rx_clk),
-    .rgmii_rxd(phy0_rxd),
-    .rgmii_rx_ctl(phy0_rx_ctl),
-    .rgmii_tx_clk(phy0_tx_clk),
-    .rgmii_txd(phy0_txd),
-    .rgmii_tx_ctl(phy0_tx_ctl),    
+
+    .rmii_clk(rmii_clk),
+    .rmii_rxd(rmii_rxd),
+    .rmii_rx_crs_dv(rmii_rx_crs_dv),
+    .rmii_txd(rmii_txd),
+    .rmii_tx_en(rmii_tx_en),    
+
     .tx_fifo_overflow(),
     .tx_fifo_bad_frame(),
     .tx_fifo_good_frame(),
-    .rx_error_bad_frame(),
+    .rx_error_bad_frame(test_bad_frame),
     .rx_error_bad_fcs(),
     .rx_fifo_overflow(),
     .rx_fifo_bad_frame(),
     .rx_fifo_good_frame(),
-    .speed(),
     .ifg_delay(12)
 );
 
+always @(posedge sys_clk)
+begin
+    if (rst)
+    begin
+        rgb_led0_r <= 1;
+        rgb_led0_b <= 1;
+    end else
+    begin
+        if (test_bad_frame)
+             rgb_led0_r <= 0;
+        if (rx_axis_tvalid)
+             rgb_led0_b <= 0;
+    end
+end
+
 eth_axis_rx
 eth_axis_rx_inst (
-    .clk(clk),
+    .clk(sys_clk),
     .rst(rst),
     // AXI input
     .s_axis_tdata(rx_axis_tdata),
@@ -311,7 +314,7 @@ eth_axis_rx_inst (
   
 eth_axis_tx
 eth_axis_tx_inst (
-    .clk(clk),
+    .clk(sys_clk),
     .rst(rst),
     // Ethernet frame input
     .s_eth_hdr_valid(tx_eth_hdr_valid),
@@ -338,7 +341,7 @@ udp_complete #(
     .UDP_CHECKSUM_GEN_ENABLE (0)
 )
 udp_complete_inst (
-    .clk(clk),
+    .clk(sys_clk),
     .rst(rst),
     // Ethernet frame input
     .s_eth_hdr_valid(rx_eth_hdr_valid),
@@ -479,7 +482,7 @@ axis_fifo #(
     .FRAME_FIFO(0)
 )
 udp_payload_fifo (
-    .clk(clk),
+    .clk(sys_clk),
     .rst(rst),
     // AXI input
     .s_axis_tdata(rx_fifo_udp_payload_axis_tdata/*+8'h01*/),
