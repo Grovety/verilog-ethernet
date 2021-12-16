@@ -178,73 +178,78 @@ reg [2:0] state;
 always @ (posedge rx_clk)
 begin
      if (rx_rst)
-	  begin
-	      state <= STATE_IDLE;
+     begin
+         state <= STATE_IDLE;
          mac_mii_rxd <= 0;
          mac_mii_rx_dv <= 0;
-			rx_clk_enable <= 0;
-	  end else
-	  begin
-	      case (state)
-			STATE_IDLE: begin
-			    mac_mii_rx_dv <= 0;
+         rx_clk_enable <= 0;
+     end else
+     begin
+         case (state)
+         STATE_IDLE: begin
+             mac_mii_rx_dv <= 0;
              mac_mii_rxd <= 4'b0000;
              rx_clk_enable <= ~rx_clk_enable;
-			    if (mac_rmii_rx_crs_dv) begin
-				      state <= STATE_CRS;
-				 end
-			end
-			STATE_CRS: begin
-			    mac_mii_rx_dv <= 1;
+             if (mac_rmii_rx_crs_dv) begin
+                  state <= STATE_CRS;
+             end
+         end
+         STATE_CRS: begin
+             mac_mii_rx_dv <= 1;
              rx_clk_enable <= ~rx_clk_enable;
-			    if (mac_rmii_rxd == 2'b0) begin
+             if (mac_rmii_rxd == 2'b0) begin
                   mac_mii_rxd <= 4'b0000;
-				      state <= STATE_CRS;
-				 end else if (mac_rmii_rxd == 2'b01) begin
+                  state <= STATE_CRS;
+             end else if (mac_rmii_rxd == 2'b01) begin
                   mac_mii_rxd <= 4'b0101;
-				      state <= STATE_SFD;
-				 end else begin
+                  state <= STATE_SFD;
+             end else begin
                   mac_mii_rxd <= 4'b0000;
-				      state <= STATE_IDLE;
-				 end
-			end
-			STATE_SFD: begin
-			    if (mac_rmii_rxd == 2'b11) begin
+                  state <= STATE_IDLE;
+             end
+         end
+         STATE_SFD: begin
+             if (mac_rmii_rxd == 2'b11) begin
                   rx_clk_enable <= 1;
                   mac_mii_rxd <= 4'b01101;
-				      state <= STATE_NIBBLE0;
-				 end else if (mac_rmii_rxd == 2'b01) begin
+                  state <= STATE_NIBBLE0;
+             end else if (mac_rmii_rxd == 2'b01) begin
                   rx_clk_enable <= ~rx_clk_enable;
                   mac_mii_rxd <= 4'b0101;
-				      state <= STATE_SFD;
-				 end else begin
+                  state <= STATE_SFD;
+             end else begin
                   rx_clk_enable <= ~rx_clk_enable;
                   mac_mii_rxd <= 4'b0000;
-				      state <= STATE_IDLE;
-				 end
-			end
-			STATE_NIBBLE0: begin
+                  state <= STATE_IDLE;
+             end
+         end
+         STATE_NIBBLE0: begin
              rx_clk_enable <= 0;
              mac_mii_rxd [1:0] <= mac_rmii_rxd;
-		       state <= STATE_NIBBLE1;
-			end
-			STATE_NIBBLE1: begin
+             state <= STATE_NIBBLE1;
+         end
+         STATE_NIBBLE1: begin
              rx_clk_enable <= 1;
              mac_mii_rxd [3:2] <= mac_rmii_rxd;
-				 if (mac_rmii_rx_crs_dv)
-				       state <= STATE_NIBBLE0;
-				 else
-				       state <= STATE_IDLE;
-			end
-			default: begin
-				state <= STATE_IDLE;
-				mac_mii_rxd <= 0;
-				mac_mii_rx_dv <= 0;
-  			   rx_clk_enable <= 0;
-			end
-		   endcase
-	  end
-	  
+             if (mac_rmii_rx_crs_dv)
+             begin
+                   state <= STATE_NIBBLE0;
+             end
+             else
+             begin
+                   mac_mii_rx_dv <= 0;
+                   state <= STATE_IDLE;
+            end
+         end
+         default: begin
+            state <= STATE_IDLE;
+            mac_mii_rxd <= 0;
+            mac_mii_rx_dv <= 0;
+            rx_clk_enable <= 0;
+         end
+         endcase
+     end
+     
 end
 
 // TX Functionality 
@@ -253,23 +258,23 @@ reg       tx_en_latch;
 always @(posedge tx_clk)
 begin
     if (tx_rst)
-	 begin
-			tx_clk_enable <= 0;
-	 end else
-	 begin
-	      tx_clk_enable <= !tx_clk_enable;
-			if (tx_clk_enable)
-			begin
-			     mac_rmii_txd <= mac_mii_txd [1:0];
-				  txd_latch <= mac_mii_txd [3:2];
-				  mac_rmii_tx_en <= mac_mii_tx_en;
-				  tx_en_latch <= mac_mii_tx_en;
-			end else
-			begin
-			     mac_rmii_txd <= txd_latch;
-				  mac_rmii_tx_en <= tx_en_latch;
-			end
-	 end
+    begin
+         tx_clk_enable <= 0;
+    end else
+    begin
+         tx_clk_enable <= !tx_clk_enable;
+         if (tx_clk_enable)
+         begin
+              mac_rmii_txd <= mac_mii_txd [1:0];
+              txd_latch <= mac_mii_txd [3:2];
+              mac_rmii_tx_en <= mac_mii_tx_en;
+              tx_en_latch <= mac_mii_tx_en;
+         end else
+         begin
+              mac_rmii_txd <= txd_latch;
+              mac_rmii_tx_en <= tx_en_latch;
+         end
+    end
 end
 
 endmodule
