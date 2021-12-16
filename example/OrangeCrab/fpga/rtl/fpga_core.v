@@ -13,10 +13,7 @@ module fpga_core #(
     input  wire [1:0]  rmii_rxd,
     input  wire        rmii_rx_crs_dv,
     output wire [1:0]  rmii_txd,
-    output wire        rmii_tx_en,
-
-    output             rmii_mdc,
-    inout              rmii_mdio
+    output wire        rmii_tx_en
 );
 
 // AXI between MAC and Ethernet modules
