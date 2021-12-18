@@ -62,7 +62,7 @@ $(FPGA_TOP).ys:
 	echo "attrmap -tocase keep -imap keep="true" keep=1 -imap keep="false" keep=0 -remove keep=0" >> $(FPGA_TOP).ys
 	echo "synth_ecp5 -top $(FPGA_TOP) -json $(FPGA_TOP)pga.json -abc9" >> $(FPGA_TOP).ys
 
-$(FPGA_TOP)_out.config: $(FPGA_TOP).json 
+$(FPGA_TOP)_out.config: $(FPGA_TOP).json ../$(BOARD).lpf
 	python3 ../script.py --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166 --log PlaceAndRoute.log
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
