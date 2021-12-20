@@ -36,3 +36,5 @@
 /example/ColorLight 5A-75B/fpga_no1G/fpga/fpga_out.config
 /example/OrangeCrab/fpga/fpga/fpga_out.config
 /example/OrangeCrab/fpga/fpga/fpga.json
+/example/ColorLight 5A-75B/fpga/*.ys
+/.vscode/settings.json
