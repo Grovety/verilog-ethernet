@@ -235,9 +235,9 @@ eth_mac_rmii_fifo #(
     .RX_FRAME_FIFO(1)
 )
 eth_mac_inst (
-     .rst(rst),
-     .logic_clk(sys_clk),
-     .logic_rst(rst),
+    .rst(rst),
+    .logic_clk(sys_clk),
+    .logic_rst(rst),
 
     .tx_axis_tdata(tx_axis_tdata),
     .tx_axis_tvalid(tx_axis_tvalid),
@@ -268,18 +268,17 @@ eth_mac_inst (
     .ifg_delay(12)
 );
 
-always @(posedge sys_clk)
-begin
-    if (rst)
-    begin
+always @(posedge sys_clk) begin
+    if (rst) begin
         rgb_led0_r <= 1;
         rgb_led0_b <= 1;
-    end else
-    begin
-        if (test_bad_frame)
-             rgb_led0_r <= 0;
-        if (rx_axis_tvalid)
-             rgb_led0_b <= 0;
+    end else begin
+        if (test_bad_frame) begin
+            rgb_led0_r <= 0;
+        end
+        if (rx_axis_tvalid) begin
+            rgb_led0_b <= 0;
+        end
     end
 end
 
@@ -504,6 +503,5 @@ udp_payload_fifo (
     .status_bad_frame(),
     .status_good_frame()
 );
-
 
 endmodule

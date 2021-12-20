@@ -26,8 +26,7 @@
 // v2.1 - Add universal 8/16 bit mode.
 //
 
-module sdram
-(
+module sdram (
    input             init,        // reset to initialize RAM
    input             clk,         // clock ~100MHz
                                   //
@@ -36,7 +35,7 @@ module sdram
    output reg [12:0] SDRAM_A,     // 13 bit multiplexed address bus
    output reg        SDRAM_DQML,  // two byte masks
    output reg        SDRAM_DQMH,  // 
-   output reg  [1:0] SDRAM_BA,    // two banks
+   output reg [1:0]  SDRAM_BA,    // two banks
    output            SDRAM_nCS,   // a single chip select
    output            SDRAM_nWE,   // write enable
    output            SDRAM_nRAS,  // row address select
@@ -44,7 +43,7 @@ module sdram
    output            SDRAM_CKE,   // clock enable
    output            SDRAM_CLK,
                                   //
-   input       [1:0] wtbt,        // 16bit mode:  bit1 - write high byte, bit0 - write low byte,
+   input      [1:0]  wtbt,        // 16bit mode:  bit1 - write high byte, bit0 - write low byte,
                                   // 8bit mode:  2'b00 - use addr[0] to decide which byte to write
                                   // Ignored while reading.
                                   //
@@ -92,8 +91,7 @@ reg [24:0] save_addr;
 reg [15:0] data;
 assign dout = save_addr[0] ? {data[7:0], data[15:8]} : {data[15:8], data[7:0]};
 
-typedef enum
-{
+typedef enum {
 	STATE_STARTUP,
 	STATE_OPEN_1, STATE_OPEN_2,
 	STATE_IDLE,	  STATE_IDLE_1, STATE_IDLE_2, STATE_IDLE_3,
@@ -141,7 +139,7 @@ always @(posedge clk) begin
 				SDRAM_A     <= MODE;
 			end
 
-			if(!refresh_count) begin
+			if (!refresh_count) begin
 				state   <= STATE_IDLE;
 				ready   <= 1;
 				refresh_count <= 0;
@@ -157,7 +155,7 @@ always @(posedge clk) begin
 		STATE_IDLE_1: begin
 			state      <= STATE_IDLE;
 			// mask possible refresh to reduce colliding.
-			if(refresh_count > cycles_per_refresh) begin
+			if (refresh_count > cycles_per_refresh) begin
 				state    <= STATE_IDLE_7;
 				command  <= CMD_AUTO_REFRESH;
 				refresh_count <= 0;
@@ -166,8 +164,8 @@ always @(posedge clk) begin
 
 		STATE_IDLE: begin
 			// Priority is to issue a refresh if one is outstanding
-			if(refresh_count > (cycles_per_refresh<<1)) state <= STATE_IDLE_1;
-			else if(new_rd | new_we) begin
+			if (refresh_count > (cycles_per_refresh<<1)) state <= STATE_IDLE_1;
+			else if (new_rd | new_we) begin
 				new_we   <= 0;
 				new_rd   <= 0;
 				save_we  <= new_we;
@@ -182,13 +180,12 @@ always @(posedge clk) begin
 
 		STATE_OPEN_2: begin
 			SDRAM_A     <= {save_we & (new_wtbt ? ~new_wtbt[1] : ~save_addr[0]), save_we & (new_wtbt ? ~new_wtbt[0] :  save_addr[0]), 2'b10, save_addr[22:14]};
-			if(save_we) begin
+			if (save_we) begin
 				command  <= CMD_WRITE;
 				SDRAM_DQ <= new_wtbt ? new_data : {new_data[7:0], new_data[7:0]};
 				ready    <= 1;
 				state    <= STATE_IDLE_2;
-			end
-			else begin
+			end else begin
 				command  <= CMD_READ;
 				data_ready_delay[CAS_LATENCY] <= 1;
 				state    <= STATE_IDLE_5;
@@ -196,26 +193,25 @@ always @(posedge clk) begin
 		end
 	endcase
 
-	if(init) begin
+	if (init) begin
 		state <= STATE_STARTUP;
 		refresh_count <= startup_refresh_max - sdram_startup_cycles;
 	end
 
 	old_we <= we;
-	if(we & ~old_we) begin
+	if (we & ~old_we) begin
 		save_addr <= addr;
 		{ready, new_we, new_data, new_wtbt} <= {1'b0, 1'b1, din, wtbt};
 	end
 
 	old_rd <= rd;
-	if(rd & ~old_rd) begin
+	if (rd & ~old_rd) begin
 		save_addr <= addr;
-		if(!(ready & ~save_we & (save_addr[24:1] == addr[24:1]))) {ready, new_rd} <= {1'b0, 1'b1};
+		if (!(ready & ~save_we & (save_addr[24:1] == addr[24:1]))) {ready, new_rd} <= {1'b0, 1'b1};
 	end
 end
 
-altddio_out
-#(
+altddio_out #(
 	.extend_oe_disable("OFF"),
 	.intended_device_family("Cyclone V"),
 	.invert_output("OFF"),
@@ -225,8 +221,7 @@ altddio_out
 	.power_up_high("OFF"),
 	.width(1)
 )
-sdramclk_ddr
-(
+sdramclk_ddr (
 	.datain_h(1'b0),
 	.datain_l(1'b1),
 	.outclock(clk),

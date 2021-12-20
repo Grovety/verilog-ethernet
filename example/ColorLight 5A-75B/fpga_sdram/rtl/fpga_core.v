@@ -505,5 +505,4 @@ udp_payload_fifo (
     .status_good_frame()
 );
 
-
 endmodule

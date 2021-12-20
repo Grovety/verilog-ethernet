@@ -29,8 +29,7 @@ THE SOFTWARE.
 /*
  * RMII PHY interface
  */
-module rmii_phy_if #
-(
+module rmii_phy_if # (
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // Clock input style ("BUFG", "BUFR", "BUFIO", "BUFIO2")
@@ -41,7 +40,6 @@ module rmii_phy_if #
 )
 (
     input  wire        rst,
-
     /*
      * RMII interface to MAC
      */
@@ -52,7 +50,6 @@ module rmii_phy_if #
     output wire        mac_rmii_tx_rst,
     input  wire [1:0]  mac_rmii_txd,
     input  wire        mac_rmii_tx_en,
-
     /*
      * RMII interface to PHY
      */
@@ -63,8 +60,7 @@ module rmii_phy_if #
     output wire        phy_rmii_tx_en
 );
 
-ssio_sdr_in #
-(
+ssio_sdr_in #(
     .TARGET(TARGET),
     .CLOCK_INPUT_STYLE(CLOCK_INPUT_STYLE),
     .WIDTH(5)
@@ -90,7 +86,6 @@ always @(posedge mac_rmii_clk) begin
 end
 
 generate
-
 if (TARGET == "XILINX") begin
     BUFG
     mii_bufg_inst (
@@ -100,7 +95,6 @@ if (TARGET == "XILINX") begin
 end else begin
     assign mac_rmii_clk = phy_rmii_clk;
 end
-
 endgenerate
 
 // reset sync

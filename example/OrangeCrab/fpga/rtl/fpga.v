@@ -19,16 +19,6 @@ module fpga #(
 
 wire sys_clk;
 
-//assign test = sys_clk;
-
-/*ODDRX1F ODDRX1F(
-	.D0(1'd1),
-	.D1(1'd0),
-	.SCLK(clk48),
-	.Q(test)
-);
-
-*/
 localparam MAX = 45_000_000;
 localparam WIDTH = $clog2(MAX);
 
@@ -57,42 +47,43 @@ wire clkfb;
 (* FREQUENCY_PIN_CLKOP="90" *)
 (* ICP_CURRENT="12" *) (* LPF_RESISTOR="8" *) (* MFG_ENABLE_FILTEROPAMP="1" *) (* MFG_GMCREF_SEL="2" *)
 EHXPLLL #(
-        .PLLRST_ENA("DISABLED"),
-        .INTFB_WAKE("DISABLED"),
-        .STDBY_ENABLE("DISABLED"),
-        .DPHASE_SOURCE("DISABLED"),
-        .OUTDIVIDER_MUXA("DIVA"),
-        .OUTDIVIDER_MUXB("DIVB"),
-        .OUTDIVIDER_MUXC("DIVC"),
-        .OUTDIVIDER_MUXD("DIVD"),
-        .CLKI_DIV(8),
-        .CLKOP_ENABLE("ENABLED"),
-        .CLKOP_DIV(7),
-        .CLKOP_CPHASE(3),
-        .CLKOP_FPHASE(0),
-        .FEEDBK_PATH("INT_OP"),
-        .CLKFB_DIV(15)
-    ) pll_i (
-        .RST(1'b0),
-        .STDBY(1'b0),
-        .CLKI(clk48),
-        .CLKOP(sys_clk),
-        .CLKFB(clkfb),
-        .CLKINTFB(clkfb),
-        .PHASESEL0(1'b0),
-        .PHASESEL1(1'b0),
-        .PHASEDIR(1'b1),
-        .PHASESTEP(1'b1),
-        .PHASELOADREG(1'b1),
-        .PLLWAKESYNC(1'b0),
-        .ENCLKOP(1'b0),
-        .LOCK()
-	);
+    .PLLRST_ENA("DISABLED"),
+    .INTFB_WAKE("DISABLED"),
+    .STDBY_ENABLE("DISABLED"),
+    .DPHASE_SOURCE("DISABLED"),
+    .OUTDIVIDER_MUXA("DIVA"),
+    .OUTDIVIDER_MUXB("DIVB"),
+    .OUTDIVIDER_MUXC("DIVC"),
+    .OUTDIVIDER_MUXD("DIVD"),
+    .CLKI_DIV(8),
+    .CLKOP_ENABLE("ENABLED"),
+    .CLKOP_DIV(7),
+    .CLKOP_CPHASE(3),
+    .CLKOP_FPHASE(0),
+    .FEEDBK_PATH("INT_OP"),
+    .CLKFB_DIV(15)
+)
+pll_i (
+    .RST(1'b0),
+    .STDBY(1'b0),
+    .CLKI(clk48),
+    .CLKOP(sys_clk),
+    .CLKFB(clkfb),
+    .CLKINTFB(clkfb),
+    .PHASESEL0(1'b0),
+    .PHASESEL1(1'b0),
+    .PHASEDIR(1'b1),
+    .PHASESTEP(1'b1),
+    .PHASELOADREG(1'b1),
+    .PLLWAKESYNC(1'b0),
+    .ENCLKOP(1'b0),
+    .LOCK()
+);
 
 fpga_core #(
     .TARGET(TARGET),
-) ethCore0
-(
+) 
+ethCore0 (
     .rst(rst),
     .sys_clk(sys_clk),
 
@@ -119,48 +110,30 @@ wire mdio_cmd_ready;
 
 reg [3:0] mdio_state;
 
-always @(posedge clk48) 
-begin
-    if (rst) 
-    begin
+always @(posedge clk48) begin
+    if (rst) begin
         mdio_state <= 0;
         delay_reg <= 16'hffff;
         mdio_cmd_reg_addr <= 5'h00;
         mdio_cmd_data <= 16'd0;
         mdio_cmd_valid <= 1'b0;
         mdio_cmd_opcode = 2'b01;
-    end else 
-    begin
+    end else begin
         mdio_cmd_valid <= mdio_cmd_valid & !mdio_cmd_ready;
-        if (delay_reg > 0) 
-        begin
+        if (delay_reg > 0) begin
             delay_reg <= delay_reg - 1;
-        end else if (!mdio_cmd_ready) 
-        begin
+        end else if (!mdio_cmd_ready) begin
             // wait for ready
             mdio_state <= mdio_state;
-        end else 
-        begin
+        end else begin
             mdio_cmd_valid <= 1'b0;
             case (mdio_state)
-                4'd0: 
-                begin
+                4'd0: begin
                     mdio_cmd_reg_addr <= 5'h17;
                     mdio_cmd_data <= 16'h0022;
                     mdio_cmd_valid <= 1'b1;
                     mdio_state <= 4'd12;
                 end
-/*                4'd1: 
-                begin
-                    // Re Negotiate
-                    mdio_cmd_reg_addr <= 5'h00;
-                    mdio_cmd_data <= 16'h1340;
-                    mdio_cmd_valid <= 1'b1;
-                    mdio_state <= 4'd12;
-                end*/
-                // ...
-                // Values from 1 to 11 are reserved
-                // ...
                 4'd12: begin
                     // done
                     mdio_state <= 4'd12;

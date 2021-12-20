@@ -35,8 +35,9 @@ always @(posedge clk125) begin
     if (reset == 1) begin
     end else begin
         txReady <= 0;    
-        if (txDelay != 0)
+        if (txDelay != 0) begin
             txDelay <= txDelay - 1;
+        end
         else begin
             if (txBit == 20) begin
                 txReady <= 1;
@@ -145,7 +146,7 @@ always @(posedge clk125) begin
                     mdioCmdValid <= 1;
                     rxState <= rxIdle;
                 end
-               control <= rxShift [13:10];
+                control <= rxShift [13:10];
             end
             default: begin
                 rxState <= rxIdle;

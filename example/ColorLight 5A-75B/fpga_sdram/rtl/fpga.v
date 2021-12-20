@@ -87,8 +87,8 @@ pll_i (
 fpga_core #(
     .TARGET(TARGET),
     .USE_CLK90("FALSE")
-) ethCore0
-(
+) 
+ethCore0 (
     .rst(rst),
     .clk(clk),
     .clk90(clk90),	

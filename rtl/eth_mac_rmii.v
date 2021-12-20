@@ -29,8 +29,7 @@ THE SOFTWARE.
 /*
  * 10M/100M Ethernet MAC with MII interface
  */
-module eth_mac_rmii #
-(
+module eth_mac_rmii #(
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // Clock input style ("BUFG", "BUFR", "BUFIO", "BUFIO2")
@@ -47,7 +46,6 @@ module eth_mac_rmii #
     output wire        rx_rst,
     output wire        tx_clk,
     output wire        tx_rst,
-
     /*
      * AXI input
      */
@@ -56,7 +54,6 @@ module eth_mac_rmii #
     output wire        tx_axis_tready,
     input  wire        tx_axis_tlast,
     input  wire        tx_axis_tuser,
-
     /*
      * AXI output
      */
@@ -64,7 +61,6 @@ module eth_mac_rmii #
     output wire        rx_axis_tvalid,
     output wire        rx_axis_tlast,
     output wire        rx_axis_tuser,
-
     /*
      * RMII interface
      */
@@ -73,7 +69,6 @@ module eth_mac_rmii #
     input  wire        rmii_rx_crs_dv,
     output wire [1:0]  rmii_txd,
     output wire        rmii_tx_en,
-
     /*
      * Status
      */
@@ -82,14 +77,13 @@ module eth_mac_rmii #
     output wire        rx_start_packet,
     output wire        rx_error_bad_frame,
     output wire        rx_error_bad_fcs,
-
     /*
      * Configuration
      */
     input  wire [7:0]  ifg_delay
 );
 
-reg [3:0]   mac_mii_rxd;
+reg  [3:0]  mac_mii_rxd;
 reg         mac_mii_rx_dv;
 wire        mac_mii_rx_er = 0;
 wire [3:0]  mac_mii_txd;
@@ -101,8 +95,8 @@ wire        mac_rmii_rx_crs_dv;
 reg  [1:0]  mac_rmii_txd;
 reg         mac_rmii_tx_en;
 
-reg rx_clk_enable;
-reg tx_clk_enable;
+reg         rx_clk_enable;
+reg         tx_clk_enable;
 
 
 rmii_phy_if #(
@@ -175,80 +169,74 @@ localparam STATE_NIBBLE1            = 4;
 
 reg [2:0] state;
 
-always @ (posedge rx_clk)
-begin
-     if (rx_rst)
-     begin
-         state <= STATE_IDLE;
-         mac_mii_rxd <= 0;
-         mac_mii_rx_dv <= 0;
-         rx_clk_enable <= 0;
-     end else
-     begin
-         case (state)
-         STATE_IDLE: begin
-             mac_mii_rx_dv <= 0;
-             mac_mii_rxd <= 4'b0000;
-             rx_clk_enable <= ~rx_clk_enable;
-             if (mac_rmii_rx_crs_dv) begin
-                  state <= STATE_CRS;
-             end
-         end
-         STATE_CRS: begin
-             mac_mii_rx_dv <= 1;
-             rx_clk_enable <= ~rx_clk_enable;
-             if (mac_rmii_rxd == 2'b0) begin
-                  mac_mii_rxd <= 4'b0000;
-                  state <= STATE_CRS;
-             end else if (mac_rmii_rxd == 2'b01) begin
-                  mac_mii_rxd <= 4'b0101;
-                  state <= STATE_SFD;
-             end else begin
-                  mac_mii_rxd <= 4'b0000;
-                  state <= STATE_IDLE;
-             end
-         end
-         STATE_SFD: begin
-             if (mac_rmii_rxd == 2'b11) begin
-                  rx_clk_enable <= 1;
-                  mac_mii_rxd <= 4'b01101;
-                  state <= STATE_NIBBLE0;
-             end else if (mac_rmii_rxd == 2'b01) begin
-                  rx_clk_enable <= ~rx_clk_enable;
-                  mac_mii_rxd <= 4'b0101;
-                  state <= STATE_SFD;
-             end else begin
-                  rx_clk_enable <= ~rx_clk_enable;
-                  mac_mii_rxd <= 4'b0000;
-                  state <= STATE_IDLE;
-             end
-         end
-         STATE_NIBBLE0: begin
-             rx_clk_enable <= 0;
-             mac_mii_rxd [1:0] <= mac_rmii_rxd;
-             state <= STATE_NIBBLE1;
-         end
-         STATE_NIBBLE1: begin
-             rx_clk_enable <= 1;
-             mac_mii_rxd [3:2] <= mac_rmii_rxd;
-             if (mac_rmii_rx_crs_dv)
-             begin
-                   state <= STATE_NIBBLE0;
-             end
-             else
-             begin
-                   mac_mii_rx_dv <= 0;
-                   state <= STATE_IDLE;
+always @ (posedge rx_clk) begin
+    if (rx_rst) begin
+        state <= STATE_IDLE;
+        mac_mii_rxd <= 0;
+        mac_mii_rx_dv <= 0;
+        rx_clk_enable <= 0;
+    end else begin
+        case (state)
+            STATE_IDLE: begin
+                mac_mii_rx_dv <= 0;
+                mac_mii_rxd <= 4'b0000;
+                rx_clk_enable <= ~rx_clk_enable;
+                if (mac_rmii_rx_crs_dv) begin
+                    state <= STATE_CRS;
+                end
             end
-         end
-         default: begin
-            state <= STATE_IDLE;
-            mac_mii_rxd <= 0;
-            mac_mii_rx_dv <= 0;
-            rx_clk_enable <= 0;
-         end
-         endcase
-     end
+            STATE_CRS: begin
+                mac_mii_rx_dv <= 1;
+                rx_clk_enable <= ~rx_clk_enable;
+                if (mac_rmii_rxd == 2'b0) begin
+                    mac_mii_rxd <= 4'b0000;
+                    state <= STATE_CRS;
+                end else if (mac_rmii_rxd == 2'b01) begin
+                    mac_mii_rxd <= 4'b0101;
+                    state <= STATE_SFD;
+                end else begin
+                    mac_mii_rxd <= 4'b0000;
+                    state <= STATE_IDLE;
+                end
+            end
+            STATE_SFD: begin
+                if (mac_rmii_rxd == 2'b11) begin
+                    rx_clk_enable <= 1;
+                    mac_mii_rxd <= 4'b01101;
+                    state <= STATE_NIBBLE0;
+                end else if (mac_rmii_rxd == 2'b01) begin
+                    rx_clk_enable <= ~rx_clk_enable;
+                    mac_mii_rxd <= 4'b0101;
+                    state <= STATE_SFD;
+                end else begin
+                    rx_clk_enable <= ~rx_clk_enable;
+                    mac_mii_rxd <= 4'b0000;
+                    state <= STATE_IDLE;
+                end
+            end
+            STATE_NIBBLE0: begin
+                rx_clk_enable <= 0;
+                mac_mii_rxd [1:0] <= mac_rmii_rxd;
+                state <= STATE_NIBBLE1;
+            end
+            STATE_NIBBLE1: begin
+                rx_clk_enable <= 1;
+                mac_mii_rxd [3:2] <= mac_rmii_rxd;
+                if (mac_rmii_rx_crs_dv) begin
+                    state <= STATE_NIBBLE0;
+                end else begin
+                    mac_mii_rx_dv <= 0;
+                    state <= STATE_IDLE;
+                end
+            end
+            default: begin
+                state <= STATE_IDLE;
+                mac_mii_rxd <= 0;
+                mac_mii_rx_dv <= 0;
+                rx_clk_enable <= 0;
+            end
+        endcase
+    end
      
 end
 

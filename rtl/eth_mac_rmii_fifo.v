@@ -29,8 +29,7 @@ THE SOFTWARE.
 /*
  * 10M/100M Ethernet MAC with RMII interface and TX and RX FIFOs
  */
-module eth_mac_rmii_fifo #
-(
+module eth_mac_rmii_fifo #(
     // target ("SIM", "GENERIC", "XILINX", "ALTERA")
     parameter TARGET = "GENERIC",
     // Clock input style ("BUFG", "BUFR", "BUFIO", "BUFIO2")
@@ -60,7 +59,6 @@ module eth_mac_rmii_fifo #
     input  wire                       rst,
     input  wire                       logic_clk,
     input  wire                       logic_rst,
-
     /*
      * AXI input
      */
@@ -70,7 +68,6 @@ module eth_mac_rmii_fifo #
     output wire                       tx_axis_tready,
     input  wire                       tx_axis_tlast,
     input  wire                       tx_axis_tuser,
-
     /*
      * AXI output
      */
@@ -80,26 +77,14 @@ module eth_mac_rmii_fifo #
     input  wire                       rx_axis_tready,
     output wire                       rx_axis_tlast,
     output wire                       rx_axis_tuser,
-
     /*
      * RMII interface
      */
-    input  wire        rmii_clk,
-    input  wire [1:0]  rmii_rxd,
-    input  wire        rmii_rx_crs_dv,
-    output wire [1:0]  rmii_txd,
-    output wire        rmii_tx_en,
-
-
-//    input  wire                       mii_rx_clk,
-//    input  wire [3:0]                 mii_rxd,
-//    input  wire                       mii_rx_dv,
-//    input  wire                       mii_rx_er,
-//    input  wire                       mii_tx_clk,
-//    output wire [3:0]                 mii_txd,
-//    output wire                       mii_tx_en,
-//    output wire                       mii_tx_er,
-
+    input  wire                       rmii_clk,
+    input  wire [1:0]                 rmii_rxd,
+    input  wire                       rmii_rx_crs_dv,
+    output wire [1:0]                 rmii_txd,
+    output wire                       rmii_tx_en,
     /*
      * Status
      */
@@ -112,7 +97,6 @@ module eth_mac_rmii_fifo #
     output wire                       rx_fifo_overflow,
     output wire                       rx_fifo_bad_frame,
     output wire                       rx_fifo_good_frame,
-
     /*
      * Configuration
      */

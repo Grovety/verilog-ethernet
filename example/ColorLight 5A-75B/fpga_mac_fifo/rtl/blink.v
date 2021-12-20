@@ -19,6 +19,7 @@ module blink (
     output             eth_mdc,
     inout              eth_mdio
 );
+
 localparam MAX = 12_500_000;
 localparam WIDTH = $clog2(MAX);
 
@@ -125,8 +126,6 @@ mdio_control mdio(
     .mdio_t(mdio_t)
 );
 wire [1:0] speed;
-//wire [11:0] debug;
-
 
 wire [7:0] bus_data;
 wire bus_tvalid;
