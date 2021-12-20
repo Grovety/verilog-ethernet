@@ -65,11 +65,15 @@ def estimate(results):
     estimation = 0
     count = 0
     for signal in results.values():
-        freq = signal[0]
-        FMax = signal[2]
-        estimation += float(freq)/float(FMax)
-        count += 1
-    return estimation/count
+        if signal[1] == 'FAIL':
+            freq = signal[0]
+            FMax = signal[2]
+            estimation += float(freq)/float(FMax)
+            count += 1
+    if count == 0: 
+        return 100
+    else:
+        return estimation/count
 
 def test_estimate():
     # 175.35 PASS 25.00
@@ -149,7 +153,6 @@ def find_best(command, cli_params):
         os.system (command + ' --seed ' + str(best_seed))
     print ("Best seed is: ", best_seed)
     return best_seed
-
 
 
 cli_params = parse_command_line()
