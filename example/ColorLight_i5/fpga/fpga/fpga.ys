@@ -1,0 +1,45 @@
+verilog_defaults -push
+verilog_defaults -add -defer
+read_verilog ../rtl/fpga.v
+read_verilog ../rtl/fpga_core.v
+read_verilog ../rtl/rst_gen.v
+read_verilog ../rtl/lfsr_yosys.v
+read_verilog ../lib/eth/rtl/iddr.v
+read_verilog ../lib/eth/rtl/oddr.v
+read_verilog ../lib/eth/rtl/ssio_ddr_in.v
+read_verilog ../lib/eth/rtl/ssio_ddr_out.v
+read_verilog ../lib/eth/rtl/rgmii_phy_if.v
+read_verilog ../lib/eth/lib/axis/rtl/axis_async_fifo.v
+read_verilog ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v
+read_verilog ../lib/eth/rtl/axis_gmii_tx.v
+read_verilog ../lib/eth/rtl/axis_gmii_rx.v
+read_verilog ../lib/eth/rtl/eth_mac_1g.v
+read_verilog ../lib/eth/rtl/eth_mac_1g_rgmii.v
+read_verilog ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v
+read_verilog ../lib/eth/rtl/eth_axis_rx.v
+read_verilog ../lib/eth/rtl/eth_axis_tx.v
+read_verilog ../lib/eth/rtl/udp_complete.v
+read_verilog ../lib/eth/rtl/udp_checksum_gen.v
+read_verilog ../lib/eth/rtl/udp.v
+read_verilog ../lib/eth/rtl/udp_ip_rx.v
+read_verilog ../lib/eth/rtl/udp_ip_tx.v
+read_verilog ../lib/eth/rtl/ip_complete.v
+read_verilog ../lib/eth/rtl/ip.v
+read_verilog ../lib/eth/rtl/ip_eth_rx.v
+read_verilog ../lib/eth/rtl/ip_eth_tx.v
+read_verilog ../lib/eth/rtl/ip_arb_mux.v
+read_verilog ../lib/eth/rtl/ip_mux.v
+read_verilog ../lib/eth/rtl/arp.v
+read_verilog ../lib/eth/rtl/arp_cache.v
+read_verilog ../lib/eth/rtl/arp_eth_rx.v
+read_verilog ../lib/eth/rtl/arp_eth_tx.v
+read_verilog ../lib/eth/rtl/eth_arb_mux.v
+read_verilog ../lib/eth/rtl/eth_mux.v
+read_verilog ../lib/eth/rtl/hash_11_bit.v
+read_verilog ../lib/eth/lib/axis/rtl/arbiter.v
+read_verilog ../lib/eth/lib/axis/rtl/priority_encoder.v
+read_verilog ../lib/eth/lib/axis/rtl/axis_fifo.v
+read_verilog ../lib/eth/lib/axis/rtl/sync_reset.v
+verilog_defaults -pop
+attrmap -tocase keep -imap keep=true keep=1 -imap keep=false keep=0 -remove keep=0
+synth_ecp5 -top fpga -json fpga.json -abc9

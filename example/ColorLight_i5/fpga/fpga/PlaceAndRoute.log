@@ -1,0 +1,613 @@
+Info: constraining clock net 'clk_i' to 225.00 MHz
+Info: constraining clock net 'eth_clocks_rx' to 225.00 MHz
+Info: constraining clock net 'clk' to 225.00 MHz
+Info: constraining clock net 'clk90' to 225.00 MHz
+
+Info: Logic utilisation before packing:
+Info:     Total LUT4s:      3790/24288    15%
+Info:         logic LUTs:   3244/24288    13%
+Info:         carry LUTs:    546/24288     2%
+Info:           RAM LUTs:      0/12144     0%
+Info:          RAMW LUTs:      0/ 6072     0%
+
+Info:      Total DFFs:      5374/24288    22%
+
+Info: Packing IOs..
+Info: pin 'led_o$tr_io' constrained to Bel 'X72/Y47/PIOC'.
+Info: pin 'eth_tx_data[3]$tr_io' constrained to Bel 'X0/Y29/PIOC'.
+Info: pin 'eth_tx_data[2]$tr_io' constrained to Bel 'X0/Y32/PIOB'.
+Info: pin 'eth_tx_data[1]$tr_io' constrained to Bel 'X0/Y32/PIOC'.
+Info: pin 'eth_tx_data[0]$tr_io' constrained to Bel 'X0/Y26/PIOA'.
+Info: pin 'eth_tx_ctl$tr_io' constrained to Bel 'X0/Y32/PIOD'.
+Info: pin 'eth_rx_data[3]$tr_io' constrained to Bel 'X0/Y47/PIOA'.
+Info: pin 'eth_rx_data[2]$tr_io' constrained to Bel 'X0/Y44/PIOD'.
+Info: pin 'eth_rx_data[1]$tr_io' constrained to Bel 'X0/Y44/PIOC'.
+Info: pin 'eth_rx_data[0]$tr_io' constrained to Bel 'X0/Y32/PIOA'.
+Info: pin 'eth_rx_ctl$tr_io' constrained to Bel 'X0/Y47/PIOB'.
+Info: pin 'eth_rst_n$tr_io' constrained to Bel 'X0/Y47/PIOD'.
+Info: pin 'eth_mdio$tr_io' constrained to Bel 'X0/Y38/PIOD'.
+Info: pin 'eth_mdc$tr_io' constrained to Bel 'X0/Y38/PIOB'.
+Info: pin 'eth_clocks_tx$tr_io' constrained to Bel 'X0/Y26/PIOD'.
+Info: pin 'eth_clocks_rx$tr_io' constrained to Bel 'X0/Y26/PIOC'.
+Info: pin 'clk_i$tr_io' constrained to Bel 'X0/Y47/PIOC'.
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_ssio_ddr_inst.data_iddr_inst.genblk1.genblk1.genblk1.iddr[4].DELAYG_7 connected to PIO Bel X0/Y47/PIOA
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_ssio_ddr_inst.data_iddr_inst.genblk1.genblk1.genblk1.iddr[3].DELAYG_7 connected to PIO Bel X0/Y44/PIOD
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_ssio_ddr_inst.data_iddr_inst.genblk1.genblk1.genblk1.iddr[2].DELAYG_7 connected to PIO Bel X0/Y44/PIOC
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_ssio_ddr_inst.data_iddr_inst.genblk1.genblk1.genblk1.iddr[1].DELAYG_7 connected to PIO Bel X0/Y32/PIOA
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_ssio_ddr_inst.data_iddr_inst.genblk1.genblk1.genblk1.iddr[0].DELAYG_7 connected to PIO Bel X0/Y47/PIOB
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.data_oddr_inst.genblk1.genblk1.genblk1.oddr[4].DELAYG_2 connected to PIO Bel X0/Y29/PIOC
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.data_oddr_inst.genblk1.genblk1.genblk1.oddr[3].DELAYG_2 connected to PIO Bel X0/Y32/PIOB
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.data_oddr_inst.genblk1.genblk1.genblk1.oddr[2].DELAYG_2 connected to PIO Bel X0/Y32/PIOC
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.data_oddr_inst.genblk1.genblk1.genblk1.oddr[1].DELAYG_2 connected to PIO Bel X0/Y26/PIOA
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.data_oddr_inst.genblk1.genblk1.genblk1.oddr[0].DELAYG_2 connected to PIO Bel X0/Y32/PIOD
+Info: IOLOGIC component ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.clk_oddr_inst.genblk1.genblk1.genblk1.oddr[0].DELAYG_2 connected to PIO Bel X0/Y26/PIOD
+Info: Packing constants..
+Info: Packing carries...
+Info: Finding LUTFF pairs...
+Info: Packing LUT5-7s...
+Info: Finding LUT-LUT pairs...
+Info: Packing paired LUTs into a SLICE...
+Info: Packing unpaired LUTs into a SLICE...
+Info: Packing unpaired FFs into a SLICE...
+Info: Generating derived timing constraints...
+Info:     Input frequency of PLL 'pll_i' is constrained to 225.0 MHz
+Info:     Derived VCO frequency 5649.7 MHz of PLL 'pll_i' is out of legal range [400MHz, 800MHz]
+Warning:     Overriding derived constraint of 225.0 MHz on net clk with user-specified constraint of 1126.1 MHz.
+Warning:     Overriding derived constraint of 225.0 MHz on net clk90 with user-specified constraint of 1126.1 MHz.
+Info: Promoting globals...
+Info:     promoting clock net clk to global network
+Info:     promoting clock net eth_clocks_rx$TRELLIS_IO_IN to global network
+Info:     promoting clock net clk_i$TRELLIS_IO_IN to global network
+Info: Checksum: 0x25e9e1a9
+
+Info: Annotating ports with timing budgets for target frequency 166.00 MHz
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[80]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_1_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[79]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_2_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[78]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_3_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[77]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_4_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[76]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_5_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[75]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_6_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[74]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_7_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[73]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_8_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[72]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_9_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[71]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_10_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[70]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_11_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[69]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_12_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[68]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_13_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[67]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_14_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[66]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_15_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[65]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_16_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[64]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_17_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[63]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_18_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[62]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_19_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[61]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_20_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[60]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_21_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[59]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_22_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[58]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_23_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[57]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_24_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[56]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_25_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[55]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_26_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[54]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_27_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[53]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_28_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[52]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_29_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[51]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_30_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[50]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_31_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[49]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_32_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[48]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_33_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[47]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_34_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[46]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_35_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[45]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_36_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[44]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_37_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[43]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_38_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[42]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_39_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[41]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_40_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[40]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_41_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[39]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_42_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[38]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_43_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[37]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_44_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[36]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_45_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[35]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_46_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[34]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_47_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[33]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_48_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[32]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_49_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[31]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_50_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[30]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_51_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[29]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_52_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[28]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_53_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[27]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_54_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[26]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_55_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[25]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_56_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[24]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_57_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[23]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_58_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[22]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_59_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[21]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_60_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[20]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_61_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[19]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_62_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[18]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_7_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][0]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_63_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[17]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_64_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[16]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_65_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[15]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_66_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[14]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_67_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[13]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_68_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[12]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_69_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[11]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_70_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[10]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_71_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[9]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_6_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][1]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_72_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[8]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_73_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[7]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_74_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[6]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_75_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[5]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_76_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[4]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_77_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[3]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_78_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[2]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_79_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[1]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r2_TRELLIS_FF_Q_80_SLICE.M0, connected to net 'ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.ram_last_data_r[0]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_5_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][2]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_4_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][3]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_3_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][4]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_2_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][5]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_1_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][6]', has negative timing budget of -1.386000ns
+Info: port ethCore0.tx_fifo_udp_payload_axis_tuser_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][9]', has negative timing budget of -1.386000ns
+Info: port ethCore0.tx_fifo_udp_payload_axis_tlast_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][8]', has negative timing budget of -1.386000ns
+Info: port ethCore0.udp_payload_fifo.m_axis_pipe_reg[1]_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.udp_payload_fifo.m_axis_pipe_reg[0][7]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_7_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][0]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_6_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][1]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_5_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][2]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_4_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][3]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_3_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][4]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_2_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][5]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_1_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][6]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][7]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_7_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][0]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_6_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][1]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_5_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][2]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_4_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][3]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_3_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][4]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_2_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][5]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_1_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][6]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[1]_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][7]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_tx_inst.s_axis_tuser_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][9]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_tx_inst.s_axis_tlast_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.tx_fifo.fifo_inst.m_axis_pipe_reg[0][8]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_axis_rx_inst.m_eth_payload_axis_tuser_int_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][9]', has negative timing budget of -1.386000ns
+Info: port ethCore0.eth_axis_rx_inst.m_eth_payload_axis_tlast_int_TRELLIS_FF_Q_SLICE.M0, connected to net 'ethCore0.eth_mac_inst.rx_fifo.fifo_inst.m_axis_pipe_reg[0][8]', has negative timing budget of -1.386000ns
+Info: Checksum: 0xc4df2ce3
+
+Info: Device utilisation:
+Info: 	       TRELLIS_SLICE:  3788/12144    31%
+Info: 	          TRELLIS_IO:    17/  197     8%
+Info: 	                DCCA:     3/   56     5%
+Info: 	              DP16KD:    20/   56    35%
+Info: 	          MULT18X18D:     0/   28     0%
+Info: 	              ALU54B:     0/   14     0%
+Info: 	             EHXPLLL:     1/    2    50%
+Info: 	             EXTREFB:     0/    1     0%
+Info: 	                DCUA:     0/    1     0%
+Info: 	           PCSCLKDIV:     0/    2     0%
+Info: 	             IOLOGIC:    11/  128     8%
+Info: 	            SIOLOGIC:     0/   69     0%
+Info: 	                 GSR:     0/    1     0%
+Info: 	               JTAGG:     0/    1     0%
+Info: 	                OSCG:     0/    1     0%
+Info: 	               SEDGA:     0/    1     0%
+Info: 	                 DTR:     0/    1     0%
+Info: 	             USRMCLK:     0/    1     0%
+Info: 	             CLKDIVF:     0/    4     0%
+Info: 	           ECLKSYNCB:     0/   10     0%
+Info: 	             DLLDELD:     0/    8     0%
+Info: 	              DDRDLL:     0/    4     0%
+Info: 	             DQSBUFM:     0/    8     0%
+Info: 	     TRELLIS_ECLKBUF:     0/    8     0%
+Info: 	        ECLKBRIDGECS:     0/    2     0%
+Info: 	                DCSC:     0/    2     0%
+
+Info: Placed 29 cells based on constraints.
+Info: Creating initial analytic placement for 3206 cells, random placement wirelen = 214473.
+Info:     at initial placer iter 0, wirelen = 1183
+Info:     at initial placer iter 1, wirelen = 1046
+Info:     at initial placer iter 2, wirelen = 1007
+Info:     at initial placer iter 3, wirelen = 981
+Info: Running main analytical placer.
+Info:     at iteration #1, type ALL: wirelen solved = 1096, spread = 40209, legal = 43080; time = 0.22s
+Info:     at iteration #2, type ALL: wirelen solved = 3104, spread = 32226, legal = 36147; time = 0.17s
+Info:     at iteration #3, type ALL: wirelen solved = 4956, spread = 27434, legal = 30528; time = 0.19s
+Info:     at iteration #4, type ALL: wirelen solved = 7155, spread = 25115, legal = 27931; time = 0.18s
+Info:     at iteration #5, type ALL: wirelen solved = 8253, spread = 24949, legal = 28325; time = 0.18s
+Info:     at iteration #6, type ALL: wirelen solved = 9059, spread = 23958, legal = 26463; time = 0.18s
+Info:     at iteration #7, type ALL: wirelen solved = 10119, spread = 23376, legal = 25447; time = 0.18s
+Info:     at iteration #8, type ALL: wirelen solved = 10319, spread = 23569, legal = 25439; time = 0.17s
+Info:     at iteration #9, type ALL: wirelen solved = 10824, spread = 21796, legal = 23842; time = 0.16s
+Info:     at iteration #10, type ALL: wirelen solved = 10949, spread = 22165, legal = 23806; time = 0.15s
+Info:     at iteration #11, type ALL: wirelen solved = 11521, spread = 21977, legal = 24567; time = 0.29s
+Info:     at iteration #12, type ALL: wirelen solved = 12257, spread = 21809, legal = 24827; time = 0.17s
+Info:     at iteration #13, type ALL: wirelen solved = 12488, spread = 22728, legal = 26393; time = 0.18s
+Info:     at iteration #14, type ALL: wirelen solved = 13072, spread = 21900, legal = 25845; time = 0.15s
+Info:     at iteration #15, type ALL: wirelen solved = 12961, spread = 22401, legal = 25323; time = 0.17s
+Info: HeAP Placer Time: 4.48s
+Info:   of which solving equations: 3.16s
+Info:   of which spreading cells: 0.21s
+Info:   of which strict legalisation: 0.10s
+
+Info: Running simulated annealing placer for refinement.
+Info:   at iteration #1: temp = 0.000000, timing cost = 1286, wirelen = 23806
+Info:   at iteration #5: temp = 0.000000, timing cost = 1291, wirelen = 20542
+Info:   at iteration #10: temp = 0.000000, timing cost = 1102, wirelen = 19673
+Info:   at iteration #15: temp = 0.000000, timing cost = 1031, wirelen = 18987
+Info:   at iteration #20: temp = 0.000000, timing cost = 1242, wirelen = 18703
+Info:   at iteration #22: temp = 0.000000, timing cost = 1172, wirelen = 18663 
+Info: SA placement time 7.43s
+
+Info: Max frequency for clock         '$glbnet$clk_i$TRELLIS_IO_IN': 115.98 MHz (FAIL at 225.02 MHz)
+Info: Max frequency for clock                         '$glbnet$clk': 78.43 MHz (FAIL at 225.02 MHz)
+Info: Max frequency for clock '$glbnet$eth_clocks_rx$TRELLIS_IO_IN': 101.81 MHz (FAIL at 225.02 MHz)
+
+Info: Max delay posedge $glbnet$clk                         -> <async>                                    : 10.11 ns
+Info: Max delay posedge $glbnet$clk                         -> posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN: 2.44 ns
+Info: Max delay posedge $glbnet$clk_i$TRELLIS_IO_IN         -> <async>                                    : 7.48 ns
+Info: Max delay posedge $glbnet$clk_i$TRELLIS_IO_IN         -> posedge $glbnet$clk                        : 9.58 ns
+Info: Max delay posedge $glbnet$clk_i$TRELLIS_IO_IN         -> posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN: 8.62 ns
+Info: Max delay posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN -> <async>                                    : 6.75 ns
+Info: Max delay posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN -> posedge $glbnet$clk                        : 3.11 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 10 endpoint(s)
+Info:          + represents [1,10) endpoint(s)
+Info: [ -8306,  -7651) |+
+Info: [ -7651,  -6996) |*+
+Info: [ -6996,  -6341) |**********+
+Info: [ -6341,  -5686) |**************+
+Info: [ -5686,  -5031) |****************+
+Info: [ -5031,  -4376) |*****************************+
+Info: [ -4376,  -3721) |***************************************+
+Info: [ -3721,  -3066) |**********************************************+
+Info: [ -3066,  -2411) |********************************************************+
+Info: [ -2411,  -1756) |**************************************************+
+Info: [ -1756,  -1101) |********************************************+
+Info: [ -1101,   -446) |*****************************************+
+Info: [  -446,    209) |**********************************************************+
+Info: [   209,    864) |************************************************************ 
+Info: [   864,   1519) |**************************************************+
+Info: [  1519,   2174) |********************************************+
+Info: [  2174,   2829) |***************************************************+
+Info: [  2829,   3484) |******************************************************+
+Info: [  3484,   4139) |*******+
+Info: [  4139,   4794) |****+
+Info: Checksum: 0xbe17f36b
+Info: Routing globals...
+Info:     routing clock net $glbnet$clk_i$TRELLIS_IO_IN using global 0
+Info:     routing clock net $glbnet$eth_clocks_rx$TRELLIS_IO_IN using global 1
+Info:     routing clock net $glbnet$clk using global 2
+
+Info: Routing..
+Info: Setting up routing queue.
+Info: Routing 17230 arcs.
+Info:            |   (re-)routed arcs  |   delta    | remaining|       time spent     |
+Info:    IterCnt |  w/ripup   wo/ripup |  w/r  wo/r |      arcs| batch(sec) total(sec)|
+Info:       1000 |        6        993 |    6   993 |     16244|       0.19       0.19|
+Info:       2000 |       10       1989 |    4   996 |     15253|       0.17       0.36|
+Info:       3000 |       17       2982 |    7   993 |     14262|       0.17       0.53|
+Info:       4000 |       21       3978 |    4   996 |     13268|       0.17       0.70|
+Info:       5000 |       33       4966 |   12   988 |     12282|       0.18       0.88|
+Info:       6000 |       35       5964 |    2   998 |     11287|       0.16       1.04|
+Info:       7000 |       63       6936 |   28   972 |     10323|       0.21       1.25|
+Info:       8000 |      103       7896 |   40   960 |      9373|       0.22       1.47|
+Info:       9000 |      118       8881 |   15   985 |      8395|       0.17       1.64|
+Info:      10000 |      160       9839 |   42   958 |      7445|       0.22       1.86|
+Info:      11000 |      196      10803 |   36   964 |      6501|       0.19       2.05|
+Info:      12000 |      255      11744 |   59   941 |      5596|       0.27       2.33|
+Info:      13000 |      321      12678 |   66   934 |      4703|       0.28       2.60|
+Info:      14000 |      391      13608 |   70   930 |      3913|       0.31       2.91|
+Info:      15000 |      483      14516 |   92   908 |      3046|       0.30       3.22|
+Info:      16000 |      545      15454 |   62   938 |      2146|       0.33       3.55|
+Info:      17000 |      648      16351 |  103   897 |      1329|       0.49       4.05|
+Info:      18000 |      736      17263 |   88   912 |       460|       0.45       4.49|
+Info:      18531 |      764      17767 |   28   504 |         0|       0.19       4.69|
+Info: Routing complete.
+Info: Router1 time 4.69s
+Info: Checksum: 0xc3ce4cfb
+
+Info: Critical path report for clock '$glbnet$clk_i$TRELLIS_IO_IN' (posedge -> posedge):
+Info: curr total
+Info:  0.5  0.5  Source cpt_next_s_CCU2C_S0_4$CCU2_SLICE.Q1
+Info:  1.1  1.7    Net cpt_s[23] budget 0.511000 ns (41,39) -> (40,40)
+Info:                Sink led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_2_A_LUT4_Z_1_SLICE.C1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:26.18-26.23
+Info:  0.2  1.9  Source led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_2_A_LUT4_Z_1_SLICE.F1
+Info:  0.6  2.5    Net led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_2_A[1] budget 0.510000 ns (40,40) -> (40,40)
+Info:                Sink led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_2_A_LUT4_Z_3_SLICE.B1
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  2.7  Source led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_2_A_LUT4_Z_3_SLICE.F1
+Info:  0.7  3.4    Net led_o_TRELLIS_FF_Q_CE_LUT4_Z_B[2] budget 0.510000 ns (40,40) -> (39,38)
+Info:                Sink led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_1_SLICE.D1
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  3.7  Source led_o_TRELLIS_FF_Q_CE_LUT4_Z_B_LUT4_Z_1_SLICE.F1
+Info:  0.5  4.1    Net led_o_TRELLIS_FF_Q_CE[1] budget 0.510000 ns (39,38) -> (39,38)
+Info:                Sink led_o_TRELLIS_FF_Q_CE_LUT4_D_SLICE.C1
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  4.4  Source led_o_TRELLIS_FF_Q_CE_LUT4_D_SLICE.F1
+Info:  0.7  5.1    Net led_o_TRELLIS_FF_Q_CE_LUT4_D_Z budget 0.510000 ns (39,38) -> (40,39)
+Info:                Sink cpt_next_s_CCU2C_S0_5$CCU2_SLICE.LSR
+Info:  0.4  5.5  Setup cpt_next_s_CCU2C_S0_5$CCU2_SLICE.LSR
+Info: 1.9 ns logic, 3.6 ns routing
+
+Info: Critical path report for clock '$glbnet$clk' (posedge -> posedge):
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_11_DI_LUT4_Z_C_LUT4_D_Z_LUT4_Z_6_SLICE.Q1
+Info:  1.0  1.5    Net ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_6_DI[1] budget 0.518000 ns (9,15) -> (9,15)
+Info:                Sink ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_6_SLICE.C1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:267.1-297.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:165.20-165.30
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:  0.2  1.8  Source ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_6_SLICE.F1
+Info:  1.4  3.1    Net ethCore0.eth_mac_inst.tx_fifo.fifo_inst.drop_frame_reg_LUT4_A_B[1] budget 0.531000 ns (9,15) -> (10,15)
+Info:                Sink ethCore0.eth_axis_tx_inst.eth_type_reg_LUT4_B_Z_L6MUX21_Z_1_SD_PFUMX_Z_1_SLICE.A1
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.4  3.5  Source ethCore0.eth_axis_tx_inst.eth_type_reg_LUT4_B_Z_L6MUX21_Z_1_SD_PFUMX_Z_1_SLICE.OFX0
+Info:  1.2  4.8    Net ethCore0.eth_axis_tx_inst.eth_type_reg_LUT4_B_Z_L6MUX21_Z_1_SD[3] budget 1.090000 ns (10,15) -> (11,12)
+Info:                Sink ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_update_ack_sync2_reg_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_SLICE.M0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.3  5.0  Source ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_update_ack_sync2_reg_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_SLICE.OFX0
+Info:  0.0  5.0    Net ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_update_ack_sync2_reg_LUT4_D_Z_L6MUX21_Z_D1 budget 0.000000 ns (11,12) -> (11,12)
+Info:                Sink ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_update_ack_sync2_reg_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_SLICE.FXB
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:142.38-142.40
+Info:  0.2  5.3  Source ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_update_ack_sync2_reg_LUT4_D_Z_L6MUX21_Z_D1_PFUMX_Z_SLICE.OFX1
+Info:  1.1  6.3    Net ethCore0.eth_mac_inst.tx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_10_DI_LUT4_D_Z[5] budget 0.318000 ns (11,12) -> (7,15)
+Info:                Sink ethCore0.eth_mac_inst.tx_fifo.fifo_inst.mem.0.0.0_WEA_LUT4_Z_SLICE.D0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  6.6  Source ethCore0.eth_mac_inst.tx_fifo.fifo_inst.mem.0.0.0_WEA_LUT4_Z_SLICE.F0
+Info:  1.6  8.1    Net ethCore0.eth_mac_inst.tx_fifo.fifo_inst.mem.0.0.0_WEA[9] budget 0.318000 ns (7,15) -> (10,25)
+Info:                Sink ethCore0.eth_mac_inst.tx_fifo.fifo_inst.mem.0.0.0.WEA
+Info:  0.1  8.3  Setup ethCore0.eth_mac_inst.tx_fifo.fifo_inst.mem.0.0.0.WEA
+Info: 2.0 ns logic, 6.2 ns routing
+
+Info: Critical path report for clock '$glbnet$eth_clocks_rx$TRELLIS_IO_IN' (posedge -> posedge):
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_7_SLICE.Q1
+Info:  1.0  1.5    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_cur_reg[2] budget 2.632000 ns (5,33) -> (5,32)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_LUT4_D_Z_LUT4_Z_1_SLICE.D1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:318.1-348.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:166.20-166.34
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:  0.2  1.7  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_LUT4_D_Z_LUT4_Z_1_SLICE.F1
+Info:  0.4  2.2    Net ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_SD_PFUMX_Z_C0[4] budget 2.631000 ns (5,32) -> (5,32)
+Info:                Sink ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_SD_PFUMX_Z_SLICE.M0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.3  2.4  Source ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_SD_PFUMX_Z_SLICE.OFX0
+Info:  1.3  3.7    Net ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_SD[1] budget 0.409000 ns (5,32) -> (5,31)
+Info:                Sink ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z_SLICE.B1
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.4  4.2  Source ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D0_L6MUX21_Z_D0_PFUMX_Z_SLICE.OFX0
+Info:  0.0  4.2    Net ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D0_L6MUX21_Z_D0 budget 0.000000 ns (5,31) -> (5,31)
+Info:                Sink ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z_SLICE.FXA
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:158.50-158.52
+Info:  0.2  4.4  Source ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D0_L6MUX21_Z_D1_PFUMX_Z_SLICE.OFX1
+Info:  0.0  4.4    Net ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D0 budget 0.000000 ns (5,31) -> (5,31)
+Info:                Sink ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_SLICE.FXA
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:158.66-158.68
+Info:  0.2  4.6  Source ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.m_axis_tvalid_reg_LUT4_C_Z_L6MUX21_Z_D1_L6MUX21_Z_D0_PFUMX_Z_SLICE.OFX1
+Info:  0.9  5.6    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_1_DI[4] budget 0.361000 ns (5,31) -> (6,30)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.mem.0.0.0_WEA_LUT4_Z_SLICE.D0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  5.8  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.mem.0.0.0_WEA_LUT4_Z_SLICE.F0
+Info:  1.1  6.9    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.mem.0.0.0_WEA[9] budget 0.361000 ns (6,30) -> (8,37)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.mem.1.0.0.WEA
+Info:  0.1  7.0  Setup ethCore0.eth_mac_inst.rx_fifo.fifo_inst.mem.1.0.0.WEA
+Info: 2.3 ns logic, 4.7 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$clk' -> '<async>':
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_eth_rx_inst.m_arp_oper_reg_TRELLIS_FF_Q_12_SLICE.Q0
+Info:  1.1  1.7    Net ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.incoming_arp_oper[11] budget 0.454000 ns (19,32) -> (19,32)
+Info:                Sink ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.outgoing_arp_tha_next_LUT4_Z_B_LUT4_Z_D_LUT4_Z_C_LUT4_Z_1_SLICE.A0
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/udp_complete.v:435.1-514.2
+Info:                  ../lib/eth/rtl/arp.v:124.13-124.30
+Info:                  ../lib/eth/rtl/ip_complete.v:409.1-451.2
+Info:                  ../rtl/fpga_core.v:340.1-469.2
+Info:  0.2  1.9  Source ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.outgoing_arp_tha_next_LUT4_Z_B_LUT4_Z_D_LUT4_Z_C_LUT4_Z_1_SLICE.F0
+Info:  0.6  2.5    Net ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.outgoing_arp_tha_next_LUT4_Z_B_LUT4_Z_D_LUT4_Z_C[1] budget 0.453000 ns (19,32) -> (19,32)
+Info:                Sink ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_eth_rx_inst.m_mac_matched_LUT4_D_Z_PFUMX_BLUT_Z_LUT4_Z_SLICE.C1
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  2.7  Source ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_eth_rx_inst.m_mac_matched_LUT4_D_Z_PFUMX_BLUT_Z_LUT4_Z_SLICE.F1
+Info:  1.7  4.4    Net ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_eth_rx_inst.m_mac_matched_LUT4_D_Z_PFUMX_BLUT_Z[4] budget 0.453000 ns (19,32) -> (23,19)
+Info:                Sink ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.query_response_error_LUT4_C_1_Z_LUT4_B_Z_LUT4_Z_1_SLICE.D0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  4.7  Source ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.query_response_error_LUT4_C_1_Z_LUT4_B_Z_LUT4_Z_1_SLICE.F0
+Info:  1.6  6.2    Net ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.query_response_error_LUT4_C_1_Z_LUT4_B_1_Z[4] budget 1.197000 ns (23,19) -> (24,9)
+Info:                Sink ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.outgoing_arp_tha_next_L6MUX21_Z_3_D0_PFUMX_Z_SLICE.M0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.0  6.2  Setup ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.outgoing_arp_tha_next_L6MUX21_Z_3_D0_PFUMX_Z_SLICE.M0
+Info: 1.2 ns logic, 5.0 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$clk' -> 'posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN':
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_C_TRELLIS_FF_Q_SLICE.Q0
+Info:  0.5  1.0    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_C[1] budget 1.842000 ns (3,24) -> (3,24)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_SLICE.D0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  1.2  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_SLICE.F0
+Info:  0.7  1.9    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI budget 1.841000 ns (3,24) -> (2,24)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_SLICE.M0
+Info:  0.0  1.9  Setup ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_SLICE.M0
+Info: 0.8 ns logic, 1.1 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$clk_i$TRELLIS_IO_IN' -> '<async>':
+Info: curr total
+Info:  0.5  0.5  Source led_o_LUT4_D_SLICE.Q1
+Info:  3.0  3.5    Net led_o$TRELLIS_IO_OUT budget 5.502000 ns (39,38) -> (72,47)
+Info:                Sink led_o$tr_io.I
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:6.24-6.29
+Info: 0.5 ns logic, 3.0 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$clk_i$TRELLIS_IO_IN' -> 'posedge $glbnet$clk':
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.query_response_error_TRELLIS_FF_Q_DI_LUT4_D_SLICE.Q1
+Info:  1.2  1.7    Net led_o_TRELLIS_FF_Q_CE[0] budget 1.631000 ns (19,29) -> (28,27)
+Info:                Sink ethCore0.phy0_reset_n_LUT4_D_SLICE.D1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:24.9-24.60
+Info:                  ../rtl/rst_gen.v:16.23-16.37
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/techmap.v:270.23-270.24
+Info:  0.2  1.9  Source ethCore0.phy0_reset_n_LUT4_D_SLICE.F1
+Info:  2.6  4.5    Net led_o_TRELLIS_FF_Q_LSR budget 1.631000 ns (28,27) -> (3,23)
+Info:                Sink ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rgmii_tx_clk_2_TRELLIS_FF_Q_CE_LUT4_Z_D_LUT4_C_Z_CCU2C_S0_S1_LUT4_C_Z_LUT4_Z_3_SLICE.LSR
+Info:  0.4  4.9  Setup ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rgmii_tx_clk_2_TRELLIS_FF_Q_CE_LUT4_Z_D_LUT4_C_Z_CCU2C_S0_S1_LUT4_C_Z_LUT4_Z_3_SLICE.LSR
+Info: 1.2 ns logic, 3.8 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$clk_i$TRELLIS_IO_IN' -> 'posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN':
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.udp_complete_inst.ip_complete_inst.arp_inst.arp_cache_inst.query_response_error_TRELLIS_FF_Q_DI_LUT4_D_SLICE.Q1
+Info:  1.2  1.7    Net led_o_TRELLIS_FF_Q_CE[0] budget 1.631000 ns (19,29) -> (28,27)
+Info:                Sink ethCore0.phy0_reset_n_LUT4_D_SLICE.D1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:24.9-24.60
+Info:                  ../rtl/rst_gen.v:16.23-16.37
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/techmap.v:270.23-270.24
+Info:  0.2  1.9  Source ethCore0.phy0_reset_n_LUT4_D_SLICE.F1
+Info:  1.8  3.7    Net led_o_TRELLIS_FF_Q_LSR budget 1.631000 ns (28,27) -> (4,26)
+Info:                Sink ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_rst_reg_TRELLIS_FF_Q_1_SLICE.LSR
+Info:  0.4  4.1  Setup ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.rgmii_phy_if_inst.rx_rst_reg_TRELLIS_FF_Q_1_SLICE.LSR
+Info: 1.2 ns logic, 3.0 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN' -> '<async>':
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_SLICE.Q0
+Info:  1.4  1.9    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_cur_reg[1] budget 0.420000 ns (7,32) -> (6,33)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1$CCU2_SLICE.B1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:318.1-348.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:166.20-166.34
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:  0.4  2.3  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1$CCU2_SLICE.FCO
+Info:  0.0  2.3    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT budget 0.000000 ns (6,33) -> (6,33)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN$CCU2_SLICE.FCI
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:318.1-348.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:346.27-346.45
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/arith_map.v:74.7-80.4
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_sim.v:82.9-82.13
+Info:  0.1  2.4  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN$CCU2_SLICE.FCO
+Info:  0.0  2.4    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT budget 0.000000 ns (6,33) -> (6,33)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN$CCU2_SLICE.FCI
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:318.1-348.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:346.27-346.45
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/arith_map.v:74.7-80.4
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_sim.v:82.9-82.13
+Info:  0.1  2.5  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN$CCU2_SLICE.FCO
+Info:  0.0  2.5    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT budget 0.000000 ns (6,33) -> (7,33)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN$CCU2_SLICE.FCI
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:318.1-348.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:346.27-346.45
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/arith_map.v:74.7-80.4
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_sim.v:82.9-82.13
+Info:  0.4  2.9  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN$CCU2_SLICE.F0
+Info:  1.4  4.3    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S0[2] budget 0.617000 ns (7,33) -> (8,30)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S0_LUT4_C_SLICE.C0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.2  4.6  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_reg_TRELLIS_FF_Q_12_DI_LUT4_C_Z_LUT4_Z_8_C_CCU2C_S1_COUT_CCU2C_CIN_COUT_CCU2C_CIN_COUT_CCU2C_CIN_S0_LUT4_C_SLICE.F0
+Info:  0.7  5.3    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_12_DI[6] budget 1.400000 ns (8,30) -> (9,30)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_7_DI_LUT4_D_1_Z_LUT4_C_Z_PFUMX_ALUT_Z_L6MUX21_Z_3_D1_L6MUX21_Z_D1_PFUMX_Z_SLICE.M0
+Info:                Defined in:
+Info:                  /home/anatoly/fpga-toolchain/bin/../share/yosys/ecp5/cells_map.v:109.23-109.24
+Info:  0.0  5.3  Setup ethCore0.eth_mac_inst.rx_fifo.fifo_inst.wr_ptr_gray_reg_TRELLIS_FF_Q_7_DI_LUT4_D_1_Z_LUT4_C_Z_PFUMX_ALUT_Z_L6MUX21_Z_3_D1_L6MUX21_Z_D1_PFUMX_Z_SLICE.M0
+Info: 1.8 ns logic, 3.5 ns routing
+
+Info: Critical path report for cross-domain path 'posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN' -> 'posedge $glbnet$clk':
+Info: curr total
+Info:  0.5  0.5  Source ethCore0.eth_mac_inst.eth_mac_1g_rgmii_inst.eth_mac_1g_inst.axis_gmii_rx_inst.rst_TRELLIS_FF_Q_SLICE.Q0
+Info:  0.5  1.0    Net ethCore0.eth_mac_inst.rx_rst budget 1.630000 ns (3,26) -> (3,24)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_SLICE.D1
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:124.6-124.12
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:  0.2  1.3  Source ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_SLICE.F1
+Info:  0.5  1.8    Net ethCore0.eth_mac_inst.rx_fifo.fifo_inst.async_rst budget 1.629000 ns (3,24) -> (3,24)
+Info:                Sink ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_SLICE.LSR
+Info:                Defined in:
+Info:                  ../rtl/fpga.v:90.3-103.2
+Info:                  ../lib/eth/rtl/eth_mac_1g_rgmii_fifo.v:318.1-348.2
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo.v:84.35-84.44
+Info:                  ../lib/eth/lib/axis/rtl/axis_async_fifo_adapter.v:323.1-353.2
+Info:                  ../rtl/fpga_core.v:252.1-284.2
+Info:  0.4  2.2  Setup ethCore0.eth_mac_inst.rx_fifo.fifo_inst.s_rst_sync2_reg_TRELLIS_FF_Q_DI_LUT4_Z_SLICE.LSR
+Info: 1.2 ns logic, 1.0 ns routing
+
+ERROR: Max frequency for clock         '$glbnet$clk_i$TRELLIS_IO_IN': 182.18 MHz (FAIL at 225.02 MHz)
+ERROR: Max frequency for clock                         '$glbnet$clk': 121.04 MHz (FAIL at 225.02 MHz)
+ERROR: Max frequency for clock '$glbnet$eth_clocks_rx$TRELLIS_IO_IN': 142.51 MHz (FAIL at 225.02 MHz)
+
+Info: Max delay posedge $glbnet$clk                         -> <async>                                    : 6.23 ns
+Info: Max delay posedge $glbnet$clk                         -> posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN: 1.89 ns
+Info: Max delay posedge $glbnet$clk_i$TRELLIS_IO_IN         -> <async>                                    : 3.55 ns
+Info: Max delay posedge $glbnet$clk_i$TRELLIS_IO_IN         -> posedge $glbnet$clk                        : 4.94 ns
+Info: Max delay posedge $glbnet$clk_i$TRELLIS_IO_IN         -> posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN: 4.14 ns
+Info: Max delay posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN -> <async>                                    : 5.26 ns
+Info: Max delay posedge $glbnet$eth_clocks_rx$TRELLIS_IO_IN -> posedge $glbnet$clk                        : 2.18 ns
+
+Info: Slack histogram:
+Info:  legend: * represents 13 endpoint(s)
+Info:          + represents [1,13) endpoint(s)
+Info: [ -3818,  -3376) |+
+Info: [ -3376,  -2934) |**+
+Info: [ -2934,  -2492) |********+
+Info: [ -2492,  -2050) |*********************+
+Info: [ -2050,  -1608) |*****************+
+Info: [ -1608,  -1166) |********************+
+Info: [ -1166,   -724) |***************************+
+Info: [  -724,   -282) |**********************+
+Info: [  -282,    160) |******************************+
+Info: [   160,    602) |*************************************************+
+Info: [   602,   1044) |******************************************+
+Info: [  1044,   1486) |*********************************+
+Info: [  1486,   1928) |***********************************************+
+Info: [  1928,   2370) |************************************************************ 
+Info: [  2370,   2812) |********************************************+
+Info: [  2812,   3254) |*******************************************************+
+Info: [  3254,   3696) |***********************+
+Info: [  3696,   4138) |**+
+Info: [  4138,   4580) |**********+
+Info: [  4580,   5022) |**+
+2 warnings, 3 errors
+
+Info: Program finished normally.
