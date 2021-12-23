@@ -9,6 +9,7 @@ SYN_FILES += rtl/fpga_core.v
 SYN_FILES += rtl/rst_gen.v
 SYN_FILES += rtl/lfsr_yosys.v
 SYN_FILES += rtl/mdio_master.v
+SYN_FILES += rtl/icmp.sv
 SYN_FILES += lib/eth/rtl/iddr.v
 SYN_FILES += lib/eth/rtl/oddr.v
 SYN_FILES += lib/eth/rtl/ssio_sdr_in.v
