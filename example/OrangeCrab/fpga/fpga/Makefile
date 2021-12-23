@@ -52,4 +52,5 @@ TRELLIS = /usr/local/share/trellis
 include ../common/lattice.mk
 
 program: ${FPGA_TOP}.svf
-	openocd -f ../vsllink.cfg
+#	openocd -f ../vsllink.cfg
+	openocd -f ../cmsisdap.cfg
