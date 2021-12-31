@@ -1,4 +1,4 @@
-BOARD:=version_7
+BOARD:=orangecrab_r0.2
 
 # Targets
 TARGETS:=

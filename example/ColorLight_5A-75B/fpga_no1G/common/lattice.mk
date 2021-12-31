@@ -43,7 +43,7 @@ all: fpga
 fpga: $(FPGA_TOP).bit
 
 clean:
-	rm -f *.svf *.bit *.config *.ys *.json
+	rm -f *.svf *.bit *.config *.ys *.json *.log
 
 ###################################################################
 # Target implementations
@@ -63,7 +63,7 @@ $(FPGA_TOP).ys:
 	echo "synth_ecp5 -top $(FPGA_TOP) -json $(FPGA_TOP).json -abc2" >> $(FPGA_TOP).ys
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json ../$(BOARD).lpf
-	python3 place_and_route.py --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166 --quiet --force --log PlaceAndRoute.log
+	python3 ../common/place_and_route.py --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166 --quiet --force --log PlaceAndRoute.log
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
 	ecppack --svf ${FPGA_TOP}.svf $< $@

@@ -1,4 +1,4 @@
-BOARD:=version_7
+BOARD:=pinout_v7
 
 # Targets
 TARGETS:=
