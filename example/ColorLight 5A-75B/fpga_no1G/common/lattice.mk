@@ -9,7 +9,7 @@
 # FPGA_FAMILY - FPGA family (e.g. VirtexUltrascale)
 # FPGA_DEVICE - FPGA device (e.g. xcvu095-ffva2104-2-e)
 # BOARD - Version of the Colorlight board, possible values
-# ecp5_v7(by default), ecp5_v8
+# pinout_v7(by default), pinout_v8
 # SYN_FILES - space-separated list of source files
 # 
 # Example:
@@ -26,9 +26,10 @@
 # phony targets
 .PHONY: clean fpga
 
-BOARD:=version_7
+BOARD:=pinout_v7
 
 SYN_FILES_REL = $(patsubst %, ../%, $(SYN_FILES))
+FILES_TO_SCRIPT = $(patsubst %.sv, "-sv %.sv", $(SYN_FILES_REL))
 
 ###################################################################
 # Main Targets
@@ -48,11 +49,21 @@ clean:
 # Target implementations
 ###################################################################
 
-$(FPGA_TOP).json: $(SYN_FILES_REL)
-	yosys -p "synth_ecp5 -top $(FPGA_TOP) -json $@ -abc9" $(SYN_FILES_REL)
+$(FPGA_TOP).json: $(FPGA_TOP).ys $(SYN_FILES_REL)
+	yosys -q -l "Synth.log" $(FPGA_TOP).ys
 
-$(FPGA_TOP)_out.config: $(FPGA_TOP).json
-	nextpnr-ecp5 --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166 --seed 2
+$(FPGA_TOP).ys:
+	echo "verilog_defaults -push" > $(FPGA_TOP).ys
+	echo "verilog_defaults -add -defer" >> $(FPGA_TOP).ys
+	for file in $(FILES_TO_SCRIPT); do \
+		echo "read_verilog $$file" >> $(FPGA_TOP).ys; \
+	done
+	echo "verilog_defaults -pop" >> $(FPGA_TOP).ys
+	echo "attrmap -tocase keep -imap keep="true" keep=1 -imap keep="false" keep=0 -remove keep=0" >> $(FPGA_TOP).ys
+	echo "synth_ecp5 -top $(FPGA_TOP) -json $(FPGA_TOP).json -abc2" >> $(FPGA_TOP).ys
+
+$(FPGA_TOP)_out.config: $(FPGA_TOP).json ../$(BOARD).lpf
+	python3 place_and_route.py --25k --package CABGA256 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).lpf --freq 166 --quiet --force --log PlaceAndRoute.log
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
 	ecppack --svf ${FPGA_TOP}.svf $< $@

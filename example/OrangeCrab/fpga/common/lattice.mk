@@ -29,6 +29,7 @@
 BOARD:=orangecrab_r0.2
 
 SYN_FILES_REL = $(patsubst %, ../%, $(SYN_FILES))
+FILES_TO_SCRIPT = $(patsubst %.sv, "-sv %.sv", $(SYN_FILES_REL))
 
 ###################################################################
 # Main Targets
@@ -48,11 +49,21 @@ clean:
 # Target implementations
 ###################################################################
 
-$(FPGA_TOP).json: $(SYN_FILES_REL)
-	yosys -q -l "Synth.log" -p "synth_ecp5 -top $(FPGA_TOP) -json $@ -abc2" $(SYN_FILES_REL)
+$(FPGA_TOP).json: $(FPGA_TOP).ys $(SYN_FILES_REL)
+	yosys -q -l "Synth.log" $(FPGA_TOP).ys
+
+$(FPGA_TOP).ys:
+	echo "verilog_defaults -push" > $(FPGA_TOP).ys
+	echo "verilog_defaults -add -defer" >> $(FPGA_TOP).ys
+	for file in $(FILES_TO_SCRIPT); do \
+		echo "read_verilog $$file" >> $(FPGA_TOP).ys; \
+	done
+	echo "verilog_defaults -pop" >> $(FPGA_TOP).ys
+	echo "attrmap -tocase keep -imap keep="true" keep=1 -imap keep="false" keep=0 -remove keep=0" >> $(FPGA_TOP).ys
+	echo "synth_ecp5 -top $(FPGA_TOP) -json $(FPGA_TOP).json -abc2" >> $(FPGA_TOP).ys
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json
-	nextpnr-ecp5 --25k --package CSFBGA285 --speed 6 --json $< --textcfg $@ --lpf ../common/$(BOARD).pcf --freq 166 --quiet --log PlaceAndRoute.log
+	python3 place_and_route.py --25k --package CSFBGA285 --speed 6 --json $< --textcfg $@ --lpf ../$(BOARD).pcf --freq 166 --quiet --force --log PlaceAndRoute.log
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
 	ecppack --compress --svf ${FPGA_TOP}.svf $< $@
