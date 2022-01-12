@@ -1,7 +1,7 @@
 # FPGA settings
 FPGA_TOP=fpga
 FPGA_FAMILY = ECP5
-FPGA_DEVICE = LFE5U-25F-6BG256C
+FPGA_DEVICE = LFE5U-25F-6BG381C
 
 # Files for synthesis
 SYN_FILES = rtl/fpga.v 
