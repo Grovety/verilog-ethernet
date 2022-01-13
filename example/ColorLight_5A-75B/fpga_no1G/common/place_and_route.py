@@ -154,7 +154,28 @@ def find_best(command, cli_params):
     print ("Best seed is: ", best_seed)
     return best_seed
 
+def write_ip_to_file(ipAddress):
+    file_name = "../fpga/fpga_out.config"
+    with open(file_name, "r") as file:
+        new_data = file.read().replace('.comment ', '.comment '+ipAddress)
+
+    with open(file_name, "w") as file:
+        file.write(new_data)
+
+def process_ip_address():
+    ipAddr = [192,168,2,128]
+    subNetMask = [255,255,255,0]
+    gateWay = [192,168,2,1]
+    address = ""
+    for i in ipAddr+subNetMask+gateWay:
+        address += chr(((i & 0x0F) + 0x40))
+        address += chr((((i >> 4) & 0x0F) + 0x40))
+    return address
+
 
 cli_params = parse_command_line()
 command = prepare_comand(cli_params)    
 seed = find_best(command, cli_params)
+
+ipAddress = process_ip_address()
+write_ip_to_file(ipAddress)
