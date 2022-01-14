@@ -47,6 +47,18 @@ SYN_FILES += lib/eth/lib/axis/rtl/priority_encoder.v
 SYN_FILES += lib/eth/lib/axis/rtl/axis_fifo.v    
 SYN_FILES += lib/eth/lib/axis/rtl/sync_reset.v  
 
+#Nextpnr parameters
+NEXTPNR_PARAMS := --25k
+NEXTPNR_PARAMS += --package CSFBGA285
+NEXTPNR_PARAMS += --speed 6
+NEXTPNR_PARAMS += --json $(FPGA_TOP).json
+NEXTPNR_PARAMS += --textcfg $(FPGA_TOP)_out.config
+NEXTPNR_PARAMS += --lpf ../orangecrab_r0.2.pcf
+NEXTPNR_PARAMS += --freq 166
+NEXTPNR_PARAMS +=  --quiet
+NEXTPNR_PARAMS +=  --force
+NEXTPNR_PARAMS +=  --log PlaceAndRoute.log
+
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis
 
