@@ -12,10 +12,8 @@
 # --log PlaceAndRoute.log 
 # --seed 3
 
-
 import sys
 import os
-
 
 def parse_command_line():
     key = ''
@@ -34,10 +32,16 @@ def parse_command_line():
 
 def prepare_comand(parameters):
     command = 'nextpnr-ecp5'
+    log_file = './Logfile.log' # default log file
+    if '--log' in parameters:
+        log_file = parameters['--log']
+    else:
+        parameters['--log'] = log_file
     for key, value in parameters.items():
         if key == '--times' or key == '--seed':
             continue
         command += ' ' + key + ' ' + value
+    
     return command
 
 
@@ -75,6 +79,7 @@ def estimate(results):
     else:
         return estimation/count
 
+
 def test_estimate():
     # 175.35 PASS 25.00
     lhs_signal = {'signal1' : ['100.0', 'FAIL', '125.0'],
@@ -95,6 +100,7 @@ def is_better(lhs_signal, rhs_signal):
     res = True if lhs_value > rhs_value else False
     return res
 
+
 def test_is_better():
     lhs_signal = {'signal1' : ['100.0', 'FAIL', '125.0'],
                 'signal2' : ['100.0', 'FAIL', '125.0'],
@@ -111,23 +117,16 @@ def test_is_better():
 def find_best(command, cli_params):
     best_seed = 0
     best_results = {}
-
-    times = 7 # Default value
-    log_file = './Logfile.log' # default log file    
+    times = 7 # Default value      
     if '--times' in cli_params:
         times = cli_params['--times']
-    if '--log' in cli_params:
-        log_file = cli_params['--log']
-    else:
-        cli_params['--log'] = log_file
-
+    log_file = cli_params['--log']
     # Run nextpnr several times with different seeds to obtain the best frequences
     for i in range (1,int(times)+1):        
         print ('------------------------------------------------------------------------------------')
         print ('Attempt to run NEXTPNR # ', i)
         print ('------------------------------------------------------------------------------------')
-        os.system (command + ' --seed ' + str(i))
-        
+        os.system (command + ' --seed ' + str(i))        
         cur_results = parse_log(log_file)
         # Ceck if all frequences satisfy FMax
         proceed = False
@@ -146,13 +145,14 @@ def find_best(command, cli_params):
             if is_better(cur_results, best_results):
                 best_results = cur_results
                 best_seed = i
-    else:        
+    else:
         print ('------------------------------------------------------------------------------------')
         print ('Final runing NEXTPNR')
         print ('------------------------------------------------------------------------------------')
         os.system (command + ' --seed ' + str(best_seed))
     print ("Best seed is: ", best_seed)
     return best_seed
+
 
 def write_ip_to_file(ipAddress):
     file_name = "../fpga/fpga_out.config"
@@ -161,6 +161,7 @@ def write_ip_to_file(ipAddress):
 
     with open(file_name, "w") as file:
         file.write(new_data)
+
 
 def process_ip_address():
     ipAddr = [192,168,2,128]
@@ -174,7 +175,8 @@ def process_ip_address():
 
 
 cli_params = parse_command_line()
-command = prepare_comand(cli_params)    
+command = prepare_comand(cli_params)
+print(command)  
 seed = find_best(command, cli_params)
 
 ipAddress = process_ip_address()
