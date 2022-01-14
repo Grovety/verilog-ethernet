@@ -55,9 +55,9 @@ NEXTPNR_PARAMS += --json $(FPGA_TOP).json
 NEXTPNR_PARAMS += --textcfg $(FPGA_TOP)_out.config
 NEXTPNR_PARAMS += --lpf ../orangecrab_r0.2.pcf
 NEXTPNR_PARAMS += --freq 166
-NEXTPNR_PARAMS +=  --quiet
-NEXTPNR_PARAMS +=  --force
-NEXTPNR_PARAMS +=  --log PlaceAndRoute.log
+NEXTPNR_PARAMS += --quiet
+NEXTPNR_PARAMS += --force
+NEXTPNR_PARAMS += --log PlaceAndRoute.log
 
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis

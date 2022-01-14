@@ -46,6 +46,18 @@ SYN_FILES += lib/eth/lib/axis/rtl/priority_encoder.v
 SYN_FILES += lib/eth/lib/axis/rtl/axis_fifo.v    
 SYN_FILES += lib/eth/lib/axis/rtl/sync_reset.v  
 
+#Nextpnr parameters
+NEXTPNR_PARAMS := --25k
+NEXTPNR_PARAMS += --package CABGA256
+NEXTPNR_PARAMS += --speed 6
+NEXTPNR_PARAMS += --json $(FPGA_TOP).json
+NEXTPNR_PARAMS += --textcfg $(FPGA_TOP)_out.config
+NEXTPNR_PARAMS += --lpf ../pinout_v7.lpf
+NEXTPNR_PARAMS += --freq 166
+NEXTPNR_PARAMS += --quiet
+NEXTPNR_PARAMS += --force
+NEXTPNR_PARAMS += --log PlaceAndRoute.log
+
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis
 
