@@ -62,7 +62,13 @@ NEXTPNR_PARAMS += --log PlaceAndRoute.log
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis
 
+#IP address properties
+IP_ADDRESS := 192.168.2.128
+SUBNET_MASK := 255.255.255.0
+GATEWAY := 192.168.2.1
+
 include ../common/lattice.mk
+
 
 program: ${FPGA_TOP}.svf
 #	openocd -f ../vsllink.cfg

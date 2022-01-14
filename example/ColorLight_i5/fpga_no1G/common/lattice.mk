@@ -61,6 +61,9 @@ $(FPGA_TOP).ys:
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json
 	python3 ../common/place_and_route.py $(NEXTPNR_PARAMS)
+ifdef IP_ADDRESS
+	python3 ../common/add_ip_to_configfile.py ./$(FPGA_TOP)_out.config $(IP_ADDRESS) $(SUBNET_MASK) $(GATEWAY)
+endif
 
 $(FPGA_TOP).bit: $(FPGA_TOP)_out.config
 	ecppack --compress --svf ${FPGA_TOP}.svf $< $@

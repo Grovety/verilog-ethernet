@@ -57,6 +57,11 @@ NEXTPNR_PARAMS += --quiet
 NEXTPNR_PARAMS += --force
 NEXTPNR_PARAMS += --log PlaceAndRoute.log
 
+#IP address properties
+IP_ADDRESS := 192.168.2.128
+SUBNET_MASK := 255.255.255.0
+GATEWAY := 192.168.2.1
+
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis
 
