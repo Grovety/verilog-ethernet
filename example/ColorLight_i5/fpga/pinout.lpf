@@ -2,6 +2,16 @@ LOCATE COMP "clk_i" SITE "P3";
 IOBUF PORT "clk_i" IO_TYPE=LVCMOS33;
 FREQUENCY PORT "clk_i" 25 MHZ;
 
+#LOCATE COMP "spi_flash_sck" SITE "U3";
+#IOBUF PORT "spi_flash_sck" IO_TYPE=LVCMOS33;
+LOCATE COMP "spi_flash_mosi" SITE "W2";
+IOBUF PORT "spi_flash_mosi" IO_TYPE=LVCMOS33;
+LOCATE COMP "spi_flash_miso" SITE "V2";
+IOBUF PORT "spi_flash_miso" IO_TYPE=LVCMOS33;
+LOCATE COMP "spi_flash_cs" SITE "R2";
+IOBUF PORT "spi_flash_cs" IO_TYPE=LVCMOS33;
+
+
 LOCATE COMP "eth_clocks_tx" SITE "U19";
 IOBUF PORT "eth_clocks_tx" IO_TYPE=LVCMOS33;
 LOCATE COMP "eth_clocks_rx" SITE "L19";

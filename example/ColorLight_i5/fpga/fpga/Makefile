@@ -5,9 +5,10 @@ FPGA_DEVICE = LFE5U-25F-6BG381C
 
 # Files for synthesis
 SYN_FILES = rtl/fpga.v 
-SYN_FILES += rtl/fpga_core.v 
+SYN_FILES += rtl/fpga_core.sv 
 SYN_FILES += rtl/rst_gen.v
 SYN_FILES += rtl/lfsr_yosys.v
+SYN_FILES += rtl/SpiFlashReader.sv
 SYN_FILES += rtl/icmp.sv
 SYN_FILES += lib/eth/rtl/iddr.v
 SYN_FILES += lib/eth/rtl/oddr.v

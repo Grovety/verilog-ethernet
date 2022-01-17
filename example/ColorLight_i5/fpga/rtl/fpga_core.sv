@@ -17,6 +17,11 @@ module fpga_core #(
     output wire        phy0_reset_n,
     input  wire        phy0_int_n,
 
+    output             spi_flash_sck,
+    output             spi_flash_mosi,
+    input              spi_flash_miso,    
+    output             spi_flash_cs,
+
 // Just for successfull TestBench
     input  wire       phy1_rx_clk,
     input  wire [3:0] phy1_rxd,
@@ -189,6 +194,112 @@ assign tx_ip_payload_axis_tdata = 0;
 assign tx_ip_payload_axis_tvalid = 0;
 assign tx_ip_payload_axis_tlast = 0;
 assign tx_ip_payload_axis_tuser = 0;*/
+
+
+wire [7:0] spi_tdata;
+wire spi_tvalid;
+reg spi_tready; 
+
+SpiFlashReader flashReader
+(
+   .rst (rst),     
+   .clk (clk),     
+         
+   .spi_sck(spi_flash_sck), 
+   .spi_mosi(spi_flash_mosi),
+   .spi_miso(spi_flash_miso),
+   .spi_cs(spi_flash_cs),  
+         
+   .m_tdata(spi_tdata), 
+   .m_tvalid(spi_tvalid),
+   .m_tready(spi_tready) 
+);
+
+reg [31:0] stored_local_ip = 0;
+reg [31:0] stored_gateway_ip  = 0;
+reg [31:0] stored_subnet_mask = 0;
+
+reg [4:0] readState;
+always @(posedge clk)
+begin
+    if (rst)
+    begin
+        readState <= 0;
+        spi_tready <= 1;
+    end else
+    begin
+        if (spi_tvalid & spi_tready)
+        begin
+            readState <= readState + 1;
+        end
+        case (readState)
+           // We need skip first 2 bytes
+//           5'h00: if (spi_tvalid) begin readState <= 5'h1; end
+//           5'h01: if (spi_tvalid) begin readState <= 5'h2; end
+           5'h02: if (spi_tvalid) stored_local_ip [27:24] <= spi_tdata[3:0]; 
+           5'h03: if (spi_tvalid) stored_local_ip [31:28] <= spi_tdata[3:0]; 
+           5'h04: if (spi_tvalid) stored_local_ip [19:16] <= spi_tdata[3:0]; 
+           5'h05: if (spi_tvalid) stored_local_ip [23:20] <= spi_tdata[3:0]; 
+           5'h06: if (spi_tvalid) stored_local_ip [11:8]  <= spi_tdata[3:0]; 
+           5'h07: if (spi_tvalid) stored_local_ip [15:12] <= spi_tdata[3:0];
+           5'h08: if (spi_tvalid) stored_local_ip [3:0]   <= spi_tdata[3:0]; 
+           5'h09: if (spi_tvalid) stored_local_ip [7:4]   <= spi_tdata[3:0]; 
+           5'h0a: if (spi_tvalid) stored_gateway_ip [27:24] <= spi_tdata[3:0]; 
+           5'h0b: if (spi_tvalid) stored_gateway_ip [31:28] <= spi_tdata[3:0]; 
+           5'h0c: if (spi_tvalid) stored_gateway_ip [19:16] <= spi_tdata[3:0]; 
+           5'h0d: if (spi_tvalid) stored_gateway_ip [23:20] <= spi_tdata[3:0]; 
+           5'h0e: if (spi_tvalid) stored_gateway_ip [11:8]  <= spi_tdata[3:0]; 
+           5'h0f: if (spi_tvalid) stored_gateway_ip [15:12]  <= spi_tdata[3:0];
+           5'h10: if (spi_tvalid) stored_gateway_ip [3:0]   <= spi_tdata[3:0]; 
+           5'h11: if (spi_tvalid) stored_gateway_ip [7:4]   <= spi_tdata[3:0]; 
+           5'h12: if (spi_tvalid) stored_subnet_mask [27:24] <= spi_tdata[3:0];
+           5'h13: if (spi_tvalid) stored_subnet_mask [31:28] <= spi_tdata[3:0];
+           5'h14: if (spi_tvalid) stored_subnet_mask [19:16] <= spi_tdata[3:0];
+           5'h15: if (spi_tvalid) stored_subnet_mask [23:20] <= spi_tdata[3:0];
+           5'h16: if (spi_tvalid) stored_subnet_mask [11:8]  <= spi_tdata[3:0];
+           5'h17: if (spi_tvalid) stored_subnet_mask [15:12]  <= spi_tdata[3:0];
+           5'h18: if (spi_tvalid) stored_subnet_mask [3:0]   <= spi_tdata[3:0]; 
+           5'h19: if (spi_tvalid) stored_subnet_mask [7:4]   <= spi_tdata[3:0]; 
+           5'h1a: spi_tready <= 0;
+          
+        endcase
+    end
+end
+
+
+reg [3:0] dataPtr;
+reg [7:0] demoData;
+
+always @(posedge clk)
+begin
+     if (rst)
+     begin
+        dataPtr <= 0; 
+     end else
+     begin  
+         case (dataPtr)
+             4'h0: demoData <= stored_local_ip [31:24];
+             4'h1: demoData <= stored_local_ip [23:16];
+             4'h2: demoData <= stored_local_ip [15:8];
+             4'h3: demoData <= stored_local_ip [7:0];
+             4'h4: demoData <= stored_gateway_ip [31:24];
+             4'h5: demoData <= stored_gateway_ip [23:16];
+             4'h6: demoData <= stored_gateway_ip [15:8];
+             4'h7: demoData <= stored_gateway_ip [7:0];
+             4'h8: demoData <= stored_subnet_mask [31:24];
+             4'h9: demoData <= stored_subnet_mask [23:16];
+             4'ha: demoData <= stored_subnet_mask [15:8];
+             4'hb: demoData <= stored_subnet_mask [7:0];
+             4'hc: demoData <= 8'h11;
+             4'hd: demoData <= 8'h22;
+             4'he: demoData <= 8'h33;
+             4'hf: demoData <= 8'h44;
+        endcase
+        if (rx_fifo_udp_payload_axis_tvalid & rx_fifo_udp_payload_axis_tready)
+            dataPtr <= dataPtr + 1;
+     end
+end
+
 
 // Loop back UDP
 wire match_cond = rx_udp_dest_port == 1234;
@@ -482,7 +593,7 @@ udp_payload_fifo (
     .clk(clk),
     .rst(rst),
     // AXI input
-    .s_axis_tdata(rx_fifo_udp_payload_axis_tdata/*+8'h01*/),
+    .s_axis_tdata(demoData/*rx_fifo_udp_payload_axis_tdata/*+8'h01*/),
     .s_axis_tkeep(0),
     .s_axis_tvalid(rx_fifo_udp_payload_axis_tvalid),
     .s_axis_tready(rx_fifo_udp_payload_axis_tready),
