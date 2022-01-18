@@ -174,9 +174,9 @@ wire tx_fifo_udp_payload_axis_tuser;
 
 // Configuration
 wire [47:0] local_mac   = 48'h02_00_00_00_00_00;
-wire [31:0] local_ip    = {8'd192, 8'd168, 8'd2,   8'd128};
-wire [31:0] gateway_ip  = {8'd192, 8'd168, 8'd2,   8'd1};
-wire [31:0] subnet_mask = {8'd255, 8'd255, 8'd255, 8'd0};
+//wire [31:0] local_ip    = {8'd192, 8'd168, 8'd2,   8'd128};
+//wire [31:0] gateway_ip  = {8'd192, 8'd168, 8'd2,   8'd1};
+//wire [31:0] subnet_mask = {8'd255, 8'd255, 8'd255, 8'd0};
 
 // IP ports not used
 //assign rx_ip_hdr_ready = 1;
@@ -331,7 +331,7 @@ assign rx_udp_hdr_ready = (tx_eth_hdr_ready && match_cond) || no_match;
 assign tx_udp_ip_dscp = 0;
 assign tx_udp_ip_ecn = 0;
 assign tx_udp_ip_ttl = 64;
-assign tx_udp_ip_source_ip = local_ip;
+assign tx_udp_ip_source_ip = stored_local_ip;
 assign tx_udp_ip_dest_ip = rx_udp_ip_source_ip;
 assign tx_udp_source_port = rx_udp_dest_port;
 assign tx_udp_dest_port = rx_udp_source_port;
@@ -573,9 +573,9 @@ udp_complete_inst (
     .udp_tx_error_payload_early_termination(),
     // Configuration
     .local_mac(local_mac),
-    .local_ip(local_ip),
-    .gateway_ip(gateway_ip),
-    .subnet_mask(subnet_mask),
+    .local_ip(stored_local_ip),
+    .gateway_ip(stored_gateway_ip),
+    .subnet_mask(stored_subnet_mask),
     .clear_arp_cache(0)
 );
 
@@ -654,7 +654,7 @@ icmp ICMP (
     .s_ip_payload_axis_tlast(rx_ip_payload_axis_tlast),
     .s_ip_payload_axis_tuser(rx_ip_payload_axis_tuser),
 
-    .local_ip(local_ip)
+    .local_ip(stored_local_ip)
 );
 
 
