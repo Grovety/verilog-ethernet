@@ -30,6 +30,7 @@ DUT      = fpga_core
 TOPLEVEL = $(DUT)
 MODULE   = test_$(DUT)
 VERILOG_SOURCES += ../../rtl/$(DUT).v
+VERILOG_SOURCES += ../../rtl/icmp.sv
 VERILOG_SOURCES += ../../rtl/rst_gen.v
 VERILOG_SOURCES += ../../rtl/lfsr_yosys.v
 VERILOG_SOURCES += ../../lib/eth/rtl/iddr.v

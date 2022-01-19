@@ -179,6 +179,7 @@ def test_fpga(request):
     verilog_sources = [
         os.path.join(rtl_dir, f"{dut}.v"),
         os.path.join(rtl_dir, "rst_gen.v"),
+        os.path.join(rtl_dir, "icmp.sv"),
         os.path.join(rtl_dir, "lfsr_yosys.v"),
         os.path.join(eth_rtl_dir, "iddr.v"),
         os.path.join(eth_rtl_dir, "oddr.v"),
