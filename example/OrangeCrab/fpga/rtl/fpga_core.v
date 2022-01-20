@@ -1,5 +1,5 @@
 module fpga_core #(
-    parameter TARGET = "GENERIC",		// For correct simulation! Override by "LATTICE" from parent module!!!
+    parameter TARGET = "GENERIC"		// For correct simulation! Override by "LATTICE" from parent module!!!
 )
 (
     input              sys_clk,
