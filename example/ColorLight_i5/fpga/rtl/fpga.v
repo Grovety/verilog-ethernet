@@ -4,6 +4,12 @@ module fpga #(
 (
     input              clk_i,
     output reg         led_o,
+
+//    output             spi_flash_sck,
+    output             spi_flash_mosi,
+    input              spi_flash_miso,    
+    output             spi_flash_cs,
+
     output wire        eth_clocks_tx,
     input  wire        eth_clocks_rx,
     output wire        eth_rst_n,
@@ -14,6 +20,12 @@ module fpga #(
     output             eth_mdc,
     inout              eth_mdio
 );
+
+USRMCLK USRMCLK(
+	.USRMCLKI(spi_flash_sck),
+	.USRMCLKTS(1'd0)
+);
+
 
 localparam MAX = 12_500_000;
 localparam WIDTH = $clog2(MAX);
@@ -92,6 +104,12 @@ fpga_core #(
     .rst(rst),
     .clk(clk),
     .clk90(clk90),	
+
+    .spi_flash_sck(spi_flash_sck),
+    .spi_flash_mosi(spi_flash_mosi),
+    .spi_flash_miso(spi_flash_miso),
+    .spi_flash_cs(spi_flash_cs), 
+
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),
     .phy0_rx_ctl(eth_rx_ctl),
