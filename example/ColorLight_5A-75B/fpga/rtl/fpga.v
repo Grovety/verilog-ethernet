@@ -30,6 +30,9 @@ USRMCLK USRMCLK(
 );
 
 wire rst;
+wire clk;
+wire clk90;
+wire locked;
 
 // Reset Generator
 rst_gen rst_inst (.clk_i(clk_i), .rst_i(1'b0), .rst_o(rst));
