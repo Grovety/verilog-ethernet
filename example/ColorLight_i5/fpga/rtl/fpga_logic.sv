@@ -622,6 +622,7 @@ begin
               spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
 	      spi_write_strobe <= 1;
               spi_s_tvalid <= 0;
+              rx_udp_payload_axis_tready <= 0;
               answerState <= wr_eeprom_process1;
            end
         end
