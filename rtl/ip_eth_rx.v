@@ -82,18 +82,8 @@ module ip_eth_rx
     output wire        error_header_early_termination,
     output wire        error_payload_early_termination,
     output wire        error_invalid_header,
-    output wire        error_invalid_checksum,
+    output wire        error_invalid_checksum
 
-    // Pipelined outputs
-    output reg         m_ip_addr_is_broadcast,
-    output reg         m_ip_addr_is_subnet_broadcast,
-    output reg         m_ip_request_is_local,
-
-    /*
-     * Configuration
-     */
-    input  wire [31:0]            gateway_ip,
-    input  wire [31:0]            subnet_mask
 );
 
 /*
@@ -159,18 +149,6 @@ reg store_ip_dest_ip_1;
 reg store_ip_dest_ip_2;
 reg store_ip_dest_ip_3;
 reg store_last_word;
-
-// Pipeline Registers
-//reg [3:0] pipeline_stage;
-reg [3:0] ip_addr_is_broadcast;
-reg [3:0] ip_addr_is_subnet_broadcast;
-reg [31:0] ip_with_subnet;
-
-reg [31:0] ip_with_gateway;
-reg [31:0] ip_with_gateway_and_submask;
-
-reg [3:0] request_is_local;
-
 
 reg [5:0] hdr_ptr_reg = 6'd0, hdr_ptr_next;
 reg [15:0] word_count_reg = 16'd0, word_count_next;
@@ -553,41 +531,6 @@ begin
         end
      end
 end*/
-
-// Pipeline DataPath
-always @(posedge clk)
-begin
-       ip_addr_is_broadcast [3] <= (m_ip_dest_ip_reg[31:24] == 8'hff); 
-       ip_addr_is_broadcast [2] <= (m_ip_dest_ip_reg[23:16] == 8'hff); 
-       ip_addr_is_broadcast [1] <= (m_ip_dest_ip_reg[15:8] == 8'hff); 
-       ip_addr_is_broadcast [0] <= (m_ip_dest_ip_reg[7:0] == 8'hff); 
-
-       m_ip_addr_is_broadcast <= ip_addr_is_broadcast [3] & ip_addr_is_broadcast [2]
-                               & ip_addr_is_broadcast [1] & ip_addr_is_broadcast [0];
-
-       ip_with_subnet <= m_ip_dest_ip_reg | subnet_mask;
-
-       ip_addr_is_subnet_broadcast [3] <= (ip_with_subnet[31:24] == 8'hff); 
-       ip_addr_is_subnet_broadcast [2] <= (ip_with_subnet[23:16] == 8'hff); 
-       ip_addr_is_subnet_broadcast [1] <= (ip_with_subnet[15:8] == 8'hff); 
-       ip_addr_is_subnet_broadcast [0] <= (ip_with_subnet[7:0] == 8'hff); 
-
-       m_ip_addr_is_subnet_broadcast <= ip_addr_is_subnet_broadcast [3] 
-                                      & ip_addr_is_subnet_broadcast [2]
-                                      & ip_addr_is_subnet_broadcast [1] 
-                                      & ip_addr_is_subnet_broadcast [0];
-
-      ip_with_gateway <= m_ip_dest_ip_reg ^ gateway_ip;
-      ip_with_gateway_and_submask <= ip_with_gateway & subnet_mask;
-
-      request_is_local [3] <= (ip_with_gateway_and_submask[31:24] == 8'h00);
-      request_is_local [2] <= (ip_with_gateway_and_submask[23:16] == 8'h00);
-      request_is_local [1] <= (ip_with_gateway_and_submask[15:8] == 8'h00);
-      request_is_local [0] <= (ip_with_gateway_and_submask[7:0] == 8'h00);
-
-      m_ip_request_is_local <= request_is_local [3] & request_is_local [2]
-                          & request_is_local [1] & request_is_local [0];
-end
 
 
 // output datapath logic

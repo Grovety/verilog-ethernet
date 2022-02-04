@@ -294,7 +294,7 @@ always @* begin
     incoming_frame_ready = 1'b0;
     
     force_set_request_timeout [0] = 0;
-	 force_set_request_retry_interval [0] = 0;
+    force_set_request_retry_interval [0] = 0;
 
     outgoing_frame_valid_next = outgoing_frame_valid_reg && !outgoing_frame_ready;
     outgoing_eth_dest_mac_next = outgoing_eth_dest_mac_reg;
@@ -313,7 +313,7 @@ always @* begin
     arp_request_ip_next = arp_request_ip_reg;
     arp_request_operation_next = arp_request_operation_reg;
     arp_request_retry_cnt_next = arp_request_retry_cnt_reg;
-	 arp_request_timer_dec = 0;
+    arp_request_timer_dec = 0;
 //    arp_request_timer_next = arp_request_timer_reg;
     arp_response_valid_next = arp_response_valid_reg && !arp_response_ready;
     arp_response_error_next = 1'b0;
@@ -357,7 +357,7 @@ always @* begin
         arp_request_ready_next = 1'b0;
         cache_query_request_valid_next = 1'b1;
 //        arp_request_timer_next = arp_request_timer_reg - 1;
-		  arp_request_timer_dec = 1;
+        arp_request_timer_dec = 1;
         // if we got a response, it will go in the cache, so when the query succeds, we're done
         if (cache_query_response_valid && !cache_query_response_error) begin
             arp_request_operation_next = 1'b0;
@@ -378,9 +378,9 @@ always @* begin
                 outgoing_arp_tpa_next = arp_request_ip_reg;
                 arp_request_retry_cnt_next = arp_request_retry_cnt_reg - 1;
                 if (arp_request_retry_cnt_reg > 1) begin
-					      force_set_request_retry_interval [0] = 1;
+                     force_set_request_retry_interval [0] = 1;
                 end else begin
-					     force_set_request_timeout [0] = 1;
+                    force_set_request_timeout [0] = 1;
                 end
             end else begin
                 // out of retries
@@ -402,9 +402,9 @@ always @* begin
                     outgoing_eth_dest_mac_next = 48'hffffffffffff;
                     outgoing_arp_oper_next = ARP_OPER_ARP_REQUEST;
                     outgoing_arp_tha_next = 48'h000000000000;
-                    outgoing_arp_tpa_next = arp_request_ip_reg;		// HERE!!!
+                    outgoing_arp_tpa_next = arp_request_ip_reg;      // HERE!!!
                     arp_request_retry_cnt_next = REQUEST_RETRY_COUNT-1;
-						  force_set_request_retry_interval [0] = 1;
+                    force_set_request_retry_interval [0] = 1;
                 end else begin
                     cache_query_request_valid_next = 1'b0;
                     arp_response_valid_next = 1'b1;
@@ -488,13 +488,13 @@ begin
          arp_request_timer_reg[14] <= 1;
     end else
     begin
-			if (force_set_request_timeout [1])
-			begin
-				 arp_request_timer_reg <= REQUEST_TIMEOUT;
-			end else if (force_set_request_retry_interval [1])
-			begin
-				 arp_request_timer_reg <= REQUEST_RETRY_INTERVAL;
-			end else
+         if (force_set_request_timeout [1])
+         begin
+             arp_request_timer_reg <= REQUEST_TIMEOUT;
+         end else if (force_set_request_retry_interval [1])
+         begin
+             arp_request_timer_reg <= REQUEST_RETRY_INTERVAL;
+         end else
          begin
             if (arp_request_timer_reg_lo == 0)
             begin
@@ -502,10 +502,10 @@ begin
                  if (arp_request_timer_reg_mid == 0)
                  begin
                      arp_request_timer_reg_mid <= 10'd999;
-							if (arp_request_timer_dec)
-							begin
-								arp_request_timer_reg <= arp_request_timer_reg - 1;
-							end
+                     if (arp_request_timer_dec)
+                     begin
+                        arp_request_timer_reg <= arp_request_timer_reg - 1;
+                     end
                  end else
                  begin
                      arp_request_timer_reg_mid <= arp_request_timer_reg_mid - 1;
@@ -515,8 +515,8 @@ begin
                  arp_request_timer_reg_lo <= arp_request_timer_reg_lo - 1;
             end
          end
-			force_set_request_timeout [1] <= force_set_request_timeout [0];
-			force_set_request_retry_interval [1] <= force_set_request_retry_interval[0];
+         force_set_request_timeout [1] <= force_set_request_timeout [0];
+         force_set_request_retry_interval [1] <= force_set_request_retry_interval[0];
     end
 end
 

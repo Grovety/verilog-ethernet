@@ -101,6 +101,7 @@ module ip_arb_mux #
     output wire [15:0]                   m_ip_header_checksum,
     output wire [31:0]                   m_ip_source_ip,
     output wire [31:0]                   m_ip_dest_ip,
+    output wire [31:0]                   m_ip_dest_ip_online,
     output wire [DATA_WIDTH-1:0]         m_ip_payload_axis_tdata,
     output wire [KEEP_WIDTH-1:0]         m_ip_payload_axis_tkeep,
     output wire                          m_ip_payload_axis_tvalid,
@@ -134,6 +135,8 @@ reg [7:0]  m_ip_protocol_reg = 8'd0, m_ip_protocol_next;
 reg [15:0] m_ip_header_checksum_reg = 16'd0, m_ip_header_checksum_next;
 reg [31:0] m_ip_source_ip_reg = 32'd0, m_ip_source_ip_next;
 reg [31:0] m_ip_dest_ip_reg = 32'd0, m_ip_dest_ip_next;
+reg [31:0] m_ip_dest_ip_online_reg = 32'd0, m_ip_dest_ip_online_next;
+
 
 wire [S_COUNT-1:0] request;
 wire [S_COUNT-1:0] acknowledge;
@@ -173,6 +176,7 @@ assign m_ip_protocol = m_ip_protocol_reg;
 assign m_ip_header_checksum = m_ip_header_checksum_reg;
 assign m_ip_source_ip = m_ip_source_ip_reg;
 assign m_ip_dest_ip = m_ip_dest_ip_reg;
+assign m_ip_dest_ip_online = m_ip_dest_ip_online_reg;
 
 // mux for incoming packet
 wire [DATA_WIDTH-1:0] current_s_tdata  = s_ip_payload_axis_tdata[grant_encoded*DATA_WIDTH +: DATA_WIDTH];
@@ -235,6 +239,8 @@ always @* begin
         end
     end
 
+    m_ip_dest_ip_online_next = s_ip_dest_ip[grant_encoded*32 +: 32];
+
     if (!frame_reg && grant_valid && (m_ip_hdr_ready || !m_ip_hdr_valid)) begin
         // start of frame
         frame_next = 1'b1;
@@ -292,6 +298,7 @@ always @(posedge clk) begin
     m_ip_header_checksum_reg <= m_ip_header_checksum_next;
     m_ip_source_ip_reg <= m_ip_source_ip_next;
     m_ip_dest_ip_reg <= m_ip_dest_ip_next;
+    m_ip_dest_ip_online_reg <= m_ip_dest_ip_online_next;
 
     if (rst) begin
         frame_reg <= 1'b0;

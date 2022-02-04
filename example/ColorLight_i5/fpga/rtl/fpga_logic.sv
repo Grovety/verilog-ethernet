@@ -1,6 +1,7 @@
 module fpga_logic #(
     parameter TARGET = "GENERIC",		// For correct simulation! Override by "LATTICE" from parent module!!!
-    parameter USE_CLK90 = "TRUE"                // For correct simulation! Override by "FALSE" from parent module!!!
+    parameter USE_CLK90 = "TRUE",               // For correct simulation! Override by "FALSE" from parent module!!!
+    parameter DCHP_TEMPLATE_EEPROM_ADDR = 24'h1ff000
 )
 (
     input              clk,
@@ -459,7 +460,8 @@ enum {idle,
        wr_eeprom_addr0,wr_eeprom_addr1,wr_eeprom_addr2,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,er_eeprom_addr1,er_eeprom_addr2,
-       er_eeprom_process1,er_eeprom_process2
+       er_eeprom_process1,er_eeprom_process2,
+       dhcp_fill_0
      } answerState;
 
 always @(posedge clk)
@@ -509,6 +511,21 @@ begin
                          else
                             answerState <= reflect_1;
                          rx_udp_hdr_ready <= 0;
+                     end
+                     16'hD0C0: begin
+                         rx_udp_hdr_ready <= 0;
+                         // DHCP Temp
+                         spi_start_addr<=DCHP_TEMPLATE_EEPROM_ADDR;
+                         eeprom_cnt <= 8'hf7;      // Request for read 0xf8 bytes
+                         spi_read_strobe <= 1;     // Start read from EEPROM
+
+                         tx_udp_ip_source_ip <= 32'h00000000;
+                         tx_udp_ip_dest_ip <= 32'hffffffff; 
+                         tx_udp_source_port <= 16'd68; 
+                         tx_udp_dest_port <= 16'd67;   
+
+                         spi_m_tready <= 1;
+                         answerState <= dhcp_fill_0;
                      end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
@@ -681,6 +698,25 @@ begin
             begin
                 answerState <= idle; 
             end
+        end
+        dhcp_fill_0: begin
+           ourData_tdata <= spi_m_tdata;
+           ourData_tvalid <= spi_m_tvalid;
+           if (spi_m_tvalid)
+           begin
+               if (eeprom_cnt == 0)
+               begin
+                   answerState <= idle;
+                   ourData_tlast <= 1;
+	           spi_m_tready <= 0;
+                   tx_udp_length <= 16'h00f8 + 8;   	
+                   tx_udp_hdr_valid <= 1;		// Start send to UDP
+               end else
+               begin
+                   eeprom_cnt <= eeprom_cnt - 1;
+                   ourData_tlast <= 0;
+               end
+           end
         end
         endcase
 

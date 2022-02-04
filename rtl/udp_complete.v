@@ -226,6 +226,7 @@ wire [7:0] ip_tx_ip_ttl;
 wire [7:0] ip_tx_ip_protocol;
 wire [31:0] ip_tx_ip_source_ip;
 wire [31:0] ip_tx_ip_dest_ip;
+wire [31:0] ip_tx_ip_dest_ip_online;
 wire [7:0] ip_tx_ip_payload_axis_tdata;
 wire ip_tx_ip_payload_axis_tvalid;
 wire ip_tx_ip_payload_axis_tlast;
@@ -413,6 +414,7 @@ ip_arb_mux_inst (
     .m_ip_header_checksum(),
     .m_ip_source_ip(ip_tx_ip_source_ip),
     .m_ip_dest_ip(ip_tx_ip_dest_ip),
+    .m_ip_dest_ip_online(ip_tx_ip_dest_ip_online),
     .m_ip_payload_axis_tdata(ip_tx_ip_payload_axis_tdata),
     .m_ip_payload_axis_tkeep(),
     .m_ip_payload_axis_tvalid(ip_tx_ip_payload_axis_tvalid),
@@ -472,6 +474,8 @@ ip_complete_inst (
     .s_ip_payload_axis_tready(ip_tx_ip_payload_axis_tready),
     .s_ip_payload_axis_tlast(ip_tx_ip_payload_axis_tlast),
     .s_ip_payload_axis_tuser(ip_tx_ip_payload_axis_tuser),
+
+    .s_ip_dest_ip_online(ip_tx_ip_dest_ip_online),
     // IP frame output
     .m_ip_hdr_valid(ip_rx_ip_hdr_valid),
     .m_ip_hdr_ready(ip_rx_ip_hdr_ready),

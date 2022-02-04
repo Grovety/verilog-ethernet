@@ -32,6 +32,7 @@ SYN_FILES += lib/eth/rtl/udp_ip_rx.v
 SYN_FILES += lib/eth/rtl/udp_ip_tx.v       
 SYN_FILES += lib/eth/rtl/ip_complete.v      
 SYN_FILES += lib/eth/rtl/ip.v        
+SYN_FILES += lib/eth/rtl/broadcast_checker.v
 SYN_FILES += lib/eth/rtl/ip_eth_rx.v       
 SYN_FILES += lib/eth/rtl/ip_eth_tx.v       
 SYN_FILES += lib/eth/rtl/ip_arb_mux.v      

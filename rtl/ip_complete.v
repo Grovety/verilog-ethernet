@@ -85,6 +85,8 @@ module ip_complete #(
     input  wire        s_ip_payload_axis_tlast,
     input  wire        s_ip_payload_axis_tuser,
 
+    input  wire [31:0] s_ip_dest_ip_online,
+
     /*
      * IP output
      */
@@ -355,9 +357,6 @@ ip_inst (
     .m_ip_payload_axis_tlast(m_ip_payload_axis_tlast),
     .m_ip_payload_axis_tuser(m_ip_payload_axis_tuser),
   
-    .m_ip_addr_is_broadcast(m_ip_addr_is_broadcast),
-    .m_ip_addr_is_subnet_broadcast(m_ip_addr_is_subnet_broadcast),
-    .m_ip_request_is_local(m_ip_request_is_local),
     // IP frame input
     .s_ip_hdr_valid(s_ip_hdr_valid),
     .s_ip_hdr_ready(s_ip_hdr_ready),
@@ -391,11 +390,24 @@ ip_inst (
     .tx_error_payload_early_termination(tx_error_payload_early_termination),
     .tx_error_arp_failed(tx_error_arp_failed),
     // Configuration
-    .local_mac(local_mac),
-    .local_ip(local_ip),
+    .local_mac(local_mac)
+);
+
+broadcast_checker bChecker
+(
+    .clk(clk),
+    .rst(rst),
+
+    .dest_ip(s_ip_dest_ip_online),
+
+    .m_ip_addr_is_broadcast(m_ip_addr_is_broadcast),
+    .m_ip_request_is_local(m_ip_request_is_local),
+    .m_ip_addr_is_subnet_broadcast(m_ip_addr_is_subnet_broadcast),
     .gateway_ip(gateway_ip),
     .subnet_mask(subnet_mask)
 );
+
+
 
 /*
  * ARP module
