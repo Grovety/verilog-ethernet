@@ -266,6 +266,7 @@ wire [7:0] udp_tx_ip_ttl;
 wire [7:0] udp_tx_ip_protocol;
 wire [31:0] udp_tx_ip_source_ip;
 wire [31:0] udp_tx_ip_dest_ip;
+wire [31:0] udp_tx_ip_dest_ip_online;
 wire [7:0] udp_tx_ip_payload_axis_tdata;
 wire udp_tx_ip_payload_axis_tvalid;
 wire udp_tx_ip_payload_axis_tlast;
@@ -387,6 +388,7 @@ ip_arb_mux_inst (
     .s_ip_header_checksum(0),
     .s_ip_source_ip({s_ip_source_ip, udp_tx_ip_source_ip}),
     .s_ip_dest_ip({s_ip_dest_ip, udp_tx_ip_dest_ip}),
+    .s_ip_dest_ip_online({s_ip_dest_ip, udp_tx_ip_dest_ip_online}),
     .s_ip_payload_axis_tdata({s_ip_payload_axis_tdata, udp_tx_ip_payload_axis_tdata}),
     .s_ip_payload_axis_tkeep(0),
     .s_ip_payload_axis_tvalid({s_ip_payload_axis_tvalid, udp_tx_ip_payload_axis_tvalid}),
@@ -571,6 +573,7 @@ udp_inst (
     .m_ip_header_checksum(),
     .m_ip_source_ip(udp_tx_ip_source_ip),
     .m_ip_dest_ip(udp_tx_ip_dest_ip),
+    .m_ip_dest_ip_online(udp_tx_ip_dest_ip_online),
     .m_ip_payload_axis_tdata(udp_tx_ip_payload_axis_tdata),
     .m_ip_payload_axis_tvalid(udp_tx_ip_payload_axis_tvalid),
     .m_ip_payload_axis_tready(udp_tx_ip_payload_axis_tready),

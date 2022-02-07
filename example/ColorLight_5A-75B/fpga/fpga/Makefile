@@ -36,6 +36,7 @@ SYN_FILES += lib/eth/rtl/ip_eth_rx.v
 SYN_FILES += lib/eth/rtl/ip_eth_tx.v       
 SYN_FILES += lib/eth/rtl/ip_arb_mux.v      
 SYN_FILES += lib/eth/rtl/ip_mux.v       
+SYN_FILES += lib/eth/rtl/broadcast_checker.v
 SYN_FILES += lib/eth/rtl/arp.v        
 SYN_FILES += lib/eth/rtl/arp_cache.v       
 SYN_FILES += lib/eth/rtl/arp_eth_rx.v      

@@ -71,6 +71,7 @@ module ip_arb_mux #
     input  wire [S_COUNT*16-1:0]         s_ip_header_checksum,
     input  wire [S_COUNT*32-1:0]         s_ip_source_ip,
     input  wire [S_COUNT*32-1:0]         s_ip_dest_ip,
+    input  wire [S_COUNT*32-1:0]         s_ip_dest_ip_online,
     input  wire [S_COUNT*DATA_WIDTH-1:0] s_ip_payload_axis_tdata,
     input  wire [S_COUNT*KEEP_WIDTH-1:0] s_ip_payload_axis_tkeep,
     input  wire [S_COUNT-1:0]            s_ip_payload_axis_tvalid,
@@ -239,8 +240,7 @@ always @* begin
         end
     end
 
-    m_ip_dest_ip_online_next = s_ip_dest_ip[grant_encoded*32 +: 32];
-
+    m_ip_dest_ip_online_next = s_ip_dest_ip_online[grant_encoded*32 +: 32];
     if (!frame_reg && grant_valid && (m_ip_hdr_ready || !m_ip_hdr_valid)) begin
         // start of frame
         frame_next = 1'b1;

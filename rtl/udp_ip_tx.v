@@ -85,6 +85,7 @@ module udp_ip_tx
     output wire [15:0] m_ip_header_checksum,
     output wire [31:0] m_ip_source_ip,
     output wire [31:0] m_ip_dest_ip,
+    output wire [31:0] m_ip_dest_ip_online,
     output wire [7:0]  m_ip_payload_axis_tdata,
     output wire        m_ip_payload_axis_tvalid,
     input  wire        m_ip_payload_axis_tready,
@@ -177,6 +178,7 @@ reg [7:0] m_ip_protocol_reg = 8'd0;
 reg [15:0] m_ip_header_checksum_reg = 16'd0;
 reg [31:0] m_ip_source_ip_reg = 32'd0;
 reg [31:0] m_ip_dest_ip_reg = 32'd0;
+reg [31:0] m_ip_dest_ip_online_reg = 32'd0;
 
 reg busy_reg = 1'b0;
 reg error_payload_early_termination_reg = 1'b0, error_payload_early_termination_next;
@@ -209,6 +211,7 @@ assign m_ip_protocol = m_ip_protocol_reg;
 assign m_ip_header_checksum = m_ip_header_checksum_reg;
 assign m_ip_source_ip = m_ip_source_ip_reg;
 assign m_ip_dest_ip = m_ip_dest_ip_reg;
+assign m_ip_dest_ip_online = m_ip_dest_ip_online_reg;
 
 assign busy = busy_reg;
 assign error_payload_early_termination = error_payload_early_termination_reg;
@@ -403,6 +406,7 @@ always @(posedge clk) begin
         udp_length_reg <= s_udp_length;
         udp_checksum_reg <= s_udp_checksum;
     end
+        m_ip_dest_ip_online_reg <= s_ip_dest_ip;
 
     if (store_last_word) begin
         last_word_data_reg <= m_ip_payload_axis_tdata_int;
