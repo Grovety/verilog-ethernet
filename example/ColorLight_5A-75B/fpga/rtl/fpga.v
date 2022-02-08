@@ -3,8 +3,9 @@ module fpga #(
 )
 (
     input              clk_i,
-    output          led_o,
+    output reg         led_o,
 
+//    output             spi_flash_sck,
     output             spi_flash_mosi,
     input              spi_flash_miso,    
     output             spi_flash_cs,
@@ -20,19 +21,16 @@ module fpga #(
     inout              eth_mdio
 );
 
-localparam MAX = 12_500_000;
-localparam WIDTH = $clog2(MAX);
-
-wire spi_flash_sck;
 USRMCLK USRMCLK(
 	.USRMCLKI(spi_flash_sck),
 	.USRMCLKTS(1'd0)
 );
 
+
+localparam MAX = 12_500_000;
+localparam WIDTH = $clog2(MAX);
+
 wire rst;
-wire clk;
-wire clk90;
-wire locked;
 
 // Reset Generator
 rst_gen rst_inst (.clk_i(clk_i), .rst_i(1'b0), .rst_o(rst));
@@ -42,7 +40,7 @@ wire [WIDTH-1:0] cpt_next_s = cpt_s + 1'b1;
 
 // Blink Functionality
 wire end_s = cpt_s == MAX-1;
-/*
+
 always @(posedge clk_i) begin
     cpt_s <= (rst || end_s) ? {WIDTH{1'b0}} : cpt_next_s;
     if (rst) begin
@@ -51,7 +49,7 @@ always @(posedge clk_i) begin
         led_o <= ~led_o;
     end
 end
-*/
+
 assign eth_rst_n = 1;
 
 wire clkfb;
@@ -112,8 +110,6 @@ fpga_core #(
     .spi_flash_miso(spi_flash_miso),
     .spi_flash_cs(spi_flash_cs), 
 
-    .dbg_led (led_o),
- 
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),
     .phy0_rx_ctl(eth_rx_ctl),

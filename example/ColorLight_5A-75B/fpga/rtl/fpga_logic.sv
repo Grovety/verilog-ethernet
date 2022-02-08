@@ -1,6 +1,7 @@
 module fpga_logic #(
     parameter TARGET = "GENERIC",		// For correct simulation! Override by "LATTICE" from parent module!!!
-    parameter USE_CLK90 = "TRUE"                // For correct simulation! Override by "FALSE" from parent module!!!
+    parameter USE_CLK90 = "TRUE",               // For correct simulation! Override by "FALSE" from parent module!!!
+    parameter DCHP_TEMPLATE_EEPROM_ADDR = 24'h1ff000
 )
 (
     input              clk,
@@ -402,12 +403,20 @@ udp_complete_inst (
 // AXI Stream for read EEPROM Data
 reg  rst_eeprom;
 reg [23:0] spi_start_addr;
+
 wire [7:0] spi_m_tdata;
 wire spi_m_tvalid;
 reg spi_m_tready; 
+
+reg [7:0] spi_s_tdata;
+reg spi_s_tvalid;
+wire spi_s_tready; 
+
 reg spi_read_strobe;
 reg spi_write_strobe;
+reg spi_erase_strobe;
 
+wire spi_fsm_in_finished;
 
 SpiFlashReader flashReader
 (
@@ -416,6 +425,7 @@ SpiFlashReader flashReader
 
    .read_strobe(spi_read_strobe),
    .write_strobe(spi_write_strobe),
+   .erase_strobe(spi_erase_strobe),
    .start_addr(spi_start_addr),
          
    .spi_sck(spi_flash_sck), 
@@ -425,7 +435,13 @@ SpiFlashReader flashReader
          
    .m_tdata(spi_m_tdata), 
    .m_tvalid(spi_m_tvalid),
-   .m_tready(spi_m_tready) 
+   .m_tready(spi_m_tready),
+
+   .s_tdata(spi_s_tdata), 
+   .s_tvalid(spi_s_tvalid),
+   .s_tready(spi_s_tready),
+
+   .finished (spi_fsm_in_finished) 
 );
 
 
@@ -438,9 +454,16 @@ reg       ourData_tlast;
 reg [7:0] eeprom_cnt;
 
 enum {idle,
-       reflect_1,reflect_2,
+       pre_reflect_1,pre_reflect_2,reflect_1,reflect_2,
        rd_eeprom_addr0,rd_eeprom_addr1,rd_eeprom_addr2,
-       rd_eeprom_process,rd_eeprom_send1,rd_eeprom_send2} answerState;
+       rd_eeprom_process,rd_eeprom_send1,rd_eeprom_send2,
+       wr_eeprom_addr0,wr_eeprom_addr1,wr_eeprom_addr2,
+       wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
+       er_eeprom_addr0,er_eeprom_addr1,er_eeprom_addr2,
+       er_eeprom_process1,er_eeprom_process2,
+       dhcp_fill_0
+     } answerState;
+
 always @(posedge clk)
 begin
     if (rst)
@@ -456,6 +479,7 @@ begin
         dbg_led <= 1;
         spi_read_strobe <= 0;
         spi_write_strobe <= 0;
+        spi_erase_strobe <= 0;
     end else
     begin
         case (answerState)
@@ -463,6 +487,7 @@ begin
                dbg_led <= 1; 
                spi_read_strobe <= 0;
                spi_write_strobe <= 0;
+               spi_erase_strobe <= 0;
                rst_eeprom <= 0;
                spi_m_tready <= 0;
                rx_udp_hdr_ready <= 1;
@@ -480,12 +505,23 @@ begin
                          tx_udp_source_port <= 1234; 
                          tx_udp_dest_port <= rx_udp_source_port;   
                          tx_udp_length <= rx_udp_length;
-                         tx_udp_hdr_valid <= 1;
-                         if (tx_udp_hdr_ready)
-                            answerState <= reflect_2;
-                         else
-                            answerState <= reflect_1;
                          rx_udp_hdr_ready <= 0;
+                         answerState <= pre_reflect_1;
+                     end
+                     16'hD0C0: begin
+                         rx_udp_hdr_ready <= 0;
+                         // DHCP Temp
+                         spi_start_addr<=DCHP_TEMPLATE_EEPROM_ADDR;
+                         eeprom_cnt <= 8'hf7;      // Request for read 0xf8 bytes
+                         spi_read_strobe <= 1;     // Start read from EEPROM
+
+                         tx_udp_ip_source_ip <= 32'h00000000;
+                         tx_udp_ip_dest_ip <= 32'hffffffff; 
+                         tx_udp_source_port <= 16'd68; 
+                         tx_udp_dest_port <= 16'd67;   
+
+                         spi_m_tready <= 1;
+                         answerState <= dhcp_fill_0;
                      end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
@@ -497,8 +533,32 @@ begin
                          tx_udp_length <= 128 + 8;   			 // Always sending 128 bytes
                          answerState <= rd_eeprom_addr0;
                      end
+                     // Write EEPROM
+                     16'heee2: begin
+                         rx_udp_hdr_ready <= 0;
+                         answerState <= wr_eeprom_addr0;
+                     end
+                     // Erase EEPROM
+                     16'heeee: begin
+                         rx_udp_hdr_ready <= 0;
+                         answerState <= er_eeprom_addr0;
+                     end
                   endcase
                end
+        end
+        pre_reflect_1: begin
+              answerState <= pre_reflect_2;
+        end
+        pre_reflect_2: begin
+              tx_udp_hdr_valid <= 1;
+              if (tx_udp_hdr_ready)
+              begin
+                  answerState <= reflect_2;
+              end
+              else
+              begin
+                  answerState <= reflect_1;
+              end
         end
         reflect_1: begin
            if (tx_udp_hdr_ready)
@@ -568,6 +628,105 @@ begin
                begin
                    answerState <= idle; 
                end
+        end
+        wr_eeprom_addr0: begin
+           if (rx_udp_payload_axis_tvalid)
+           begin
+              spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
+              answerState <= wr_eeprom_addr1;
+           end
+        end
+        wr_eeprom_addr1: begin
+           if (rx_udp_payload_axis_tvalid)
+           begin
+              spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
+              answerState <= wr_eeprom_addr2;
+           end
+        end
+        wr_eeprom_addr2: begin
+           if (rx_udp_payload_axis_tvalid)
+           begin
+              spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
+	      spi_write_strobe <= 1;
+              spi_s_tvalid <= 0;
+              rx_udp_payload_axis_tready <= 0;
+              answerState <= wr_eeprom_process1;
+           end
+        end
+        wr_eeprom_process1: begin
+            if (rx_udp_payload_axis_tvalid)
+            begin
+                spi_s_tdata <= rx_udp_payload_axis_tdata;
+                spi_s_tvalid <= 1;
+                rx_udp_payload_axis_tready <= 1;
+                answerState <= wr_eeprom_process2;
+            end else
+            begin
+                answerState <= wr_eeprom_process3; 
+                spi_s_tvalid <= 0;
+            end
+        end
+        wr_eeprom_process2: begin
+            rx_udp_payload_axis_tready <= 0;
+            if (spi_s_tready)
+            begin
+                spi_s_tvalid <= 0;
+                answerState <= wr_eeprom_process1;
+            end
+        end
+        wr_eeprom_process3: begin
+              if (spi_flash_cs)
+              begin
+                answerState <= idle; 
+             end
+        end
+        er_eeprom_addr0: begin
+           if (rx_udp_payload_axis_tvalid)
+           begin
+              spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
+              answerState <= er_eeprom_addr1;
+           end
+        end
+        er_eeprom_addr1: begin
+           if (rx_udp_payload_axis_tvalid)
+           begin
+              spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
+              answerState <= er_eeprom_addr2;
+           end
+        end
+        er_eeprom_addr2: begin
+           if (rx_udp_payload_axis_tvalid)
+           begin
+              spi_start_addr [23:0] <= {rx_udp_payload_axis_tdata,spi_start_addr [23:8]};
+	      spi_erase_strobe <= 1;
+              spi_s_tvalid <= 0;
+              answerState <= er_eeprom_process1;
+           end
+        end
+        er_eeprom_process1: begin
+            if (spi_fsm_in_finished)
+            begin
+                answerState <= idle; 
+            end
+        end
+        dhcp_fill_0: begin
+           ourData_tdata <= spi_m_tdata;
+           ourData_tvalid <= spi_m_tvalid;
+           if (spi_m_tvalid)
+           begin
+               if (eeprom_cnt == 0)
+               begin
+                   answerState <= idle;
+                   ourData_tlast <= 1;
+	           spi_m_tready <= 0;
+                   tx_udp_length <= 16'h00f8 + 8;   	
+                   tx_udp_hdr_valid <= 1;		// Start send to UDP
+               end else
+               begin
+                   eeprom_cnt <= eeprom_cnt - 1;
+                   ourData_tlast <= 0;
+               end
+           end
         end
         endcase
 

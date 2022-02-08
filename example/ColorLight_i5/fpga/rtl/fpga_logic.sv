@@ -454,7 +454,7 @@ reg       ourData_tlast;
 reg [7:0] eeprom_cnt;
 
 enum {idle,
-       reflect_1,reflect_2,
+       pre_reflect_1,pre_reflect_2,reflect_1,reflect_2,
        rd_eeprom_addr0,rd_eeprom_addr1,rd_eeprom_addr2,
        rd_eeprom_process,rd_eeprom_send1,rd_eeprom_send2,
        wr_eeprom_addr0,wr_eeprom_addr1,wr_eeprom_addr2,
@@ -484,7 +484,6 @@ begin
     begin
         case (answerState)
         idle: begin
-               dbg_led <= 1; 
                spi_read_strobe <= 0;
                spi_write_strobe <= 0;
                spi_erase_strobe <= 0;
@@ -500,17 +499,14 @@ begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
                      1234: begin
+                         dbg_led <= 0; 
                          tx_udp_ip_source_ip <= local_ip;
                          tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
                          tx_udp_source_port <= 1234; 
                          tx_udp_dest_port <= rx_udp_source_port;   
                          tx_udp_length <= rx_udp_length;
-                         tx_udp_hdr_valid <= 1;
-                         if (tx_udp_hdr_ready)
-                            answerState <= reflect_2;
-                         else
-                            answerState <= reflect_1;
                          rx_udp_hdr_ready <= 0;
+                         answerState <= pre_reflect_1;
                      end
                      16'hD0C0: begin
                          rx_udp_hdr_ready <= 0;
@@ -549,6 +545,20 @@ begin
                      end
                   endcase
                end
+        end
+        pre_reflect_1: begin
+              answerState <= pre_reflect_2;
+        end
+        pre_reflect_2: begin
+              tx_udp_hdr_valid <= 1;
+              if (tx_udp_hdr_ready)
+              begin
+                  answerState <= reflect_2;
+              end
+              else
+              begin
+                  answerState <= reflect_1;
+              end
         end
         reflect_1: begin
            if (tx_udp_hdr_ready)

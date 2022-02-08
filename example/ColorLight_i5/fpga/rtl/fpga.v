@@ -3,7 +3,7 @@ module fpga #(
 )
 (
     input              clk_i,
-    output reg         led_o,
+    output /*reg*/         led_o,
 
 //    output             spi_flash_sck,
     output             spi_flash_mosi,
@@ -41,14 +41,14 @@ wire [WIDTH-1:0] cpt_next_s = cpt_s + 1'b1;
 // Blink Functionality
 wire end_s = cpt_s == MAX-1;
 
-always @(posedge clk_i) begin
+/*always @(posedge clk_i) begin
     cpt_s <= (rst || end_s) ? {WIDTH{1'b0}} : cpt_next_s;
     if (rst) begin
         led_o <= 1'b0;
     end else if (end_s) begin
         led_o <= ~led_o;
     end
-end
+end*/
 
 assign eth_rst_n = 1;
 
@@ -109,6 +109,8 @@ fpga_core #(
     .spi_flash_mosi(spi_flash_mosi),
     .spi_flash_miso(spi_flash_miso),
     .spi_flash_cs(spi_flash_cs), 
+
+    .dbg_led (led_o),
 
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),
