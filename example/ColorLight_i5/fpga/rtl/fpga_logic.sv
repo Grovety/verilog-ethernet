@@ -1,7 +1,8 @@
 module fpga_logic #(
     parameter TARGET = "GENERIC",		// For correct simulation! Override by "LATTICE" from parent module!!!
     parameter USE_CLK90 = "TRUE",               // For correct simulation! Override by "FALSE" from parent module!!!
-    parameter DCHP_TEMPLATE_EEPROM_ADDR = 24'h1ff000
+//    parameter DCHP_TEMPLATE_EEPROM_ADDR = 24'h1ff000
+    parameter DEFAULT_IP_EPROM_ADDR = 24'h1ff000
 )
 (
     input              clk,
@@ -164,10 +165,10 @@ wire tx_fifo_udp_payload_axis_tuser;
 wire udp_tx_busy;
 
 // Configuration
-wire [47:0] local_mac   = 48'h02_00_00_00_00_00;
-wire [31:0] local_ip    = {8'd192, 8'd168, 8'd2,   8'd128};
-wire [31:0] gateway_ip  = {8'd192, 8'd168, 8'd2,   8'd1};
-wire [31:0] subnet_mask = {8'd255, 8'd255, 8'd255, 8'd0};
+wire [47:0] local_mac;//   = 48'h02_00_00_00_00_00;
+wire [31:0] local_ip;//    = {8'd192, 8'd168, 8'd2,   8'd128};
+wire [31:0] gateway_ip; //  = {8'd192, 8'd168, 8'd2,   8'd1};
+wire [31:0] subnet_mask;// = {8'd255, 8'd255, 8'd255, 8'd0};
 
 // Loop back UDP
 wire match_cond = rx_udp_dest_port == 1234;
@@ -401,7 +402,6 @@ udp_complete_inst (
 
 
 // AXI Stream for read EEPROM Data
-reg  rst_eeprom;
 reg [23:0] spi_start_addr;
 
 wire [7:0] spi_m_tdata;
@@ -420,7 +420,7 @@ wire spi_fsm_in_finished;
 
 SpiFlashReader flashReader
 (
-   .rst (rst_eeprom),     
+   .rst (rst),     
    .clk (clk),     
 
    .read_strobe(spi_read_strobe),
@@ -444,7 +444,24 @@ SpiFlashReader flashReader
    .finished (spi_fsm_in_finished) 
 );
 
+reg  dhcp_s_eeprom_process_start;
+wire dhcp_s_eeprom_process_finished;
+DHCPhelper dhcpHelp
+(
+    .clk (clk),
+    .rst (rst),
 
+    .s_eeprom_process_start (dhcp_s_eeprom_process_start),
+    .s_eeprom_process_finished (dhcp_s_eeprom_process_finished),
+
+    .s_eeprom_axis_tdata (spi_m_tdata), 
+    .s_eeprom_axis_tvalid (spi_m_tvalid),
+//No need    .s_eeprom_axis_tready
+    .local_mac(local_mac),  
+    .local_ip(local_ip),   
+    .gateway_ip(gateway_ip), 
+    .subnet_mask(subnet_mask)
+);
 
 reg [7:0] ourData_tdata;
 reg       ourData_tvalid;
@@ -454,6 +471,7 @@ reg       ourData_tlast;
 reg [7:0] eeprom_cnt;
 
 enum {idle,
+       init_eeprom_1,
        pre_reflect_1,pre_reflect_2,reflect_1,reflect_2,
        rd_eeprom_addr0,rd_eeprom_addr1,rd_eeprom_addr2,
        rd_eeprom_process,rd_eeprom_send1,rd_eeprom_send2,
@@ -468,9 +486,8 @@ always @(posedge clk)
 begin
     if (rst)
     begin
-        rst_eeprom <= 1;
         spi_m_tready <= 0;
-        answerState <= idle;
+        answerState <= init_eeprom_1;
         rx_udp_hdr_ready <= 1;
         rx_udp_payload_axis_tready <= 1;
         ourData_tvalid <= 0;
@@ -483,11 +500,24 @@ begin
     end else
     begin
         case (answerState)
+        init_eeprom_1: begin
+             spi_m_tready <= 1;
+             spi_start_addr <= DEFAULT_IP_EPROM_ADDR;
+             spi_read_strobe <= 1;
+             if (dhcp_s_eeprom_process_finished)
+             begin
+                dhcp_s_eeprom_process_start <= 0;
+                answerState <= idle;
+             end else
+             begin
+                dhcp_s_eeprom_process_start <= 1;
+             end
+        end
         idle: begin
+               dhcp_s_eeprom_process_start <= 0;
                spi_read_strobe <= 0;
                spi_write_strobe <= 0;
                spi_erase_strobe <= 0;
-               rst_eeprom <= 0;
                spi_m_tready <= 0;
                rx_udp_hdr_ready <= 1;
                ourData_tvalid <= 0;
@@ -508,7 +538,7 @@ begin
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
                      end
-                     16'hD0C0: begin
+/*                     16'hD0C0: begin
                          rx_udp_hdr_ready <= 0;
                          // DHCP Temp
                          spi_start_addr<=DCHP_TEMPLATE_EEPROM_ADDR;
@@ -522,7 +552,7 @@ begin
 
                          spi_m_tready <= 1;
                          answerState <= dhcp_fill_0;
-                     end
+                     end*/
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
                          rx_udp_hdr_ready <= 0;
@@ -554,8 +584,7 @@ begin
               if (tx_udp_hdr_ready)
               begin
                   answerState <= reflect_2;
-              end
-              else
+              end else
               begin
                   answerState <= reflect_1;
               end
@@ -709,7 +738,7 @@ begin
                 answerState <= idle; 
             end
         end
-        dhcp_fill_0: begin
+/*        dhcp_fill_0: begin
            ourData_tdata <= spi_m_tdata;
            ourData_tvalid <= spi_m_tvalid;
            if (spi_m_tvalid)
@@ -727,7 +756,7 @@ begin
                    ourData_tlast <= 0;
                end
            end
-        end
+        end   */
         endcase
 
     end 
