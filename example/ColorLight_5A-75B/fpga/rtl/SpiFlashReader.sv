@@ -32,11 +32,13 @@ module SpiFlashReader
                   sendByte2,sendByte3,sendByte4,sendByte5,
                   axisTx1,axisTx2,axisTx3,
                   transmitSpi,transmitSpi1,transmitSpi2,
-                   Write_en1,Write_en2,Write_1,Write_2,Write_3,Write_4,
-                   Erase_en1,Erase_en2,Erase_1,Erase_2,Erase_3,Erase_4
+                   SingleCmd,
+                   Write_0,Write_1,Write_2,Write_3,Write_4,
+                   Erase_0,Erase_1,Erase_2,Erase_3,Erase_4
                  } stateType;
     stateType state;
     stateType returnState;
+    stateType stateAfterSingleCommand;
     
     reg [7:0] dataForSpi;
     reg [3:0] bitCnt;
@@ -61,7 +63,8 @@ module SpiFlashReader
              if (read_strobe) 
              begin
                spi_cs <= 0;
-               dataForSpi <= 8'h0b;
+//               dataForSpi <= 8'h0b;
+               dataForSpi <= 8'h05;
                returnState <= sendByte2;
                state <= transmitSpi;
              end
@@ -69,14 +72,16 @@ module SpiFlashReader
              begin
                spi_cs <= 0;
                dataForSpi <= 8'h06;  // Write Enable
-               returnState <= Write_en1;
+               returnState <= SingleCmd;
+               stateAfterSingleCommand <= Write_0;
                state <= transmitSpi;
              end
              if (erase_strobe) 
              begin
                spi_cs <= 0;
                dataForSpi <= 8'h06;  // Write Enable
-               returnState <= Erase_en1;
+               returnState <= SingleCmd;
+               stateAfterSingleCommand <= Erase_0;
                state <= transmitSpi;
              end
           end
@@ -147,11 +152,12 @@ module SpiFlashReader
                 state <= transmitSpi1;
              end
           end
-          Write_en1: begin
+          SingleCmd: begin
                spi_cs <= 1;
-                state <= Write_en2;
+                state <= stateAfterSingleCommand;
           end
-          Write_en2: begin
+
+          Write_0: begin
                spi_cs <= 0;
                dataForSpi <= 8'h02;  // Page Program
                returnState <= Write_1;
@@ -184,12 +190,7 @@ module SpiFlashReader
                     spi_cs <= 1;
                end
           end
-          Erase_en1: begin
-               finished <= 0;
-               spi_cs <= 1;
-                state <= Erase_en2;
-          end
-          Erase_en2: begin
+          Erase_0: begin
                spi_cs <= 0;
                dataForSpi <= 8'h52;  // Block Erase 32K
                returnState <= Erase_1;

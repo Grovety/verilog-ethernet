@@ -174,6 +174,32 @@ wire [31:0] subnet_mask;// = {8'd255, 8'd255, 8'd255, 8'd0};
 wire match_cond = rx_udp_dest_port == 1234;
 wire no_match = !match_cond;
 
+reg [11:0] mac_matched_1;
+reg [2:0] mac_matched_2;
+reg  mac_matched;
+
+always @ (posedge clk)
+begin
+     mac_matched_1 [0] <= (rx_eth_dest_mac [3:0] == local_mac [3:0])?1:0;
+     mac_matched_1 [1] <= (rx_eth_dest_mac [7:4] == local_mac [7:4])?1:0;
+     mac_matched_1 [2] <= (rx_eth_dest_mac [11:8] == local_mac [11:8])?1:0;
+     mac_matched_1 [3] <= (rx_eth_dest_mac [15:12] == local_mac [15:12])?1:0;
+     mac_matched_1 [4] <= (rx_eth_dest_mac [19:16] == local_mac [19:16])?1:0;
+     mac_matched_1 [5] <= (rx_eth_dest_mac [23:20] == local_mac [23:20])?1:0;
+     mac_matched_1 [6] <= (rx_eth_dest_mac [27:24] == local_mac [27:24])?1:0;
+     mac_matched_1 [7] <= (rx_eth_dest_mac [31:28] == local_mac [31:28])?1:0;
+     mac_matched_1 [8] <= (rx_eth_dest_mac [35:32] == local_mac [35:32])?1:0;
+     mac_matched_1 [9] <= (rx_eth_dest_mac [39:36] == local_mac [39:36])?1:0;
+     mac_matched_1 [10] <= (rx_eth_dest_mac [43:40] == local_mac [43:40])?1:0;
+     mac_matched_1 [11] <= (rx_eth_dest_mac [47:44] == local_mac [47:44])?1:0;
+     mac_matched_2 [0] = mac_matched_1 [0] & mac_matched_1 [1] & mac_matched_1 [2] & mac_matched_1 [3];
+     mac_matched_2 [1] = mac_matched_1 [4] & mac_matched_1 [5] & mac_matched_1 [6] & mac_matched_1 [7];
+     mac_matched_2 [2] = mac_matched_1 [8] & mac_matched_1 [9] & mac_matched_1 [10] & mac_matched_1 [11];
+
+     mac_matched  <= mac_matched_2 [0] & mac_matched_2 [1] & mac_matched_2 [2];
+
+end
+
 reg match_cond_reg = 0;
 reg no_match_reg = 0;
 
@@ -446,8 +472,18 @@ SpiFlashReader flashReader
 
 reg  dhcp_s_eeprom_process_start;
 wire dhcp_s_eeprom_process_finished;
-DHCPhelper dhcpHelp
-(
+
+reg  dhcp_m_dhcp_discover_start;
+wire dhcp_m_dhcp_discover_finished;
+
+wire [7:0] dhcp_m_dhcp_discover_tdata;
+wire  dhcp_m_dhcp_discover_tvalid;
+reg  dhcp_m_dhcp_discover_tready;
+wire  dhcp_m_dhcp_discover_tlast;
+
+DHCPhelper #(
+    .TARGET(TARGET)
+    )dhcpHelp(
     .clk (clk),
     .rst (rst),
 
@@ -457,6 +493,14 @@ DHCPhelper dhcpHelp
     .s_eeprom_axis_tdata (spi_m_tdata), 
     .s_eeprom_axis_tvalid (spi_m_tvalid),
 //No need    .s_eeprom_axis_tready
+
+    .m_dhcp_discover_start(dhcp_m_dhcp_discover_start),
+    .m_dhcp_discover_finished(dhcp_m_dhcp_discover_finished),
+    .m_dhcp_discover_axis_tdata(dhcp_m_dhcp_discover_tdata),
+    .m_dhcp_discover_axis_tvalid(dhcp_m_dhcp_discover_tvalid),
+    .m_dhcp_discover_axis_tready(dhcp_m_dhcp_discover_tready),
+    .m_dhcp_discover_axis_last(dhcp_m_dhcp_discover_tlast),
+
     .local_mac(local_mac),  
     .local_ip(local_ip),   
     .gateway_ip(gateway_ip), 
@@ -479,13 +523,15 @@ enum {idle,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,er_eeprom_addr1,er_eeprom_addr2,
        er_eeprom_process1,er_eeprom_process2,
-       dhcp_fill_0
+       dhcp_fill_0,dhcp_fill_1
      } answerState;
 
 always @(posedge clk)
 begin
     if (rst)
     begin
+        dhcp_s_eeprom_process_start <= 0;
+        dhcp_m_dhcp_discover_start <= 0;
         spi_m_tready <= 0;
         answerState <= init_eeprom_1;
         rx_udp_hdr_ready <= 1;
@@ -499,6 +545,8 @@ begin
         spi_erase_strobe <= 0;
     end else
     begin
+      if ((mac_matched) || (answerState == init_eeprom_1))
+      begin
         case (answerState)
         init_eeprom_1: begin
              spi_m_tready <= 1;
@@ -515,6 +563,7 @@ begin
         end
         idle: begin
                dhcp_s_eeprom_process_start <= 0;
+               dhcp_m_dhcp_discover_start <= 0;
                spi_read_strobe <= 0;
                spi_write_strobe <= 0;
                spi_erase_strobe <= 0;
@@ -528,6 +577,17 @@ begin
                begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
+                     68: begin
+                         dbg_led <= 0; 
+                         tx_udp_ip_source_ip <= local_ip;
+                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
+                         tx_udp_source_port <= 1234; 
+                         tx_udp_dest_port <= 1234;   
+                         tx_udp_length <= rx_udp_length;
+                         rx_udp_hdr_ready <= 0;
+                         answerState <= pre_reflect_1;
+                     end
+                     // Reflect port (just for test purposes)
                      1234: begin
                          dbg_led <= 0; 
                          tx_udp_ip_source_ip <= local_ip;
@@ -538,21 +598,18 @@ begin
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
                      end
-/*                     16'hD0C0: begin
-                         rx_udp_hdr_ready <= 0;
-                         // DHCP Temp
-                         spi_start_addr<=DCHP_TEMPLATE_EEPROM_ADDR;
-                         eeprom_cnt <= 8'hf7;      // Request for read 0xf8 bytes
-                         spi_read_strobe <= 1;     // Start read from EEPROM
+                     16'hD0C0: begin
 
                          tx_udp_ip_source_ip <= 32'h00000000;
                          tx_udp_ip_dest_ip <= 32'hffffffff; 
                          tx_udp_source_port <= 16'd68; 
                          tx_udp_dest_port <= 16'd67;   
+                         dhcp_m_dhcp_discover_start <= 1;
 
-                         spi_m_tready <= 1;
+                         rx_udp_hdr_ready <= 0;
                          answerState <= dhcp_fill_0;
-                     end*/
+                         tx_udp_length <= 8;		// Extra length
+                     end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
                          rx_udp_hdr_ready <= 0;
@@ -576,22 +633,33 @@ begin
                   endcase
                end
         end
+        // Two states for delay
+        // This delay is needed for IP address pipelining
         pre_reflect_1: begin
+           ourData_tdata <= rx_udp_payload_axis_tdata;
+           ourData_tvalid <= rx_udp_payload_axis_tvalid;
               answerState <= pre_reflect_2;
         end
         pre_reflect_2: begin
-              tx_udp_hdr_valid <= 1;
-              if (tx_udp_hdr_ready)
-              begin
-                  answerState <= reflect_2;
-              end else
-              begin
+           ourData_tdata <= rx_udp_payload_axis_tdata;
+           ourData_tvalid <= rx_udp_payload_axis_tvalid;
+//              tx_udp_hdr_valid <= 1;
+//              if (tx_udp_hdr_ready)
+//              begin
+//                  answerState <= reflect_2;
+//              end else
+//              begin
                   answerState <= reflect_1;
-              end
+//              end
         end
         reflect_1: begin
+           ourData_tdata <= rx_udp_payload_axis_tdata;
+           ourData_tvalid <= rx_udp_payload_axis_tvalid;
            if (tx_udp_hdr_ready)
-              answerState <= reflect_2;
+              begin
+                 tx_udp_hdr_valid <= 1;
+                 answerState <= reflect_2;
+              end
         end
         reflect_2: begin
            tx_udp_hdr_valid <= 0;
@@ -738,27 +806,30 @@ begin
                 answerState <= idle; 
             end
         end
-/*        dhcp_fill_0: begin
-           ourData_tdata <= spi_m_tdata;
-           ourData_tvalid <= spi_m_tvalid;
-           if (spi_m_tvalid)
-           begin
-               if (eeprom_cnt == 0)
-               begin
-                   answerState <= idle;
-                   ourData_tlast <= 1;
-	           spi_m_tready <= 0;
-                   tx_udp_length <= 16'h00f8 + 8;   	
-                   tx_udp_hdr_valid <= 1;		// Start send to UDP
-               end else
-               begin
-                   eeprom_cnt <= eeprom_cnt - 1;
-                   ourData_tlast <= 0;
-               end
+        dhcp_fill_0: begin
+           dhcp_m_dhcp_discover_tready <= 1;
+           ourData_tdata <= dhcp_m_dhcp_discover_tdata;
+           ourData_tvalid <= dhcp_m_dhcp_discover_tvalid;
+           ourData_tlast <= dhcp_m_dhcp_discover_tlast;
+           if (dhcp_m_dhcp_discover_tvalid)
+           begin 
+                tx_udp_length <= tx_udp_length + 1;
            end
-        end   */
-        endcase
 
+           if (dhcp_m_dhcp_discover_finished)
+           begin
+                answerState <= dhcp_fill_1; 
+           end
+        end
+        dhcp_fill_1: begin
+           tx_udp_hdr_valid <= 1;		// Start send to UDP
+           if (tx_udp_hdr_ready)
+           begin
+                answerState <= idle; 
+           end
+        end   
+        endcase
+     end // mac_matched
     end 
 end
 

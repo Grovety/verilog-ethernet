@@ -12,6 +12,7 @@ SYN_FILES += rtl/SpiFlashReader.sv
 SYN_FILES += rtl/fpga_logic.sv
 SYN_FILES += rtl/icmp.sv
 SYN_FILES += rtl/DHCPhelper.sv
+SYN_FILES += rtl/prng.sv
 SYN_FILES += lib/eth/rtl/iddr.v
 SYN_FILES += lib/eth/rtl/oddr.v
 SYN_FILES += lib/eth/rtl/ssio_ddr_in.v
@@ -63,9 +64,9 @@ NEXTPNR_PARAMS += --force
 NEXTPNR_PARAMS += --log PlaceAndRoute.log
 
 #IP address properties
-IP_ADDRESS := 192.168.2.128
-SUBNET_MASK := 255.255.255.0
-GATEWAY := 192.168.2.1
+#IP_ADDRESS := 192.168.2.128
+#SUBNET_MASK := 255.255.255.0
+#GATEWAY := 192.168.2.1
 
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis
