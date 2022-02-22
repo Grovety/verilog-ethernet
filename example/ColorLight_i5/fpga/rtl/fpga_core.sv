@@ -4,6 +4,7 @@ module fpga_core #(
 )
 (
     input              clk,
+    input              clk25,
     input              rst,
     input              clk90,
     output wire        phy0_tx_clk,
@@ -106,6 +107,7 @@ fpga_logic #(
 ourLogic (
     .clk(clk),
     .rst(rst),
+    .clk25(clk25),
     .clk90(clk90),
 
     .dbg_led(dbg_led),

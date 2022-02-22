@@ -6,6 +6,7 @@ module fpga_logic #(
 )
 (
     input              clk,
+    input              clk25,
     input              rst,
     input              clk90,
 
@@ -425,8 +426,6 @@ udp_complete_inst (
     .clear_arp_cache(0)
 );
 
-
-
 // AXI Stream for read EEPROM Data
 reg [23:0] spi_start_addr;
 
@@ -474,6 +473,7 @@ reg  dhcp_s_eeprom_process_start;
 wire dhcp_s_eeprom_process_finished;
 
 reg  dhcp_m_dhcp_discover_start;
+reg  m_dhcp_discover_step_request;
 wire dhcp_m_dhcp_discover_finished;
 
 wire [7:0] dhcp_m_dhcp_discover_tdata;
@@ -481,10 +481,20 @@ wire  dhcp_m_dhcp_discover_tvalid;
 reg  dhcp_m_dhcp_discover_tready;
 wire  dhcp_m_dhcp_discover_tlast;
 
+reg             s_dhcp_offer_start;
+wire            s_dhcp_offer_finished;
+reg   [7:0]     s_dhcp_offer_axis_tdata;
+reg             s_dhcp_offer_axis_tvalid;
+wire            s_dhcp_offer_axis_tready;
+reg             s_dhcp_offer_axis_tlast;
+
+wire            dhcp_offerIsReceived;
+
 DHCPhelper #(
     .TARGET(TARGET)
     )dhcpHelp(
     .clk (clk),
+    .clk25 (clk25),
     .rst (rst),
 
     .s_eeprom_process_start (dhcp_s_eeprom_process_start),
@@ -496,10 +506,20 @@ DHCPhelper #(
 
     .m_dhcp_discover_start(dhcp_m_dhcp_discover_start),
     .m_dhcp_discover_finished(dhcp_m_dhcp_discover_finished),
+    .m_dhcp_discover_step_request(m_dhcp_discover_step_request),
     .m_dhcp_discover_axis_tdata(dhcp_m_dhcp_discover_tdata),
     .m_dhcp_discover_axis_tvalid(dhcp_m_dhcp_discover_tvalid),
     .m_dhcp_discover_axis_tready(dhcp_m_dhcp_discover_tready),
     .m_dhcp_discover_axis_last(dhcp_m_dhcp_discover_tlast),
+
+    .s_dhcp_offer_start(s_dhcp_offer_start),
+    .s_dhcp_offer_finished(s_dhcp_offer_finished),
+    .s_dhcp_offer_axis_tdata(s_dhcp_offer_axis_tdata),
+    .s_dhcp_offer_axis_tvalid(s_dhcp_offer_axis_tvalid),
+    .s_dhcp_offer_axis_tready(s_dhcp_offer_axis_tready),
+    .s_dhcp_offer_axis_tlast(s_dhcp_offer_axis_tlast),
+
+    .dhcp_offerIsReceived (dhcp_offerIsReceived),
 
     .local_mac(local_mac),  
     .local_ip(local_ip),   
@@ -523,7 +543,8 @@ enum {idle,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,er_eeprom_addr1,er_eeprom_addr2,
        er_eeprom_process1,er_eeprom_process2,
-       dhcp_fill_0,dhcp_fill_1
+       dhcp_fill_0,dhcp_fill_1,
+       dhcp_offer_processing1,dhcp_offer_processing2
      } answerState;
 
 always @(posedge clk)
@@ -532,6 +553,8 @@ begin
     begin
         dhcp_s_eeprom_process_start <= 0;
         dhcp_m_dhcp_discover_start <= 0;
+        s_dhcp_offer_axis_tvalid <= 0;
+        s_dhcp_offer_start <= 0;
         spi_m_tready <= 0;
         answerState <= init_eeprom_1;
         rx_udp_hdr_ready <= 1;
@@ -543,6 +566,7 @@ begin
         spi_read_strobe <= 0;
         spi_write_strobe <= 0;
         spi_erase_strobe <= 0;
+        m_dhcp_discover_step_request <= 1;
     end else
     begin
       if ((mac_matched) || (answerState == init_eeprom_1))
@@ -564,6 +588,8 @@ begin
         idle: begin
                dhcp_s_eeprom_process_start <= 0;
                dhcp_m_dhcp_discover_start <= 0;
+               s_dhcp_offer_axis_tvalid <= 0;
+               s_dhcp_offer_start <= 0;
                spi_read_strobe <= 0;
                spi_write_strobe <= 0;
                spi_erase_strobe <= 0;
@@ -578,14 +604,13 @@ begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
                      68: begin
-                         dbg_led <= 0; 
                          tx_udp_ip_source_ip <= local_ip;
                          tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
-                         tx_udp_source_port <= 1234; 
-                         tx_udp_dest_port <= 1234;   
-                         tx_udp_length <= rx_udp_length;
+                         tx_udp_source_port <= 68; 
+                         tx_udp_dest_port <= 67;   
                          rx_udp_hdr_ready <= 0;
-                         answerState <= pre_reflect_1;
+                         s_dhcp_offer_start <= 1;
+                         answerState <= dhcp_offer_processing1;
                      end
                      // Reflect port (just for test purposes)
                      1234: begin
@@ -605,6 +630,8 @@ begin
                          tx_udp_source_port <= 16'd68; 
                          tx_udp_dest_port <= 16'd67;   
                          dhcp_m_dhcp_discover_start <= 1;
+
+                         m_dhcp_discover_step_request <= 1;    // This step is discover
 
                          rx_udp_hdr_ready <= 0;
                          answerState <= dhcp_fill_0;
@@ -828,6 +855,40 @@ begin
                 answerState <= idle; 
            end
         end   
+        dhcp_offer_processing1: begin
+            s_dhcp_offer_axis_tdata <= rx_udp_payload_axis_tdata;
+            s_dhcp_offer_axis_tvalid <= rx_udp_payload_axis_tvalid;
+            s_dhcp_offer_axis_tlast <= rx_udp_payload_axis_tlast;
+            rx_udp_payload_axis_tready <= 1;
+            if (rx_udp_payload_axis_tlast)
+            begin
+                answerState <= dhcp_offer_processing2; 
+            end
+        end
+        dhcp_offer_processing2: begin
+            s_dhcp_offer_axis_tvalid <= 0;
+            if (s_dhcp_offer_finished)
+            begin
+                 s_dhcp_offer_start <= 0;
+                 if (!dhcp_offerIsReceived)  
+                 begin 
+                      answerState <= idle;
+                 end else
+                 begin
+                      tx_udp_ip_source_ip <= 32'h00000000;
+                      tx_udp_ip_dest_ip <= 32'hffffffff; 
+                      tx_udp_source_port <= 16'd68; 
+                      tx_udp_dest_port <= 16'd67;   
+                      dhcp_m_dhcp_discover_start <= 1;
+     
+                      m_dhcp_discover_step_request <= 0;    
+     
+                      rx_udp_hdr_ready <= 0;
+                      answerState <= dhcp_fill_0;
+                      tx_udp_length <= 8;		// Extra length
+                end
+            end
+        end
         endcase
      end // mac_matched
     end 

@@ -136,7 +136,7 @@ reg s_frame_ready_reg = 1'b0, s_frame_ready_next;
 reg m_eth_hdr_valid_reg = 1'b0, m_eth_hdr_valid_next;
 reg [47:0] m_eth_dest_mac_reg = 48'd0;
 reg [47:0] m_eth_src_mac_reg = 48'd0;
-reg [15:0] m_eth_type_reg = 16'd0;
+reg [15:0] m_eth_type_reg;// = 16'd0;
 
 reg busy_reg = 1'b0;
 
