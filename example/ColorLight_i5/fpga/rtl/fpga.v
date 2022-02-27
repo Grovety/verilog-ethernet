@@ -112,7 +112,7 @@ fpga_core #(
     .spi_flash_miso(spi_flash_miso),
     .spi_flash_cs(spi_flash_cs), 
 
-//    .dbg_led (led_o),
+    .dbg_led (led_o),
 
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),

@@ -5,10 +5,14 @@ FPGA_DEVICE = LFE5U-25F-6BG256C
 
 # Files for synthesis
 SYN_FILES = rtl/fpga.v 
-SYN_FILES += rtl/fpga_core.v 
+SYN_FILES += rtl/fpga_core.sv 
 SYN_FILES += rtl/rst_gen.v
 SYN_FILES += rtl/lfsr_yosys.v
-SYN_FILES += rtl/mdio_master.v
+SYN_FILES += rtl/SpiFlashReader.sv
+SYN_FILES += rtl/fpga_logic.sv
+SYN_FILES += rtl/icmp.sv
+SYN_FILES += rtl/DHCPhelper.sv
+SYN_FILES += rtl/prng.sv
 SYN_FILES += lib/eth/rtl/iddr.v
 SYN_FILES += lib/eth/rtl/oddr.v
 SYN_FILES += lib/eth/rtl/ssio_ddr_in.v
@@ -30,6 +34,7 @@ SYN_FILES += lib/eth/rtl/udp_ip_rx.v
 SYN_FILES += lib/eth/rtl/udp_ip_tx.v       
 SYN_FILES += lib/eth/rtl/ip_complete.v      
 SYN_FILES += lib/eth/rtl/ip.v        
+SYN_FILES += lib/eth/rtl/broadcast_checker.v
 SYN_FILES += lib/eth/rtl/ip_eth_rx.v       
 SYN_FILES += lib/eth/rtl/ip_eth_tx.v       
 SYN_FILES += lib/eth/rtl/ip_arb_mux.v      
@@ -59,9 +64,9 @@ NEXTPNR_PARAMS += --force
 NEXTPNR_PARAMS += --log PlaceAndRoute.log
 
 #IP address properties
-IP_ADDRESS := 192.168.2.128
-SUBNET_MASK := 255.255.255.0
-GATEWAY := 192.168.2.1
+#IP_ADDRESS := 192.168.2.128
+#SUBNET_MASK := 255.255.255.0
+#GATEWAY := 192.168.2.1
 
 # TRELLIS files
 TRELLIS = /usr/local/share/trellis

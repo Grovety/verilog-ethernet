@@ -39,7 +39,8 @@ input                    s_dhcp_offer_axis_tlast,
 
 //output reg [7:0]         dhcp_lastAnswerType,
 
-output reg               dhcp_offerIsReceived
+output reg               dhcp_offerIsReceived,
+output [15:0]            dbg_out
 
 );
 
@@ -111,6 +112,35 @@ axis_async_fifo  #(
     .m_axis_tlast(dhcp_offer_axis_tlast)
 );
 
+assign dbg_out [7:0] = s_dhcp_offer_axis_tdata;
+assign dbg_out [8] = s_dhcp_offer_axis_tvalid;
+assign dbg_out [9] = s_dhcp_offer_axis_tready;
+assign dbg_out [10] = s_dhcp_offer_axis_tlast;
+//assign dbg_out [15] = clk;
+assign dbg_out [11] = dhcp_offer_axis_tdata[0];
+assign dbg_out [12] = dhcp_offer_axis_tdata[1];
+assign dbg_out [13] = dhcp_offer_axis_tready;
+
+ODDRX1F ODDRX1Fdd(
+	.D0(1'd1),
+	.D1(1'd0),
+	.SCLK(clk25),
+	.Q(dbg_out[14])
+);
+ODDRX1F ODDRX1Fd(
+	.D0(1'd1),
+	.D1(1'd0),
+	.SCLK(clk),
+	.Q(dbg_out[15])
+);
+
+
+/*assign dbg_out [7:0] = dhcp_offer_axis_tdata;
+assign dbg_out [8] = dhcp_offer_axis_tvalid;
+assign dbg_out [9] = dhcp_offer_axis_tready;
+assign dbg_out [10] = dhcp_offer_axis_tlast;
+assign dbg_out [15] = clk25;*/
+
 // For clock domain crossing!
 reg dhcp_offer_finished;
 reg dhcp_offer_finished1;
@@ -181,8 +211,8 @@ begin
              s_eeprom_axis_tready <= 1;
              if (s_eeprom_axis_tvalid)
              begin
-                  if (TARGET == "GENERIC") 
-//                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
+//                  if (TARGET == "GENERIC") 
+                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
                   begin
                    case (filler_ptr[5:0])
                       6'd0: local_mac <= {local_mac[39:0],8'h02};
@@ -426,9 +456,9 @@ begin
               if (dhcp_offer_axis_tvalid)
               begin
                  case (parser_ptr)
-                     8'h00: if (dhcp_offer_axis_tdata != 8'h02) state_parser <= parseOfferWaitFinish;
+/*                     8'h00: if (dhcp_offer_axis_tdata != 8'h02) state_parser <= parseOfferWaitFinish;
                      8'h01: if (dhcp_offer_axis_tdata != 8'h01) state_parser <= parseOfferWaitFinish;
-                     8'h02: if (dhcp_offer_axis_tdata != 8'h06) state_parser <= parseOfferWaitFinish;
+                     8'h02: if (dhcp_offer_axis_tdata != 8'h06) state_parser <= parseOfferWaitFinish;*/
 
                      8'h04: if (dhcp_offer_axis_tdata != xid [31:24]) state_parser <= parseOfferWaitFinish;
                      8'h05: if (dhcp_offer_axis_tdata != xid [23:16]) state_parser <= parseOfferWaitFinish;
@@ -451,7 +481,7 @@ begin
               if (dhcp_offer_axis_tvalid)
               begin
                   option_id <= dhcp_offer_axis_tdata;
-                  if (dhcp_offer_axis_tdata == 8'hff)
+                  if ((dhcp_offer_axis_tdata == 8'hff) || (dhcp_offer_axis_tlast == 1))
                   begin
                        state_parser <= parseOfferWaitFinish;
                   end else
@@ -464,7 +494,7 @@ begin
               if (dhcp_offer_axis_tvalid)
               begin
                   option_len <= dhcp_offer_axis_tdata[5:0];
-                  if (dhcp_offer_axis_tdata[5:0] == 0)
+                  if ((dhcp_offer_axis_tdata[5:0] == 0)|| (dhcp_offer_axis_tlast == 1))
                   begin
                        state_parser <= parseOfferWaitFinish;
                   end else
@@ -474,8 +504,13 @@ begin
               end
            end
            parseOfferProcessOption3: begin
-              if (dhcp_offer_axis_tvalid)
+              if (dhcp_offer_axis_tlast)
+              begin 
+                 state_parser <= parseOfferWaitFinish;
+              end else
               begin
+                if (dhcp_offer_axis_tvalid)
+                begin
                   if (option_len == 6'h01)
                   begin
                      case (option_id)
@@ -515,12 +550,13 @@ begin
                         8'hff : state_parser <= parseOfferWaitFinish;
                         default: state_parser <= parseOfferProcessOption1;
                      endcase
-                  end else 
-                  begin
+                    end else 
+                    begin
                        option_len <= option_len - 1;
-                  end
+                    end
                   option_data <= {option_data [23:0],dhcp_offer_axis_tdata};
-              end
+               end
+             end
            end
            parseOfferWaitFinish: begin
                dhcp_offer_finished <= 1;

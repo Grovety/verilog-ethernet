@@ -35,7 +35,9 @@ module fpga_logic #(
     input wire        rx_axis_tvalid,
     output wire       rx_axis_tready,
     input wire        rx_axis_tlast,
-    input wire        rx_axis_tuser
+    input wire        rx_axis_tuser,
+
+    output [15:0]            dbg_out
 
 );
 
@@ -494,7 +496,7 @@ DHCPhelper #(
     .TARGET(TARGET)
     )dhcpHelp(
     .clk (clk),
-    .clk25 (clk25),
+    .clk25 (clk/*25*/),
     .rst (rst),
 
     .s_eeprom_process_start (dhcp_s_eeprom_process_start),
@@ -524,7 +526,9 @@ DHCPhelper #(
     .local_mac(local_mac),  
     .local_ip(local_ip),   
     .gateway_ip(gateway_ip), 
-    .subnet_mask(subnet_mask)
+    .subnet_mask(subnet_mask),
+
+    .dbg_out(dbg_out)
 );
 
 reg [7:0] ourData_tdata;
