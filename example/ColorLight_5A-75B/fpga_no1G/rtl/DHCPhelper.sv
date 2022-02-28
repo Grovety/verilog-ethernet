@@ -39,6 +39,10 @@ input                    s_dhcp_offer_axis_tlast,
 
 //output reg [7:0]         dhcp_lastAnswerType,
 
+output reg  [31:0]       remain_lease_time,
+output reg               halfLeaseTimerIsReached,
+
+
 output reg               dhcp_offerIsReceived,
 output [15:0]            dbg_out
 
@@ -63,7 +67,98 @@ reg  [31:0]       temp_option_54;
 reg               temp_option_54_is_filled;
 reg               clr_fifo;
 
-reg  [31:0]       remain_lease_time;
+// For clock domain crossing!
+reg dhcp_offer_finished;
+reg dhcp_offer_finished1;
+reg dhcp_offer_finished2;
+
+reg need_latch_parameters_1;
+reg need_latch_parameters_2;
+reg need_latch_parameters;
+
+always @ (posedge clk)
+begin
+     dhcp_offer_finished1 <= dhcp_offer_finished;
+     dhcp_offer_finished2 <= dhcp_offer_finished1;
+     s_dhcp_offer_finished <= dhcp_offer_finished2;
+
+     need_latch_parameters_2 <= need_latch_parameters_1;
+     need_latch_parameters <= need_latch_parameters_2;
+end
+
+reg dhcp_offer_start1;
+reg dhcp_offer_start2;
+reg dhcp_offer_start;
+reg parameters_latched;
+reg parameters_latched1;
+reg parameters_latched2;
+
+always @ (posedge clk25)
+begin
+     dhcp_offer_start1 <= s_dhcp_offer_start;
+     dhcp_offer_start2 <= dhcp_offer_start1;
+     dhcp_offer_start <= dhcp_offer_start2;
+     
+     parameters_latched2 <= parameters_latched1;
+     parameters_latched <= parameters_latched2;
+end
+
+
+
+reg [13:0] remain_timer_1;
+reg [13:0] remain_timer_2;
+
+
+always @(posedge clk)
+begin
+     if (rst)
+     begin
+        remain_timer_1 <= 0;
+        remain_timer_2 <= 0;
+     end else
+     begin
+        if (need_latch_parameters)
+        begin
+            remain_lease_time <= temp_lease_time;
+            halfLeaseTimerIsReached <= 0;
+        end else
+        begin
+           if (remain_timer_1 == 0) 
+           begin
+              remain_timer_1 <= 10417;		// Change to parameter later!!!
+              if (remain_timer_2 == 0)
+              begin
+                    remain_timer_2 <= 10000;       // Also change to parameter later!!!
+                    if (remain_lease_time != 0)
+                    begin
+                        remain_lease_time <= remain_lease_time -1;
+                    end
+              end else
+              begin
+                   remain_timer_2 <= remain_timer_2 - 1;
+              end
+           end else
+           begin
+             if (remain_lease_time == {0,temp_lease_time [31:1]})
+             begin
+                 halfLeaseTimerIsReached <= 1;
+             end
+             remain_timer_1 <= remain_timer_1 - 1;
+           end
+        end
+     end
+
+end
+
+always @(posedge clk)
+begin
+      if (rst)
+      begin
+
+      end else
+      begin
+      end
+end
 
 generate
 if (TARGET == "GENERIC") 
@@ -139,42 +234,6 @@ assign dbg_out [8] = dhcp_offer_axis_tvalid;
 assign dbg_out [9] = dhcp_offer_axis_tready;
 assign dbg_out [10] = dhcp_offer_axis_tlast;
 assign dbg_out [15] = clk25;*/
-
-// For clock domain crossing!
-reg dhcp_offer_finished;
-reg dhcp_offer_finished1;
-reg dhcp_offer_finished2;
-
-reg need_latch_parameters_1;
-reg need_latch_parameters_2;
-reg need_latch_parameters;
-
-always @ (posedge clk)
-begin
-     dhcp_offer_finished1 <= dhcp_offer_finished;
-     dhcp_offer_finished2 <= dhcp_offer_finished1;
-     s_dhcp_offer_finished <= dhcp_offer_finished2;
-
-     need_latch_parameters_2 <= need_latch_parameters_1;
-     need_latch_parameters <= need_latch_parameters_2;
-end
-
-reg dhcp_offer_start1;
-reg dhcp_offer_start2;
-reg dhcp_offer_start;
-reg parameters_latched;
-reg parameters_latched1;
-reg parameters_latched2;
-
-always @ (posedge clk25)
-begin
-     dhcp_offer_start1 <= s_dhcp_offer_start;
-     dhcp_offer_start2 <= dhcp_offer_start1;
-     dhcp_offer_start <= dhcp_offer_start2;
-     
-     parameters_latched2 <= parameters_latched1;
-     parameters_latched <= parameters_latched2;
-end
 
   
 typedef enum {
@@ -328,12 +387,11 @@ begin
                  8'h20: m_dhcp_discover_axis_tdata <= local_mac [15:8];
                  8'h21: m_dhcp_discover_axis_tdata <= local_mac [7:0];
 
-/*                 8'h40: m_dhcp_discover_axis_tdata <= temp_gateway_ip [31:24];
-                 8'h41: m_dhcp_discover_axis_tdata <= temp_gateway_ip [23:16];
-                 8'h42: m_dhcp_discover_axis_tdata <= temp_gateway_ip [15:8];
-                 8'h43: m_dhcp_discover_axis_tdata <= temp_gateway_ip [7:0];
-
-                 8'h44: m_dhcp_discover_axis_tdata <= {6'b101000,temp_option_54_is_filled,temp_gateway_ip_is_filled};*/
+                 8'h40: m_dhcp_discover_axis_tdata <= remain_lease_time [31:24];
+                 8'h41: m_dhcp_discover_axis_tdata <= remain_lease_time [23:16];
+                 8'h42: m_dhcp_discover_axis_tdata <= remain_lease_time [15:8];
+                 8'h43: m_dhcp_discover_axis_tdata <= remain_lease_time [7:0];
+                 8'h44: m_dhcp_discover_axis_tdata <= {7'b1010101,halfLeaseTimerIsReached};
 
                  // Magic Cookie DHCP
                  8'hec: m_dhcp_discover_axis_tdata <= 8'h63;
