@@ -24,7 +24,7 @@ output   reg             s_eeprom_axis_tready,
 
 input                    m_dhcp_discover_start,
 output  reg              m_dhcp_discover_finished,
-input                    m_dhcp_discover_step_request,
+input                    m_dhcp_discover_step_request,   // 1 - DHCPDISCOVER, 0 - DHCPREQUEST
 output  reg   [7:0]      m_dhcp_discover_axis_tdata,
 output reg               m_dhcp_discover_axis_tvalid,
 input                    m_dhcp_discover_axis_tready,
@@ -53,9 +53,6 @@ reg  [31:0] option_data;
 wire [31:0] xid_online;
 reg  [31:0] xid;
 
-reg  [7:0]  dbg_ustas_to_alex = 8'h41;
-reg  [7:0]  dbg_ustas_to_alex_cnt = 8'h00;
-
 reg  [31:0]       temp_ip;
 reg  [31:0]       online_ip;
 reg  [31:0]       temp_gateway_ip;
@@ -65,6 +62,8 @@ reg  [31:0]       temp_lease_time;
 reg  [31:0]       temp_option_54;
 reg               temp_option_54_is_filled;
 reg               clr_fifo;
+
+reg  [31:0]       remain_lease_time;
 
 generate
 if (TARGET == "GENERIC") 
@@ -145,21 +144,36 @@ assign dbg_out [15] = clk25;*/
 reg dhcp_offer_finished;
 reg dhcp_offer_finished1;
 reg dhcp_offer_finished2;
+
+reg need_latch_parameters_1;
+reg need_latch_parameters_2;
+reg need_latch_parameters;
+
 always @ (posedge clk)
 begin
      dhcp_offer_finished1 <= dhcp_offer_finished;
      dhcp_offer_finished2 <= dhcp_offer_finished1;
      s_dhcp_offer_finished <= dhcp_offer_finished2;
+
+     need_latch_parameters_2 <= need_latch_parameters_1;
+     need_latch_parameters <= need_latch_parameters_2;
 end
 
 reg dhcp_offer_start1;
 reg dhcp_offer_start2;
 reg dhcp_offer_start;
+reg parameters_latched;
+reg parameters_latched1;
+reg parameters_latched2;
+
 always @ (posedge clk25)
 begin
      dhcp_offer_start1 <= s_dhcp_offer_start;
      dhcp_offer_start2 <= dhcp_offer_start1;
      dhcp_offer_start <= dhcp_offer_start2;
+     
+     parameters_latched2 <= parameters_latched1;
+     parameters_latched <= parameters_latched2;
 end
 
   
@@ -185,6 +199,16 @@ begin
      begin
        case (state_filler)
            idle: begin
+              if (need_latch_parameters)
+              begin
+                    parameters_latched1 <= 1;
+                    local_ip <= temp_ip;
+                    gateway_ip <= temp_gateway_ip;
+                    subnet_mask <= temp_subnet_mask;
+              end else 
+              begin
+                   parameters_latched1 <= 0;
+              end
               m_dhcp_discover_axis_last <= 0;
               s_eeprom_axis_tready <= 0;
               s_eeprom_process_finished <= 0;
@@ -292,10 +316,10 @@ begin
                  8'h06: m_dhcp_discover_axis_tdata <= xid [15:8];
                  8'h07: m_dhcp_discover_axis_tdata <= xid [7:0];
 
-                 8'h0c: m_dhcp_discover_axis_tdata <= local_ip [31:24];
-                 8'h0d: m_dhcp_discover_axis_tdata <= local_ip [23:16];
-                 8'h0e: m_dhcp_discover_axis_tdata <= local_ip [15:8];
-                 8'h0f: m_dhcp_discover_axis_tdata <= local_ip [7:0];
+                 8'h0c: m_dhcp_discover_axis_tdata <= m_dhcp_discover_step_request?local_ip [31:24]:8'h00;
+                 8'h0d: m_dhcp_discover_axis_tdata <= m_dhcp_discover_step_request?local_ip [23:16]:8'h00;
+                 8'h0e: m_dhcp_discover_axis_tdata <= m_dhcp_discover_step_request?local_ip [15:8]:8'h00;
+                 8'h0f: m_dhcp_discover_axis_tdata <= m_dhcp_discover_step_request?local_ip [7:0]:8'h00;
 
                  8'h1c: m_dhcp_discover_axis_tdata <= local_mac [47:40];
                  8'h1d: m_dhcp_discover_axis_tdata <= local_mac [39:32];
@@ -304,9 +328,12 @@ begin
                  8'h20: m_dhcp_discover_axis_tdata <= local_mac [15:8];
                  8'h21: m_dhcp_discover_axis_tdata <= local_mac [7:0];
 
-                 8'h40: m_dhcp_discover_axis_tdata <= dbg_ustas_to_alex [7:0];
-                 8'h41: m_dhcp_discover_axis_tdata <= dbg_ustas_to_alex_cnt [7:0];
+/*                 8'h40: m_dhcp_discover_axis_tdata <= temp_gateway_ip [31:24];
+                 8'h41: m_dhcp_discover_axis_tdata <= temp_gateway_ip [23:16];
+                 8'h42: m_dhcp_discover_axis_tdata <= temp_gateway_ip [15:8];
+                 8'h43: m_dhcp_discover_axis_tdata <= temp_gateway_ip [7:0];
 
+                 8'h44: m_dhcp_discover_axis_tdata <= {6'b101000,temp_option_54_is_filled,temp_gateway_ip_is_filled};*/
 
                  // Magic Cookie DHCP
                  8'hec: m_dhcp_discover_axis_tdata <= 8'h63;
@@ -421,7 +448,7 @@ end
 typedef enum {
                 parseIdle,
                 parseOfferBlock1,parseOfferProcessOption1,parseOfferProcessOption2,
-                   parseOfferProcessOption3,parseOfferWaitFinish
+                   parseOfferProcessOption3,parseLatchParameters,parseLatchParameters2,parseOfferWaitFinish
              } state_type_parser;
 state_type_parser state_parser;
 
@@ -456,9 +483,9 @@ begin
               if (dhcp_offer_axis_tvalid)
               begin
                  case (parser_ptr)
-/*                     8'h00: if (dhcp_offer_axis_tdata != 8'h02) state_parser <= parseOfferWaitFinish;
+                     8'h00: if (dhcp_offer_axis_tdata != 8'h02) state_parser <= parseOfferWaitFinish;
                      8'h01: if (dhcp_offer_axis_tdata != 8'h01) state_parser <= parseOfferWaitFinish;
-                     8'h02: if (dhcp_offer_axis_tdata != 8'h06) state_parser <= parseOfferWaitFinish;*/
+                     8'h02: if (dhcp_offer_axis_tdata != 8'h06) state_parser <= parseOfferWaitFinish;
 
                      8'h04: if (dhcp_offer_axis_tdata != xid [31:24]) state_parser <= parseOfferWaitFinish;
                      8'h05: if (dhcp_offer_axis_tdata != xid [23:16]) state_parser <= parseOfferWaitFinish;
@@ -483,7 +510,7 @@ begin
                   option_id <= dhcp_offer_axis_tdata;
                   if ((dhcp_offer_axis_tdata == 8'hff) || (dhcp_offer_axis_tlast == 1))
                   begin
-                       state_parser <= parseOfferWaitFinish;
+                       state_parser <= parseLatchParameters;
                   end else
                   begin
                        state_parser <= parseOfferProcessOption2;
@@ -496,7 +523,7 @@ begin
                   option_len <= dhcp_offer_axis_tdata[5:0];
                   if ((dhcp_offer_axis_tdata[5:0] == 0)|| (dhcp_offer_axis_tlast == 1))
                   begin
-                       state_parser <= parseOfferWaitFinish;
+                       state_parser <= parseLatchParameters;
                   end else
                   begin
                        state_parser <= parseOfferProcessOption3;
@@ -506,7 +533,7 @@ begin
            parseOfferProcessOption3: begin
               if (dhcp_offer_axis_tlast)
               begin 
-                 state_parser <= parseOfferWaitFinish;
+                 state_parser <= parseLatchParameters;
               end else
               begin
                 if (dhcp_offer_axis_tvalid)
@@ -543,11 +570,11 @@ begin
                                  state_parser <= parseOfferProcessOption1;
                                end
                         8'd54:  begin
-                                 temp_option_54 <= dhcp_offer_axis_tdata;
+                                 temp_option_54 <= {option_data [23:0],dhcp_offer_axis_tdata};
                                  state_parser <= parseOfferProcessOption1;
                                  temp_option_54_is_filled <= 1;
                                end
-                        8'hff : state_parser <= parseOfferWaitFinish;
+                        8'hff : state_parser <= parseLatchParameters;
                         default: state_parser <= parseOfferProcessOption1;
                      endcase
                     end else 
@@ -557,6 +584,29 @@ begin
                   option_data <= {option_data [23:0],dhcp_offer_axis_tdata};
                end
              end
+           end
+           parseLatchParameters: begin
+               if ((!temp_gateway_ip_is_filled) && (!temp_option_54_is_filled))
+               begin 
+                 state_parser <= parseOfferWaitFinish;
+               end else
+               begin
+                    if (!temp_gateway_ip_is_filled)
+                    begin
+                        temp_gateway_ip <= temp_option_54;
+                    end
+                    state_parser <= parseLatchParameters2;
+               end    
+           end
+           parseLatchParameters2: begin
+              if (parameters_latched)
+              begin
+                  need_latch_parameters_1 <= 0;
+                  state_parser <= parseOfferWaitFinish;
+              end else
+              begin
+                  need_latch_parameters_1 <= 1;
+              end
            end
            parseOfferWaitFinish: begin
                dhcp_offer_finished <= 1;
