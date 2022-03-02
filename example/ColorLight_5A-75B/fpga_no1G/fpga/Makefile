@@ -13,6 +13,7 @@ SYN_FILES += rtl/fpga_logic.sv
 SYN_FILES += rtl/icmp.sv
 SYN_FILES += rtl/DHCPhelper.sv
 SYN_FILES += rtl/prng.sv
+SYN_FILES += rtl/mdio_master.v
 SYN_FILES += lib/eth/rtl/iddr.v
 SYN_FILES += lib/eth/rtl/oddr.v
 SYN_FILES += lib/eth/rtl/ssio_ddr_in.v

@@ -10,6 +10,8 @@ module fpga_logic #(
     input              rst,
     input              clk90,
 
+    input              rxd,                       // It is uses as "Start DHCP" trigger
+
     output reg         dbg_led,
 
     output             spi_flash_sck,
@@ -547,7 +549,7 @@ enum {idle,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,er_eeprom_addr1,er_eeprom_addr2,
        er_eeprom_process1,er_eeprom_process2,
-       dhcp_fill_0,dhcp_fill_1,
+       dhcp_start,dhcp_fill_0,dhcp_fill_1,
        dhcp_offer_processing1,dhcp_offer_processing2
      } answerState;
 
@@ -573,8 +575,8 @@ begin
         m_dhcp_discover_step_request <= 1;
     end else
     begin
-      if ((mac_matched) || (answerState == init_eeprom_1))
-      begin
+/*      if ((mac_matched) || (answerState == init_eeprom_1)) 
+      begin*/
         case (answerState)
         init_eeprom_1: begin
              spi_m_tready <= 1;
@@ -603,7 +605,7 @@ begin
                ourData_tlast <= 0;
                tx_udp_hdr_valid <= 0;
                rx_udp_payload_axis_tready <= 1;
-               if (rx_udp_hdr_valid) 
+               if ((rx_udp_hdr_valid)  && (mac_matched))
                begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
@@ -626,20 +628,6 @@ begin
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
                      end
-                     16'hD0C0: begin
-
-                         tx_udp_ip_source_ip <= 32'h00000000;
-                         tx_udp_ip_dest_ip <= 32'hffffffff; 
-                         tx_udp_source_port <= 16'd68; 
-                         tx_udp_dest_port <= 16'd67;   
-                         dhcp_m_dhcp_discover_start <= 1;
-
-                         m_dhcp_discover_step_request <= 1;    // This step is discover
-
-                         rx_udp_hdr_ready <= 0;
-                         answerState <= dhcp_fill_0;
-                         tx_udp_length <= 8;		// Extra length
-                     end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
                          rx_udp_hdr_ready <= 0;
@@ -661,6 +649,9 @@ begin
                          answerState <= er_eeprom_addr0;
                      end
                   endcase
+               end else if (!rxd)    // Negative logic! DHCP trigger activated
+               begin
+                     answerState <= dhcp_start;
                end
         end
         // Two states for delay
@@ -836,6 +827,24 @@ begin
                 answerState <= idle; 
             end
         end
+        dhcp_start: begin
+               // negative logic! Wait for release trigger
+               if (rxd)
+               begin
+                  dbg_led <= 0; 
+                  tx_udp_ip_source_ip <= 32'h00000000;
+                  tx_udp_ip_dest_ip <= 32'hffffffff; 
+                  tx_udp_source_port <= 16'd68; 
+                  tx_udp_dest_port <= 16'd67;   
+                  dhcp_m_dhcp_discover_start <= 1;
+
+                  m_dhcp_discover_step_request <= 1;    // This step is discover
+
+                  rx_udp_hdr_ready <= 0;
+                  answerState <= dhcp_fill_0;
+                  tx_udp_length <= 8;		// Extra length
+               end
+        end
         dhcp_fill_0: begin
            dhcp_m_dhcp_discover_tready <= 1;
            ourData_tdata <= dhcp_m_dhcp_discover_tdata;
@@ -875,7 +884,6 @@ begin
                  s_dhcp_offer_start <= 0;
                  if (!dhcp_offerIsReceived)  
                  begin 
-                      dbg_led <= 0; 
                       answerState <= idle;
                  end else
                  begin
@@ -894,7 +902,7 @@ begin
             end
         end
         endcase
-     end // mac_matched
+//     end // mac_matched
     end 
 end
 

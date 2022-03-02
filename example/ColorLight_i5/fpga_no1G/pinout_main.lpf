@@ -1,0 +1,53 @@
+LOCATE COMP "clk_i" SITE "P3";
+IOBUF PORT "clk_i" IO_TYPE=LVCMOS33;
+FREQUENCY PORT "clk_i" 25 MHZ;
+
+#LOCATE COMP "spi_flash_sck" SITE "U3";
+#IOBUF PORT "spi_flash_sck" IO_TYPE=LVCMOS33;
+LOCATE COMP "spi_flash_mosi" SITE "W2";
+IOBUF PORT "spi_flash_mosi" IO_TYPE=LVCMOS33;
+LOCATE COMP "spi_flash_miso" SITE "V2";
+IOBUF PORT "spi_flash_miso" IO_TYPE=LVCMOS33;
+LOCATE COMP "spi_flash_cs" SITE "R2";
+IOBUF PORT "spi_flash_cs" IO_TYPE=LVCMOS33;
+
+
+LOCATE COMP "eth_clocks_tx" SITE "U19";
+IOBUF PORT "eth_clocks_tx" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_clocks_rx" SITE "L19";
+IOBUF PORT "eth_clocks_rx" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_rst_n" SITE "P4";
+IOBUF PORT "eth_rst_n" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_mdio" SITE "P5";
+IOBUF PORT "eth_mdio" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_mdc" SITE "N5";
+IOBUF PORT "eth_mdc" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_rx_ctl" SITE "M20";            
+IOBUF PORT "eth_rx_ctl" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_rx_data[0]" SITE "P20";
+IOBUF PORT "eth_rx_data[0]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_rx_data[1]" SITE "N19";
+IOBUF PORT "eth_rx_data[1]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_rx_data[2]" SITE "N20";
+IOBUF PORT "eth_rx_data[2]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_rx_data[3]" SITE "M19";
+IOBUF PORT "eth_rx_data[3]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_tx_ctl" SITE "P19";
+IOBUF PORT "eth_tx_ctl" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_tx_data[0]" SITE "U20";
+IOBUF PORT "eth_tx_data[0]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_tx_data[1]" SITE "T19";
+IOBUF PORT "eth_tx_data[1]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_tx_data[2]" SITE "T20";
+IOBUF PORT "eth_tx_data[2]" IO_TYPE=LVCMOS33;
+LOCATE COMP "eth_tx_data[3]" SITE "R20";
+IOBUF PORT "eth_tx_data[3]" IO_TYPE=LVCMOS33;
+
+#FREQUENCY PORT "eth_rx_clk" 125.0 MHz;
+#FREQUENCY PORT "eth_tx_clk" 125.0 MHz;
+FREQUENCY PORT "eth_clocks_rx" 125.0 MHz;
+FREQUENCY PORT "clk" 125.0 MHz;
+FREQUENCY PORT "clk90" 125.0 MHz;
+
+LOCATE COMP "led_o" SITE "U16";
+IOBUF PORT "led_o" IO_TYPE=LVCMOS33;

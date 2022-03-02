@@ -3,7 +3,7 @@ module fpga #(
 )
 (
     input              clk_i,
-    output reg         led_o,
+    output /*reg*/         led_o,
 
 //    output             spi_flash_sck,
     output             spi_flash_mosi,
@@ -20,9 +20,13 @@ module fpga #(
     output             eth_mdc,
     inout              eth_mdio,
 
+    input              rxd,                   // It is uses as "Start DHCP" trigger
+
     output [15:0]      dbg_out
 
 );
+
+wire spi_flash_sck;
 
 USRMCLK USRMCLK(
 	.USRMCLKI(spi_flash_sck),
@@ -108,6 +112,109 @@ EHXPLLL #(
         .LOCK()
 	);
 
+// MDIO logic needs for disable 1G capability
+
+reg [15:0] delay_reg = 16'hffff;
+
+reg [4:0] mdio_cmd_phy_addr = 5'h00;
+reg [4:0] mdio_cmd_reg_addr = 5'h00;
+reg [15:0] mdio_cmd_data = 16'd0;
+reg [1:0] mdio_cmd_opcode = 2'b01;
+reg mdio_cmd_valid = 1'b0;
+wire mdio_cmd_ready;
+
+reg [3:0] mdio_state;
+
+always @(posedge clk125) begin
+    if (rst) begin
+        mdio_state <= 0;
+        delay_reg <= 16'hffff;
+        mdio_cmd_reg_addr <= 5'h00;
+        mdio_cmd_data <= 16'd0;
+        mdio_cmd_valid <= 1'b0;
+        mdio_cmd_opcode = 2'b01;
+    end else begin
+        mdio_cmd_valid <= mdio_cmd_valid & !mdio_cmd_ready;
+        if (delay_reg > 0) begin
+            delay_reg <= delay_reg - 1;
+        end else if (!mdio_cmd_ready) begin
+            // wait for ready
+            mdio_state <= mdio_state;
+        end else begin
+            mdio_cmd_valid <= 1'b0;
+            case (mdio_state)
+                // set SGMII autonegotiation timer to 11 ms
+                // write 0x0070 to CFG4 (0x0031)
+                4'd0: begin
+                    // Disable 1000M Capability
+                    mdio_cmd_reg_addr <= 5'h09;
+                    mdio_cmd_data <= 16'h0000;
+                    mdio_cmd_valid <= 1'b1;
+                    mdio_state <= 4'd1;
+                end
+                4'd1: begin
+                    // Re Negotiate
+                    mdio_cmd_reg_addr <= 5'h00;
+                    mdio_cmd_data <= 16'h1340;
+                    mdio_cmd_valid <= 1'b1;
+                    mdio_state <= 4'd12;
+                end
+                // ...
+                // Values from 1 to 11 are reserved
+                // ...
+                4'd12: begin
+                    // done
+                    mdio_state <= 4'd12;
+                end
+            endcase
+        end
+    end
+end
+
+wire mdc;
+wire mdio_i;
+wire mdio_o;
+wire mdio_t;
+
+mdio_master
+mdio_master_inst (
+    .clk(clk125),
+    .rst(rst),
+
+    .cmd_phy_addr(mdio_cmd_phy_addr),
+    .cmd_reg_addr(mdio_cmd_reg_addr),
+    .cmd_data(mdio_cmd_data),
+    .cmd_opcode(mdio_cmd_opcode),
+    .cmd_valid(mdio_cmd_valid),
+    .cmd_ready(mdio_cmd_ready),
+
+    .data_out(),
+    .data_out_valid(),
+    .data_out_ready(1'b1),
+
+    .mdc_o(mdc),
+    .mdio_i(mdio_i),
+    .mdio_o(mdio_o),
+    .mdio_t(mdio_t),
+
+    .busy(),
+
+    .prescale(8'd3)
+);
+
+assign eth_mdc = mdc;
+assign mdio_i = eth_mdio;
+assign eth_mdio = mdio_t ? 1'bz : mdio_o;
+
+/*assign dbg_out [0] = mdc;
+assign dbg_out [1] = mdio_i;
+assign dbg_out [2] = mdio_o;
+assign dbg_out [3] = mdio_t;
+assign dbg_out [4] = mdio_cmd_valid;
+assign dbg_out [5] = mdio_cmd_ready;
+assign dbg_out [6] = mdio_cmd_valid;*/
+
+
 fpga_core #(
     .TARGET(TARGET),
     .USE_CLK90("FALSE")
@@ -117,15 +224,17 @@ fpga_core #(
     .clk125(clk125),
     .clk_system(clk_system),
     .clk25(clk50),
-    .clk90(clk90),	
+    .clk90(clk125),	
 
     .spi_flash_sck(spi_flash_sck),
     .spi_flash_mosi(spi_flash_mosi),
     .spi_flash_miso(spi_flash_miso),
     .spi_flash_cs(spi_flash_cs), 
 
+    .rxd (rxd),			// It is uses as "Start DHCP" trigger
+
     .dbg_led (led_o),
-    .dbg_out (dbg_out),
+//    .dbg_out (dbg_out),
 
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),

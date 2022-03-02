@@ -19,6 +19,8 @@ module fpga_core #(
     output wire        phy0_reset_n,
     input  wire        phy0_int_n,
 
+    input              rxd,                  // It is uses as "Start DHCP" trigger
+
     output             dbg_led,
 
     output             spi_flash_sck,
@@ -111,6 +113,8 @@ ourLogic (
     .rst(rst),
     .clk25(clk25),
     .clk90(clk90),
+
+    .rxd (rxd),
 
     .dbg_led(dbg_led),
     .dbg_out(dbg_out),
