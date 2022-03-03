@@ -201,7 +201,7 @@ mdio_master_inst (
 assign eth_mdc = mdc;
 assign mdio_i = eth_mdio;
 assign eth_mdio = mdio_t ? 1'bz : mdio_o;
-
+/*
 assign dbg_out [0] = mdc;
 assign dbg_out [1] = mdio_i;
 assign dbg_out [2] = mdio_o;
@@ -209,7 +209,7 @@ assign dbg_out [3] = mdio_t;
 assign dbg_out [4] = mdio_cmd_valid;
 assign dbg_out [5] = mdio_cmd_ready;
 assign dbg_out [6] = mdio_cmd_valid;
-
+*/
 
 
 fpga_core #(
@@ -220,7 +220,7 @@ fpga_core #(
     .rst(rst),
     .clk125(clk125),
     .clk_system(clk_system),
-    .clk25(clk50),
+    .clk50(clk50),
     .clk90(clk125),	
 
     .spi_flash_sck(spi_flash_sck),

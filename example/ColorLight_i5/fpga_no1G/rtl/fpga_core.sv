@@ -5,7 +5,7 @@ module fpga_core #(
 (
     input              clk125,
     input              clk_system,
-    input              clk25,
+    input              clk50,
     input              rst,
     input              clk90,
     output wire        phy0_tx_clk,
@@ -111,7 +111,7 @@ fpga_logic #(
 ourLogic (
     .clk(clk_system),
     .rst(rst),
-    .clk25(clk25),
+    .clk50(clk50),
     .clk90(clk90),
 
     .rxd (rxd),

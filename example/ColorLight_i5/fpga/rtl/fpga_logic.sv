@@ -6,9 +6,11 @@ module fpga_logic #(
 )
 (
     input              clk,
-    input              clk25,
+    input              clk50,
     input              rst,
     input              clk90,
+
+    input              rxd,                       // It is uses as "Start DHCP" trigger
 
     output reg         dbg_led,
 
@@ -35,7 +37,9 @@ module fpga_logic #(
     input wire        rx_axis_tvalid,
     output wire       rx_axis_tready,
     input wire        rx_axis_tlast,
-    input wire        rx_axis_tuser
+    input wire        rx_axis_tuser,
+
+    output [15:0]            dbg_out
 
 );
 
@@ -178,9 +182,30 @@ wire no_match = !match_cond;
 reg [11:0] mac_matched_1;
 reg [2:0] mac_matched_2;
 reg  mac_matched;
+reg mac_is_broadcast [3:0];
+reg mac_is_broadcast2;
+
 
 always @ (posedge clk)
 begin
+/*     mac_is_broadcast [3] <= rx_eth_dest_mac [47:36] == 12'b111111111111;
+     mac_is_broadcast [2] <= rx_eth_dest_mac [35:24] == 12'b111111111111;
+     mac_is_broadcast [1] <= rx_eth_dest_mac [23:12] == 12'b111111111111;
+     mac_is_broadcast [0] <= rx_eth_dest_mac [11:0] == 12'b111111111111; */
+     mac_is_broadcast [3] <= rx_eth_dest_mac [47] & rx_eth_dest_mac [46] & rx_eth_dest_mac [45] & rx_eth_dest_mac [44] & 
+                             rx_eth_dest_mac [43] & rx_eth_dest_mac [42] & rx_eth_dest_mac [41] & rx_eth_dest_mac [40] & 
+                             rx_eth_dest_mac [39] & rx_eth_dest_mac [38] & rx_eth_dest_mac [37] & rx_eth_dest_mac [36];
+     mac_is_broadcast [2] <= rx_eth_dest_mac [35] & rx_eth_dest_mac [34] & rx_eth_dest_mac [33] & rx_eth_dest_mac [32] & 
+                             rx_eth_dest_mac [31] & rx_eth_dest_mac [30] & rx_eth_dest_mac [29] & rx_eth_dest_mac [28] & 
+                             rx_eth_dest_mac [27] & rx_eth_dest_mac [26] & rx_eth_dest_mac [25] & rx_eth_dest_mac [24];
+     mac_is_broadcast [1] <= rx_eth_dest_mac [23] & rx_eth_dest_mac [22] & rx_eth_dest_mac [21] & rx_eth_dest_mac [20] & 
+                             rx_eth_dest_mac [19] & rx_eth_dest_mac [18] & rx_eth_dest_mac [17] & rx_eth_dest_mac [16] & 
+                             rx_eth_dest_mac [15] & rx_eth_dest_mac [14] & rx_eth_dest_mac [13] & rx_eth_dest_mac [12];
+     mac_is_broadcast [0] <= rx_eth_dest_mac [11] & rx_eth_dest_mac [10] & rx_eth_dest_mac [9] & rx_eth_dest_mac [8] & 
+                             rx_eth_dest_mac [7] & rx_eth_dest_mac [6] & rx_eth_dest_mac [5] & rx_eth_dest_mac [4] & 
+                             rx_eth_dest_mac [3] & rx_eth_dest_mac [2] & rx_eth_dest_mac [1] & rx_eth_dest_mac [0];
+     mac_is_broadcast2 <= mac_is_broadcast [0] & mac_is_broadcast [1] & mac_is_broadcast [2] & mac_is_broadcast [3];
+
      mac_matched_1 [0] <= (rx_eth_dest_mac [3:0] == local_mac [3:0])?1:0;
      mac_matched_1 [1] <= (rx_eth_dest_mac [7:4] == local_mac [7:4])?1:0;
      mac_matched_1 [2] <= (rx_eth_dest_mac [11:8] == local_mac [11:8])?1:0;
@@ -197,7 +222,7 @@ begin
      mac_matched_2 [1] = mac_matched_1 [4] & mac_matched_1 [5] & mac_matched_1 [6] & mac_matched_1 [7];
      mac_matched_2 [2] = mac_matched_1 [8] & mac_matched_1 [9] & mac_matched_1 [10] & mac_matched_1 [11];
 
-     mac_matched  <= mac_matched_2 [0] & mac_matched_2 [1] & mac_matched_2 [2];
+     mac_matched  <= (mac_matched_2 [0] & mac_matched_2 [1] & mac_matched_2 [2]) | mac_is_broadcast2;
 
 end
 
@@ -494,7 +519,7 @@ DHCPhelper #(
     .TARGET(TARGET)
     )dhcpHelp(
     .clk (clk),
-    .clk25 (clk25),
+    .clk50 (clk50),
     .rst (rst),
 
     .s_eeprom_process_start (dhcp_s_eeprom_process_start),
@@ -524,7 +549,9 @@ DHCPhelper #(
     .local_mac(local_mac),  
     .local_ip(local_ip),   
     .gateway_ip(gateway_ip), 
-    .subnet_mask(subnet_mask)
+    .subnet_mask(subnet_mask),
+
+    .dbg_out(dbg_out)
 );
 
 reg [7:0] ourData_tdata;
@@ -543,7 +570,7 @@ enum {idle,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,er_eeprom_addr1,er_eeprom_addr2,
        er_eeprom_process1,er_eeprom_process2,
-       dhcp_fill_0,dhcp_fill_1,
+       dhcp_start,dhcp_fill_0,dhcp_fill_1,
        dhcp_offer_processing1,dhcp_offer_processing2
      } answerState;
 
@@ -569,8 +596,8 @@ begin
         m_dhcp_discover_step_request <= 1;
     end else
     begin
-      if ((mac_matched) || (answerState == init_eeprom_1))
-      begin
+/*      if ((mac_matched) || (answerState == init_eeprom_1)) 
+      begin*/
         case (answerState)
         init_eeprom_1: begin
              spi_m_tready <= 1;
@@ -599,7 +626,7 @@ begin
                ourData_tlast <= 0;
                tx_udp_hdr_valid <= 0;
                rx_udp_payload_axis_tready <= 1;
-               if (rx_udp_hdr_valid) 
+               if ((rx_udp_hdr_valid)  && (mac_matched))
                begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
@@ -622,20 +649,6 @@ begin
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
                      end
-                     16'hD0C0: begin
-
-                         tx_udp_ip_source_ip <= 32'h00000000;
-                         tx_udp_ip_dest_ip <= 32'hffffffff; 
-                         tx_udp_source_port <= 16'd68; 
-                         tx_udp_dest_port <= 16'd67;   
-                         dhcp_m_dhcp_discover_start <= 1;
-
-                         m_dhcp_discover_step_request <= 1;    // This step is discover
-
-                         rx_udp_hdr_ready <= 0;
-                         answerState <= dhcp_fill_0;
-                         tx_udp_length <= 8;		// Extra length
-                     end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
                          rx_udp_hdr_ready <= 0;
@@ -657,6 +670,9 @@ begin
                          answerState <= er_eeprom_addr0;
                      end
                   endcase
+               end else if (!rxd)    // Negative logic! DHCP trigger activated
+               begin
+                     answerState <= dhcp_start;
                end
         end
         // Two states for delay
@@ -832,6 +848,24 @@ begin
                 answerState <= idle; 
             end
         end
+        dhcp_start: begin
+               // negative logic! Wait for release trigger
+               if (rxd)
+               begin
+                  dbg_led <= 0; 
+                  tx_udp_ip_source_ip <= 32'h00000000;
+                  tx_udp_ip_dest_ip <= 32'hffffffff; 
+                  tx_udp_source_port <= 16'd68; 
+                  tx_udp_dest_port <= 16'd67;   
+                  dhcp_m_dhcp_discover_start <= 1;
+
+                  m_dhcp_discover_step_request <= 1;    // This step is discover
+
+                  rx_udp_hdr_ready <= 0;
+                  answerState <= dhcp_fill_0;
+                  tx_udp_length <= 8;		// Extra length
+               end
+        end
         dhcp_fill_0: begin
            dhcp_m_dhcp_discover_tready <= 1;
            ourData_tdata <= dhcp_m_dhcp_discover_tdata;
@@ -871,7 +905,6 @@ begin
                  s_dhcp_offer_start <= 0;
                  if (!dhcp_offerIsReceived)  
                  begin 
-                      dbg_led <= 0; 
                       answerState <= idle;
                  end else
                  begin
@@ -890,7 +923,7 @@ begin
             end
         end
         endcase
-     end // mac_matched
+//     end // mac_matched
     end 
 end
 

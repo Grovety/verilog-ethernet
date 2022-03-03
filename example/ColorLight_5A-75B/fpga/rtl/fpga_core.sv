@@ -4,6 +4,7 @@ module fpga_core #(
 )
 (
     input              clk,
+    input              clk50,
     input              rst,
     input              clk90,
     output wire        phy0_tx_clk,
@@ -18,6 +19,8 @@ module fpga_core #(
     input  wire        phy0_int_n,
 
     output             dbg_led,
+
+    input              rxd,                  // It is uses as "Start DHCP" trigger
 
     output             spi_flash_sck,
     output             spi_flash_mosi,
@@ -106,9 +109,12 @@ fpga_logic #(
 ourLogic (
     .clk(clk),
     .rst(rst),
+    .clk50(clk50),
     .clk90(clk90),
 
     .dbg_led(dbg_led),
+
+    .rxd (rxd),
 
     .spi_flash_sck(spi_flash_sck),
     .spi_flash_mosi(spi_flash_mosi),

@@ -223,7 +223,7 @@ fpga_core #(
     .rst(rst),
     .clk125(clk125),
     .clk_system(clk_system),
-    .clk25(clk50),
+    .clk50(clk50),
     .clk90(clk125),	
 
     .spi_flash_sck(spi_flash_sck),

@@ -6,7 +6,7 @@ module DHCPhelper#
 (
 input                    rst,
 input                    clk,
-input                    clk25,
+input                    clk50,
 
 // Network parameters (initially, from EEPROM, then from DHCP)
 output reg  [47:0]       local_mac,
@@ -57,6 +57,8 @@ reg  [31:0] option_data;
 wire [31:0] xid_online;
 reg  [31:0] xid;
 
+reg  [47:0] sName;    // 6 symbols only for now
+
 reg  [31:0]       temp_ip;
 reg  [31:0]       online_ip;
 reg  [31:0]       temp_gateway_ip;
@@ -93,7 +95,7 @@ reg parameters_latched;
 reg parameters_latched1;
 reg parameters_latched2;
 
-always @ (posedge clk25)
+always @ (posedge clk50)
 begin
      dhcp_offer_start1 <= s_dhcp_offer_start;
      dhcp_offer_start2 <= dhcp_offer_start1;
@@ -198,7 +200,7 @@ axis_async_fifo  #(
     .s_axis_tdest(0),
     .s_axis_tuser(0),
     // AXI output
-    .m_clk(clk25),
+    .m_clk(clk50),
     .m_axis_tdata(dhcp_offer_axis_tdata),
 //    .m_axis_tkeep(),
     .m_axis_tvalid(dhcp_offer_axis_tvalid),
@@ -218,7 +220,7 @@ assign dbg_out [13] = dhcp_offer_axis_tready;
 ODDRX1F ODDRX1Fdd(
 	.D0(1'd1),
 	.D1(1'd0),
-	.SCLK(clk25),
+	.SCLK(clk50),
 	.Q(dbg_out[14])
 );
 ODDRX1F ODDRX1Fd(
@@ -233,14 +235,15 @@ ODDRX1F ODDRX1Fd(
 assign dbg_out [8] = dhcp_offer_axis_tvalid;
 assign dbg_out [9] = dhcp_offer_axis_tready;
 assign dbg_out [10] = dhcp_offer_axis_tlast;
-assign dbg_out [15] = clk25;*/
+assign dbg_out [15] = clk50;*/
 
   
 typedef enum {
                 idle,
                 fillFromEeprom1,fillFromEeprom2,
-                fillDiscoverBlock1,fillDiscoverSendOption03,fillDiscoverSendOption50,fillDiscoverSendOption54,
-                fillDiscoverFinish,fillDiscoverTerminate
+                fillDiscoverBlock1,fillDiscoverSendOption03,
+                fillDiscoverSendOption50,fillDiscoverSendOption54,
+                fillDiscoverFinish,fillDiscoverSendOption12,fillDiscoverTerminate
              } state_type_filler;
 state_type_filler state_filler;
 
@@ -318,7 +321,13 @@ begin
                       6'd14: subnet_mask  <= {subnet_mask[23:0],8'd255};
                       6'd15: subnet_mask  <= {subnet_mask[23:0],8'd255};
                       6'd16: subnet_mask  <= {subnet_mask[23:0],8'd255};
-                      6'd17: begin
+                      6'd17: sName  <= {sName[39:0],8'h41};
+                      6'd18: sName  <= {sName[39:0],8'h42};
+                      6'd19: sName  <= {sName[39:0],8'h43};
+                      6'd20: sName  <= {sName[39:0],8'h44};
+                      6'd21: sName  <= {sName[39:0],8'h45};
+                      6'd22: sName  <= {sName[39:0],8'h46};
+                      6'd23: begin
                                     subnet_mask  <= {subnet_mask[23:0],8'd0};
                                     state_filler <= fillFromEeprom2; 
                                     s_eeprom_process_finished <= 1;
@@ -346,7 +355,15 @@ begin
                       6'd14: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                       6'd15: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                       6'd16: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
-                      6'd17: begin
+
+                      6'd17: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd18: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd19: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd20: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd21: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd22: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+
+                      6'd23: begin
                                     subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                                     state_filler <= fillFromEeprom2; 
                                     s_eeprom_process_finished <= 1;
@@ -450,7 +467,7 @@ begin
                   if ((temp_option_54_is_filled) && (!m_dhcp_discover_step_request))
                       state_filler <= fillDiscoverSendOption54;
                   else
-                      state_filler <= fillDiscoverTerminate;
+                      state_filler <= fillDiscoverSendOption12;
                   filler_ptr <= 0;
                end else
                begin
@@ -467,6 +484,26 @@ begin
                  8'h05: m_dhcp_discover_axis_tdata <= temp_option_54 [7:0];
                endcase
                if (filler_ptr == 8'h05)
+               begin
+                  state_filler <= fillDiscoverSendOption12;
+                  filler_ptr <= 0;
+               end else
+               begin
+                  filler_ptr <= filler_ptr + 1;
+               end
+           end
+           fillDiscoverSendOption12: begin
+               case (filler_ptr) 
+                 8'h00: m_dhcp_discover_axis_tdata <= 8'd12;
+                 8'h01: m_dhcp_discover_axis_tdata <= 8'h06;
+                 8'h02: m_dhcp_discover_axis_tdata <= sName [47:40];
+                 8'h03: m_dhcp_discover_axis_tdata <= sName [39:32];
+                 8'h04: m_dhcp_discover_axis_tdata <= sName [31:24];
+                 8'h05: m_dhcp_discover_axis_tdata <= sName [23:16];
+                 8'h06: m_dhcp_discover_axis_tdata <= sName [15:8];
+                 8'h07: m_dhcp_discover_axis_tdata <= sName [7:0];
+               endcase
+               if (filler_ptr == 8'h07)
                begin
                   state_filler <= fillDiscoverTerminate;
                   filler_ptr <= 0;
@@ -510,7 +547,7 @@ typedef enum {
              } state_type_parser;
 state_type_parser state_parser;
 
-always @(posedge clk25/* or posedge rst*/)
+always @(posedge clk50/* or posedge rst*/)
 begin
      if (rst | (~dhcp_offer_start))
      begin
