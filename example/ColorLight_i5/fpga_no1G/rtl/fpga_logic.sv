@@ -644,7 +644,8 @@ begin
                          tx_udp_ip_source_ip <= local_ip;
                          tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
                          tx_udp_source_port <= 1234; 
-                         tx_udp_dest_port <= rx_udp_source_port;   
+// LoopBack version                         tx_udp_dest_port <= rx_udp_source_port;   
+                         tx_udp_dest_port <= 1235;   
                          tx_udp_length <= rx_udp_length;
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
