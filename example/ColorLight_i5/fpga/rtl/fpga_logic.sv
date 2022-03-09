@@ -775,10 +775,16 @@ begin
                  spi_write_strobe <= 1;
                  spi_s_tvalid <= 0;
                  rx_udp_payload_axis_tready <= 0;
-                 // Add here
-                 answerState <= wr_eeprom_process1;
+                 if (rx_udp_payload_axis_tdata != 8'h57) 
+                     answerState <= idle;
+                 else
+                      answerState <= wr_eeprom_process1;
               end else
               begin
+                 case (addr_cnt)
+                   02: if (rx_udp_payload_axis_tdata != 8'h45) answerState <= idle;
+                   01: if (rx_udp_payload_axis_tdata != 8'h50) answerState <= idle;
+                 endcase
                   addr_cnt <= addr_cnt - 1;
               end
            end
@@ -819,9 +825,16 @@ begin
               begin
                   spi_erase_strobe <= 1;
                   spi_s_tvalid <= 0;
-                  answerState <= er_eeprom_process1;
+                 if (rx_udp_payload_axis_tdata != 8'h43) 
+                     answerState <= idle;
+                 else
+                     answerState <= er_eeprom_process1;
               end else
               begin
+                 case (addr_cnt)
+                   02: if (rx_udp_payload_axis_tdata != 8'h45) answerState <= idle;
+                   01: if (rx_udp_payload_axis_tdata != 8'h50) answerState <= idle;
+                 endcase
                   addr_cnt <= addr_cnt - 1;
               end
            end

@@ -208,35 +208,6 @@ axis_async_fifo  #(
     .m_axis_tlast(dhcp_offer_axis_tlast)
 );
 
-assign dbg_out [7:0] = s_dhcp_offer_axis_tdata;
-assign dbg_out [8] = s_dhcp_offer_axis_tvalid;
-assign dbg_out [9] = s_dhcp_offer_axis_tready;
-assign dbg_out [10] = s_dhcp_offer_axis_tlast;
-//assign dbg_out [15] = clk;
-assign dbg_out [11] = dhcp_offer_axis_tdata[0];
-assign dbg_out [12] = dhcp_offer_axis_tdata[1];
-assign dbg_out [13] = dhcp_offer_axis_tready;
-
-ODDRX1F ODDRX1Fdd(
-	.D0(1'd1),
-	.D1(1'd0),
-	.SCLK(clk50),
-	.Q(dbg_out[14])
-);
-ODDRX1F ODDRX1Fd(
-	.D0(1'd1),
-	.D1(1'd0),
-	.SCLK(clk),
-	.Q(dbg_out[15])
-);
-
-
-/*assign dbg_out [7:0] = dhcp_offer_axis_tdata;
-assign dbg_out [8] = dhcp_offer_axis_tvalid;
-assign dbg_out [9] = dhcp_offer_axis_tready;
-assign dbg_out [10] = dhcp_offer_axis_tlast;
-assign dbg_out [15] = clk50;*/
-
   
 typedef enum {
                 idle,
@@ -655,8 +626,6 @@ begin
                                end
                         8'd53: begin
 //                                 dhcp_lastAnswerType <= dhcp_offer_axis_tdata;
-                                 dbg_ustas_to_alex <= dhcp_offer_axis_tdata;
-                                 dbg_ustas_to_alex_cnt <= dbg_ustas_to_alex_cnt + 1;
                                  if (dhcp_offer_axis_tdata == 8'h02)
                                      dhcp_offerIsReceived <= 1;
                                  else
