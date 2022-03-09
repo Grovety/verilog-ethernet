@@ -69,11 +69,11 @@ def estimate(results):
             freq = signal[0]
             FMax = signal[2]
             estimation += float(freq)/float(FMax)
-            count += 1
+            count += 3
     if count == 0: 
         return 100
     else:
-        return estimation/count
+        return estimation/(count*0.8*count)
 
 def test_estimate():
     # 175.35 PASS 25.00
@@ -97,7 +97,7 @@ def is_better(lhs_signal, rhs_signal):
 
 def test_is_better():
     lhs_signal = {'signal1' : ['100.0', 'FAIL', '125.0'],
-                'signal2' : ['100.0', 'FAIL', '125.0'],
+                'signal2' : ['100.0', 'FAIL', '125.0'] ,
                 'signal3' : ['100.0', 'FAIL', '125.0']
                 }
     rhs_signal = {'signal1' : ['110.0', 'FAIL', '125.0'],
