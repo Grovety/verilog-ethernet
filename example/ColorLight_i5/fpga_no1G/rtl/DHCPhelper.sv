@@ -268,8 +268,8 @@ begin
              s_eeprom_axis_tready <= 1;
              if (s_eeprom_axis_tvalid)
              begin
-//                  if (TARGET == "GENERIC") 
-                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
+                  if (TARGET == "GENERIC") 
+//                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
                   begin
                    case (filler_ptr[5:0])
                       6'd0: local_mac <= {local_mac[39:0],8'h02};

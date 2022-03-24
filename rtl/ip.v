@@ -130,6 +130,10 @@ module ip
     output wire tx_error_payload_early_termination,
     output wire tx_error_arp_failed,
 
+    // For Auto IP Functionality Support
+    input          justProbe,
+    output         drop_packet,
+
     /*
      * Configuration
      */
@@ -250,9 +254,14 @@ reg arp_request_valid_reg = 1'b0, arp_request_valid_next;
 reg arp_response_ready_reg = 1'b0, arp_response_ready_next;
 
 reg drop_packet_reg = 1'b0, drop_packet_next;
+assign drop_packet = drop_packet_reg;
+
+reg skip_packet_reg = 1'b0, skip_packet_next;
+assign skip_packet = skip_packet_reg;
+
 
 assign s_ip_hdr_ready = s_ip_hdr_ready_reg;
-assign s_ip_payload_axis_tready = outgoing_ip_payload_axis_tready || drop_packet_reg;
+assign s_ip_payload_axis_tready = outgoing_ip_payload_axis_tready || drop_packet_reg || skip_packet_reg;
 
 assign arp_request_valid = arp_request_valid_reg;
 assign arp_request_ip = s_ip_dest_ip;
@@ -266,6 +275,7 @@ always @* begin
     arp_request_valid_next = arp_request_valid_reg && !arp_request_ready;
     arp_response_ready_next = 1'b0;
     drop_packet_next = 1'b0;
+    skip_packet_next = 1'b0;
 
     s_ip_hdr_ready_next = 1'b0;
 
@@ -297,7 +307,13 @@ always @* begin
                 end else begin
                     // got MAC address; send packet
                     s_ip_hdr_ready_next = 1'b1;
-                    outgoing_ip_hdr_valid_next = 1'b1;
+//                    outgoing_ip_hdr_valid_next = 1'b1;
+// Added For Auto IP Functionbality
+                    outgoing_ip_hdr_valid_next = ~justProbe;  // 1 in normal mode, 0 in Auto IP
+//                    drop_packet_next = justProbe;       // 0 in normal mode, 1 in Auto IP
+                    skip_packet_next = justProbe;
+// End of added for Auto IP Functionality
+
                     outgoing_eth_dest_mac_next = arp_response_mac;
                     state_next = STATE_WAIT_PACKET;
                 end
@@ -307,6 +323,7 @@ always @* begin
         end
         STATE_WAIT_PACKET: begin
             drop_packet_next = drop_packet_reg;
+            skip_packet_next = skip_packet_reg;
 
             // wait for packet transfer to complete
             if (s_ip_payload_axis_tlast && s_ip_payload_axis_tready && s_ip_payload_axis_tvalid) begin
@@ -324,14 +341,17 @@ always @(posedge clk) begin
         arp_request_valid_reg <= 1'b0;
         arp_response_ready_reg <= 1'b0;
         drop_packet_reg <= 1'b0;
+        skip_packet_reg <= 1'b0;
         s_ip_hdr_ready_reg <= 1'b0;
         outgoing_ip_hdr_valid_reg <= 1'b0;
+
     end else begin
         state_reg <= state_next;
 
         arp_request_valid_reg <= arp_request_valid_next;
         arp_response_ready_reg <= arp_response_ready_next;
         drop_packet_reg <= drop_packet_next;
+        skip_packet_reg <= skip_packet_next;
 
         s_ip_hdr_ready_reg <= s_ip_hdr_ready_next;
 

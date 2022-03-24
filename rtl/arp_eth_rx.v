@@ -65,9 +65,6 @@ module arp_eth_rx #
     input  wire                   m_frame_ready,
     output wire [47:0]            m_eth_dest_mac,
     output wire [47:0]            m_eth_src_mac,
-//    output wire [15:0]            m_eth_type,
-//    output wire [15:0]            m_arp_htype,
-//    output wire [15:0]            m_arp_ptype,
     output reg                    m_eth_thisIsArpIncomingPkt,
     output wire [7:0]             m_arp_hlen,
     output wire [7:0]             m_arp_plen,
@@ -76,8 +73,6 @@ module arp_eth_rx #
     output wire [31:0]            m_arp_spa,
     output reg                    m_ip_matched,
     output reg                    m_mac_matched,
-//    output wire [47:0]            m_arp_tha,
-//    output wire [31:0]            m_arp_tpa,
 
     /*
      * Status signals
@@ -90,7 +85,9 @@ module arp_eth_rx #
      * Configuration
      */
     input  wire [47:0]            local_mac,
-    input  wire [31:0]            local_ip
+    input  wire [31:0]            local_ip,
+    input  wire [31:0]            auto_ip_ip,
+    output reg                    m_auto_ip_matched
     
 );
 
@@ -158,6 +155,7 @@ reg [31:0] m_arp_spa_reg = 32'd0, m_arp_spa_next;
 //reg [31:0] m_arp_tpa_reg = 32'd0, m_arp_tpa_next;
 
 reg [3:0] ip_matched;
+reg [3:0] auto_ip_matched;
 reg [5:0] mac_matched;
 
 reg [5:0] eth_thisIsArpIncomingPkt;
@@ -298,6 +296,7 @@ always @(posedge clk)
 begin
     if (rst) begin
          ip_matched <= 0;
+         auto_ip_matched <= 0;
          mac_matched <= 0;
     end else
     begin
@@ -324,16 +323,30 @@ begin
                if (ptr_reg == 23)
                     mac_matched[0] <= (s_eth_payload_axis_tdata == local_mac[0*8 +: 8]);
                if (ptr_reg == 24)
+               begin
                     ip_matched[3] <= (s_eth_payload_axis_tdata == local_ip[3*8 +: 8]);
+                    auto_ip_matched[3] <= (s_eth_payload_axis_tdata == auto_ip_ip[3*8 +: 8]);
+               end
                if (ptr_reg == 25)
+               begin
                     ip_matched[2] <= (s_eth_payload_axis_tdata == local_ip[2*8 +: 8]);
+                    auto_ip_matched[2] <= (s_eth_payload_axis_tdata == auto_ip_ip[2*8 +: 8]);
+               end
                if (ptr_reg == 26)
+               begin
                     ip_matched[1] <= (s_eth_payload_axis_tdata == local_ip[1*8 +: 8]);
+                    auto_ip_matched[1] <= (s_eth_payload_axis_tdata == auto_ip_ip[1*8 +: 8]);
+               end
                if (ptr_reg == 27)
+               begin
                     ip_matched[0] <= (s_eth_payload_axis_tdata == local_ip[0*8 +: 8]);
+                    auto_ip_matched[0] <= (s_eth_payload_axis_tdata == auto_ip_ip[0*8 +: 8]);
+               end
          end
       end      
       m_ip_matched <= (ip_matched[0] & ip_matched [1] & ip_matched [2] & ip_matched [3]);
+      m_auto_ip_matched <= (auto_ip_matched[0] & auto_ip_matched [1] 
+                            & auto_ip_matched [2] & auto_ip_matched [3]);
       m_mac_matched <= (mac_matched[0] & mac_matched [1] & mac_matched [2] & mac_matched [3] & mac_matched [4] & mac_matched [5]);
       
       m_eth_thisIsArpIncomingPkt <= eth_thisIsArpIncomingPkt[0] & eth_thisIsArpIncomingPkt[1]  

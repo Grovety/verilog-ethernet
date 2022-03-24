@@ -185,6 +185,9 @@ reg  mac_matched;
 reg mac_is_broadcast [3:0];
 reg mac_is_broadcast2;
 
+reg clear_arp_cache;
+wire arp_cache_ready;
+
 
 always @ (posedge clk)
 begin
@@ -226,6 +229,13 @@ begin
 
 end
 
+
+   reg auto_ip_prepare;
+   reg [31:0] auto_ip_ip;
+   wire       m_auto_ip_matched;
+   reg        auto_ip_matched;
+   reg        auto_ip_latch;
+
 reg match_cond_reg = 0;
 reg no_match_reg = 0;
 
@@ -245,6 +255,39 @@ always @(posedge clk) begin
             no_match_reg <= 0;
         end
     end
+end
+
+
+reg probeMode;
+reg probeMode_prev;
+wire drop_packet;
+reg probePacketIsDropped;
+always @(posedge clk)
+begin
+     if (rst) 
+     begin
+        probePacketIsDropped <= 0;
+        auto_ip_matched <= 0;
+        probeMode_prev <= 0;
+     end else
+     begin
+        probeMode_prev <= probeMode;
+        if ((probeMode == 1'b1) && (probeMode_prev == 0))
+        begin 
+           probePacketIsDropped <= 0;   
+           auto_ip_matched <= 0;
+        end else 
+        begin
+             if (drop_packet)
+             begin
+                  probePacketIsDropped <= 1;
+             end
+             if (m_auto_ip_matched)
+             begin
+                  auto_ip_matched <= 1;
+             end
+        end
+     end
 end
 
 assign tx_udp_ip_dscp = 0;
@@ -443,12 +486,22 @@ udp_complete_inst (
     .udp_rx_error_header_early_termination(),
     .udp_rx_error_payload_early_termination(),
     .udp_tx_error_payload_early_termination(),
+
+    .m_auto_ip_matched(m_auto_ip_matched),
+    // For Auto IP Functionality
+    .justProbe(probeMode),
+    .drop_packet(drop_packet),
+
+//    .dbg_out(dbg_out),
+
     // Configuration
     .local_mac(local_mac),
     .local_ip(local_ip),
+    .auto_ip_ip(auto_ip_ip),
     .gateway_ip(gateway_ip),
     .subnet_mask(subnet_mask),
-    .clear_arp_cache(0)
+    .clear_arp_cache(clear_arp_cache),
+    .cache_ready(arp_cache_ready)
 );
 
 // AXI Stream for read EEPROM Data
@@ -546,13 +599,29 @@ DHCPhelper #(
 
     .dhcp_offerIsReceived (dhcp_offerIsReceived),
 
+    .auto_ip_prepare(auto_ip_prepare),
+    .auto_ip_latch(auto_ip_latch),
+    .auto_ip_ip(auto_ip_ip[15:0]),
+
     .local_mac(local_mac),  
     .local_ip(local_ip),   
     .gateway_ip(gateway_ip), 
-    .subnet_mask(subnet_mask),
-
-    .dbg_out(dbg_out)
+    .subnet_mask(subnet_mask)
 );
+
+wire [31:0] auto_ip_online;
+generate
+if (TARGET == "GENERIC") 
+//if (TARGET == "LATTICE") 
+     assign auto_ip_online = 32'h12345678;
+else
+  prng prng_dhcp_xid_inst (
+    .clk (clk),
+    .rst (rst),
+    .in  (1'b0),
+    .res (auto_ip_online)
+  );
+endgenerate
 
 reg [7:0] ourData_tdata;
 reg       ourData_tvalid;
@@ -573,7 +642,9 @@ enum {idle,
        er_eeprom_addr0,
        er_eeprom_process1,er_eeprom_process2,
        dhcp_start,dhcp_fill_0,dhcp_fill_1,
-       dhcp_offer_processing1,dhcp_offer_processing2
+       dhcp_offer_processing1,dhcp_offer_processing2,
+       autoIp_start,autoIp_wait_cache_busy,autoIp_wait_cache_ready,
+          autoIp_wait_fake_packet_send,autoIp_wait_fake_packet_sent
      } answerState;
 
 always @(posedge clk)
@@ -596,6 +667,10 @@ begin
         spi_write_strobe <= 0;
         spi_erase_strobe <= 0;
         m_dhcp_discover_step_request <= 1;
+        probeMode <= 0;
+        auto_ip_latch <= 0;
+        clear_arp_cache <= 0;
+        auto_ip_prepare <= 0;
     end else
     begin
 /*      if ((mac_matched) || (answerState == init_eeprom_1)) 
@@ -628,6 +703,16 @@ begin
                ourData_tlast <= 0;
                tx_udp_hdr_valid <= 0;
                rx_udp_payload_axis_tready <= 1;
+               probeMode <= 0;
+               clear_arp_cache <= 0;
+               auto_ip_prepare <= 0;
+               auto_ip_latch <= 0;
+               // For help to ICMP...
+               if (rx_ip_hdr_valid)
+               begin
+                     // For correct usage of Broadcast/local pipeline!!!
+                     tx_udp_ip_dest_ip <= rx_ip_source_ip;  
+               end else
                if ((rx_udp_hdr_valid)  && (mac_matched))
                begin
                   case (rx_udp_dest_port)
@@ -675,10 +760,15 @@ begin
                          answerState <= er_eeprom_addr0;
                      end
                   endcase
-               end else if (!rxd)    // Negative logic! DHCP trigger activated
+               end /*else if (!rxd)    // Negative logic! DHCP trigger activated
                begin
                      answerState <= dhcp_start;
+               end*/ else if (!rxd)    // Negative logic! DHCP trigger activated
+               begin
+                     answerState <= autoIp_start;
                end
+
+
         end
         // Two states for delay
         // This delay is needed for IP address pipelining
@@ -916,6 +1006,70 @@ begin
                       rx_udp_hdr_ready <= 0;
                       answerState <= dhcp_fill_0;
                       tx_udp_length <= 8;		// Extra length
+                end
+            end
+        end
+        autoIp_start: begin
+               // negative logic! Wait for release trigger
+               if (rxd)
+               begin
+                  probeMode <= 1;
+
+                  // This crazy formula prevents situations of XXX.XXX.255.XXX and XXX.XXX.000.XXX
+                  // Why not?
+                  tx_udp_ip_dest_ip <= {16'ha9fe,1'b0,auto_ip_online[14:9],1'b1,auto_ip_online[7:0]}; 
+                  auto_ip_ip <= {16'ha9fe,1'b0,auto_ip_online[14:9],1'b1,auto_ip_online[7:0]}; 
+                  tx_udp_ip_source_ip <= 32'h00000000;
+
+                  clear_arp_cache <= 1;
+
+                  ourData_tdata <= 8'h00;
+                  ourData_tlast <= 1;
+                  ourData_tvalid <= 1;
+                  
+                  auto_ip_prepare <= 1;
+
+                  answerState <= autoIp_wait_cache_busy;
+               end
+        end
+        autoIp_wait_cache_busy: begin
+              auto_ip_prepare <= 0;
+              ourData_tvalid <= 0;
+              // Just any. Will not be transmitted!
+              tx_udp_source_port <= 16'd68; 
+              tx_udp_dest_port <= 16'd67;   
+              tx_udp_length <= 1 + 8;		// Extra length
+
+              if (!arp_cache_ready)
+              begin
+                  clear_arp_cache <= 0;
+                  answerState <= autoIp_wait_cache_ready;
+              end
+        end
+        autoIp_wait_cache_ready: begin
+            tx_udp_hdr_valid <= 1;
+           answerState <= autoIp_wait_fake_packet_send;
+        end
+        autoIp_wait_fake_packet_send: begin
+            tx_udp_hdr_valid <= 0;
+            if (udp_tx_busy)
+            begin
+                answerState <= autoIp_wait_fake_packet_sent; 
+            end
+        end
+        autoIp_wait_fake_packet_sent: begin
+           if (!udp_tx_busy)
+            begin
+                // TODO Add max retry checking
+                if ((!probePacketIsDropped)||(auto_ip_matched))
+                begin
+                    dbg_led <= 1'b1;
+                    answerState <= autoIp_start; 
+                end else
+                begin
+                    dbg_led <= 1'b0;
+                    auto_ip_latch <= 1;
+                    answerState <= idle; 
                 end
             end
         end

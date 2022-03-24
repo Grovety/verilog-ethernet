@@ -226,6 +226,30 @@ begin
 
 end
 
+reg probeMode;
+reg probeMode_prev;
+wire drop_packet;
+reg probePacketIsDropped;
+always @(posedge clk)
+begin
+     if (rst) 
+     begin
+        probePacketIsDropped <= 0;
+        probeMode_prev <= 0;
+     end else
+     begin
+        probeMode_prev <= 0;
+        if ((probeMode == 1'b1) && (probeMode+prev == 0))
+        begin 
+           probePacketIsDropped <= 0;   
+        end else if (drop_packet)
+        begin
+              probePacketIsDropped <= 1;
+        end
+     end
+end
+
+
 reg match_cond_reg = 0;
 reg no_match_reg = 0;
 
@@ -443,6 +467,11 @@ udp_complete_inst (
     .udp_rx_error_header_early_termination(),
     .udp_rx_error_payload_early_termination(),
     .udp_tx_error_payload_early_termination(),
+
+    // For Auto IP Functionality
+    .justProbe(probeMode),
+    .drop_packet(drop_packet),
+
     // Configuration
     .local_mac(local_mac),
     .local_ip(local_ip),
@@ -596,6 +625,7 @@ begin
         spi_write_strobe <= 0;
         spi_erase_strobe <= 0;
         m_dhcp_discover_step_request <= 1;
+        probeMode <= 0;
     end else
     begin
 /*      if ((mac_matched) || (answerState == init_eeprom_1)) 
@@ -628,6 +658,7 @@ begin
                ourData_tlast <= 0;
                tx_udp_hdr_valid <= 0;
                rx_udp_payload_axis_tready <= 1;
+               probeMode <= 0;
                if ((rx_udp_hdr_valid)  && (mac_matched))
                begin
                   case (rx_udp_dest_port)

@@ -19,6 +19,7 @@ module fpga_core #(
     input  wire        phy0_int_n,
 
     output             dbg_led,
+    output [15:0]      dbg_out,
 
     input              rxd,                  // It is uses as "Start DHCP" trigger
 
@@ -113,6 +114,7 @@ ourLogic (
     .clk90(clk90),
 
     .dbg_led(dbg_led),
+    .dbg_out (dbg_out),
 
     .rxd (rxd),
 

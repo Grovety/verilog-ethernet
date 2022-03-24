@@ -4,6 +4,7 @@ module fpga #(
 (
     input              clk_i,
     output /*reg*/         led_o,
+    output [15:0]      dbg_out,
 
 //    output             spi_flash_sck,
     output             spi_flash_mosi,
@@ -20,9 +21,8 @@ module fpga #(
     output             eth_mdc,
     inout              eth_mdio,
 
-    input              rxd,                   // It is uses as "Start DHCP" trigger
+    input              rxd                   // It is uses as "Start DHCP" trigger
 
-    output [15:0]      dbg_out
 
 );
 
@@ -206,15 +206,6 @@ assign eth_mdc = mdc;
 assign mdio_i = eth_mdio;
 assign eth_mdio = mdio_t ? 1'bz : mdio_o;
 
-/*assign dbg_out [0] = mdc;
-assign dbg_out [1] = mdio_i;
-assign dbg_out [2] = mdio_o;
-assign dbg_out [3] = mdio_t;
-assign dbg_out [4] = mdio_cmd_valid;
-assign dbg_out [5] = mdio_cmd_ready;
-assign dbg_out [6] = mdio_cmd_valid;*/
-
-
 fpga_core #(
     .TARGET(TARGET),
     .USE_CLK90("FALSE")
@@ -234,7 +225,7 @@ fpga_core #(
     .rxd (rxd),			// It is uses as "Start DHCP" trigger
 
     .dbg_led (led_o),
-//    .dbg_out (dbg_out),
+    .dbg_out (dbg_out),
 
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),

@@ -44,6 +44,11 @@ output reg               halfLeaseTimerIsReached,
 
 
 output reg               dhcp_offerIsReceived,
+
+input                    auto_ip_prepare,
+input                    auto_ip_latch,
+input                    [15:0] auto_ip_ip,
+
 output [15:0]            dbg_out
 
 );
@@ -232,6 +237,16 @@ begin
      begin
        case (state_filler)
            idle: begin
+              if (auto_ip_prepare)
+              begin
+                    local_ip    <= 32'h00000000;
+                    gateway_ip  <= 32'ha9fe0001;
+                    subnet_mask <= 32'hffff0000;
+              end else
+              if (auto_ip_latch)
+              begin
+                    local_ip    <= {16'ha9fe,auto_ip_ip};
+              end
               if (need_latch_parameters)
               begin
                     parameters_latched1 <= 1;

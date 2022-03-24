@@ -95,14 +95,22 @@ module arp #
     output wire                   arp_response_error,
     output wire [47:0]            arp_response_mac,
 
+    // For AutoIP Mode
+    input wire                    justProbe,
+
+//    output     [15:0]             dbg_out,
+
     /*
      * Configuration
      */
     input  wire [47:0]            local_mac,
     input  wire [31:0]            local_ip,
+    input  wire [31:0]            auto_ip_ip,
+    output                        m_auto_ip_matched,
     input  wire [31:0]            gateway_ip,
     input  wire [31:0]            subnet_mask,
-    input  wire                   clear_cache
+    input  wire                   clear_cache,
+    output                        cache_ready
 );
 
 localparam [15:0]
@@ -177,7 +185,10 @@ arp_eth_rx_inst (
     .error_invalid_header(),
     // Configuration
     .local_mac(local_mac),
-    .local_ip(local_ip)
+    .local_ip(local_ip),
+    .auto_ip_ip(auto_ip_ip),
+    .m_auto_ip_matched(m_auto_ip_matched)
+
     
 );
 
@@ -254,7 +265,7 @@ arp_cache_inst (
     .query_response_mac(cache_query_response_mac),
     // Write cache
     .write_request_valid(cache_write_request_valid_reg),
-    .write_request_ready(),
+    .write_request_ready(cache_ready),
     .write_request_ip(cache_write_request_ip_reg),
     .write_request_mac(cache_write_request_mac_reg),
     // Configuration
@@ -446,6 +457,20 @@ always @* begin
     end
 end
 
+/*
+ODDRX1F ODDRX1Fd(
+	.D0(1'd1),
+	.D1(1'd0),
+	.SCLK(clk),
+	.Q(dbg_out [0])
+);
+
+assign dbg_out [1] = cache_query_request_valid_next;
+assign dbg_out [2] = arp_request_ip_is_broadcast;
+assign dbg_out [3] = arp_request_request_is_local;
+assign dbg_out [4] = arp_request_ip_is_subnet_broadcast;
+assign dbg_out [15:5] = 0;*/
+
 always @(posedge clk) begin
     if (rst) begin
         outgoing_frame_valid_reg <= 1'b0;
@@ -490,7 +515,15 @@ begin
     begin
          if (force_set_request_timeout [1])
          begin
-             arp_request_timer_reg <= REQUEST_TIMEOUT;
+//             arp_request_timer_reg <= REQUEST_TIMEOUT;
+// 2048 for Probe Mode
+             if (justProbe)
+             begin
+                 arp_request_timer_reg <= 15'd2000;
+             end else
+             begin
+                arp_request_timer_reg <= REQUEST_TIMEOUT;
+             end
          end else if (force_set_request_retry_interval [1])
          begin
              arp_request_timer_reg <= REQUEST_RETRY_INTERVAL;

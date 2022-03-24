@@ -130,6 +130,12 @@ module ip_complete #(
     output wire tx_error_payload_early_termination,
     output wire tx_error_arp_failed,
 
+    // For Auto IP Functionality Support
+    input          justProbe,
+    output         drop_packet,
+
+//    output [15:0] dbg_out,
+
     /*
      * Configuration
      */
@@ -137,7 +143,10 @@ module ip_complete #(
     input  wire [31:0] local_ip,
     input  wire [31:0] gateway_ip,
     input  wire [31:0] subnet_mask,
-    input  wire        clear_arp_cache
+    input  wire [31:0]            auto_ip_ip,
+    output                        m_auto_ip_matched,
+    input  wire        clear_arp_cache,
+    output             cache_ready
 );
 
 /*
@@ -380,6 +389,11 @@ ip_inst (
     .arp_response_ready(arp_response_ready),
     .arp_response_error(arp_response_error),
     .arp_response_mac(arp_response_mac),
+
+    // For Auto IP Functionality Support
+    .justProbe(justProbe),
+    .drop_packet(drop_packet),
+
     // Status
     .rx_busy(rx_busy),
     .tx_busy(tx_busy),
@@ -454,12 +468,19 @@ arp_inst (
     .arp_response_ready(arp_response_ready),
     .arp_response_error(arp_response_error),
     .arp_response_mac(arp_response_mac),
+
+//    .dbg_out (dbg_out),
+
+    .justProbe(justProbe),
     // Configuration
     .local_mac(local_mac),
     .local_ip(local_ip),
     .gateway_ip(gateway_ip),
     .subnet_mask(subnet_mask),
-    .clear_cache(clear_arp_cache)
+    .auto_ip_ip(auto_ip_ip),
+    .m_auto_ip_matched(m_auto_ip_matched),
+    .clear_cache(clear_arp_cache),
+    .cache_ready (cache_ready)
 );
 
 endmodule

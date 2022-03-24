@@ -3,7 +3,8 @@ module fpga #(
 )
 (
     input              clk_i,
-    output reg         led_o,
+    output             led_o,
+//    output [15:0]            dbg_out,
 
 
 //    output             spi_flash_sck,
@@ -23,6 +24,8 @@ module fpga #(
     output wire [3:0]  eth_tx_data,
     output             eth_mdc,
     inout              eth_mdio
+
+
 );
 
 USRMCLK USRMCLK(
@@ -47,7 +50,7 @@ wire [WIDTH-1:0] cpt_next_s = cpt_s + 1'b1;
 
 // Blink Functionality
 wire end_s = cpt_s == MAX-1;
-
+/*
 always @(posedge clk_i) begin
     cpt_s <= (rst || end_s) ? {WIDTH{1'b0}} : cpt_next_s;
     if (rst) begin
@@ -56,7 +59,7 @@ always @(posedge clk_i) begin
         led_o <= ~led_o;
     end
 end
-
+*/
 assign eth_rst_n = 1;
 
 (* FREQUENCY_PIN_CLKI="25" *)
@@ -121,6 +124,9 @@ fpga_core #(
     .spi_flash_mosi(spi_flash_mosi),
     .spi_flash_miso(spi_flash_miso),
     .spi_flash_cs(spi_flash_cs), 
+
+    .dbg_led (led_o),
+//    .dbg_out (dbg_out),
 
     .rxd (rxd),			// It is uses as "Start DHCP" trigger
 
