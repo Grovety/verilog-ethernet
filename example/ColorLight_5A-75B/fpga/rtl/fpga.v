@@ -140,4 +140,8 @@ fpga_core #(
     .phy0_mdio(eth_mdio)
 );
 
+/*assign dbg_out [0]  = spi_flash_cs;
+assign dbg_out [1]  = spi_flash_sck;
+assign dbg_out [2]  = spi_flash_mosi;
+assign dbg_out [3]  = spi_flash_miso;*/
 endmodule

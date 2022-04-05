@@ -32,16 +32,18 @@ module SpiFlashReader
                   sendByte2,sendByte3,sendByte4,sendByte5,
                   axisTx1,axisTx2,axisTx3,
                   transmitSpi,transmitSpi1,transmitSpi2,
-                   SingleCmd,
                    Write_0,Write_1,Write_2,Write_3,Write_4,
-                   Erase_0,Erase_1,Erase_2,Erase_3,Erase_4
+                   Erase_0,Erase_1,Erase_2,Erase_3,Erase_4,
+                   WaitWriteEnabled_0,WaitWriteEnabled_1,WaitWriteEnabled_2,WaitWriteEnabled_3,WaitWriteEnabled_4
                  } stateType;
-    stateType state;
+    stateType state = idle;
     stateType returnState;
-    stateType stateAfterSingleCommand;
+    stateType stateAfterWriteEnable;
     
     reg [7:0] dataForSpi;
     reg [3:0] bitCnt;
+//    reg [3:0] timeOut;
+    reg [3:0] delay;
     
     always @ (posedge clk)
     begin
@@ -60,11 +62,13 @@ module SpiFlashReader
           idle: begin
              finished <= 0;
              s_tready <= 0;
+             delay <= 4'hf;
+//             timeOut <= 4'hf;
              if (read_strobe) 
              begin
                spi_cs <= 0;
-//               dataForSpi <= 8'h0b;
-               dataForSpi <= 8'h05;
+               dataForSpi <= 8'h0b;
+//               dataForSpi <= 8'h05;
                returnState <= sendByte2;
                state <= transmitSpi;
              end
@@ -72,16 +76,16 @@ module SpiFlashReader
              begin
                spi_cs <= 0;
                dataForSpi <= 8'h06;  // Write Enable
-               returnState <= SingleCmd;
-               stateAfterSingleCommand <= Write_0;
+               returnState <= WaitWriteEnabled_0;
+               stateAfterWriteEnable <= Write_0;
                state <= transmitSpi;
              end
              if (erase_strobe) 
              begin
                spi_cs <= 0;
                dataForSpi <= 8'h06;  // Write Enable
-               returnState <= SingleCmd;
-               stateAfterSingleCommand <= Erase_0;
+               returnState <= WaitWriteEnabled_0;
+               stateAfterWriteEnable <= Erase_0;
                state <= transmitSpi;
              end
           end
@@ -152,11 +156,6 @@ module SpiFlashReader
                 state <= transmitSpi1;
              end
           end
-          SingleCmd: begin
-               spi_cs <= 1;
-                state <= stateAfterSingleCommand;
-          end
-
           Write_0: begin
                spi_cs <= 0;
                dataForSpi <= 8'h02;  // Page Program
@@ -192,7 +191,8 @@ module SpiFlashReader
           end
           Erase_0: begin
                spi_cs <= 0;
-               dataForSpi <= 8'h52;  // Block Erase 32K
+//               dataForSpi <= 8'h52;  // Block Erase 32K
+               dataForSpi <= 8'h20;  // Block Erase 4K
                returnState <= Erase_1;
                state <= transmitSpi;
           end
@@ -214,7 +214,51 @@ module SpiFlashReader
           Erase_4 : begin
              finished <= 1;
           end
+          WaitWriteEnabled_0: begin
+               spi_cs <= 1;
+               if (delay[0] | delay[1] | delay[2] | delay[3])
+               begin
+                   delay <= delay - 1;
+               end else
+               begin 
+                    state <= WaitWriteEnabled_1;
+               end 
+          end
 
+          WaitWriteEnabled_1: begin
+               spi_cs <= 0;
+               dataForSpi <= 8'h05;  // Write Enable
+               returnState <= WaitWriteEnabled_2;
+               state <= transmitSpi;
+          end
+
+          WaitWriteEnabled_2: begin
+               dataForSpi <= 8'h00; 
+               returnState <= WaitWriteEnabled_3;
+               state <= transmitSpi;
+          end
+          WaitWriteEnabled_3: begin
+              spi_cs <= 1;
+              delay <= 4'hf;
+//              if ((dataForSpi [1] & (!dataForSpi [0])) || (!(timeOut[0] | timeOut[1] | timeOut[2] | timeOut[3])))
+              if (dataForSpi [1] & (!dataForSpi [0])) 
+              begin
+                  state <= WaitWriteEnabled_4;
+              end  else
+              begin
+//                  timeOut <= timeOut - 1;
+                  state <= WaitWriteEnabled_0;
+              end
+          end
+          WaitWriteEnabled_4: begin
+               if (delay[0] | delay[1] | delay[2] | delay[3])
+               begin
+                   delay <= delay - 1;
+               end else
+               begin 
+                    state <= stateAfterWriteEnable;
+               end 
+          end
           endcase
        end
     end
