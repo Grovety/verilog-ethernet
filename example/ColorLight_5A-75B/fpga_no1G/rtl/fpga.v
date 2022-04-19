@@ -44,7 +44,7 @@ wire clk_system;
 
 wire rst;
 // Reset Generator
-rst_gen rst_inst (.clk_i(clk_system), .rst_i(1'b0), .rst_o(rst));
+rst_gen rst_inst (.clk_i(clk125), .rst_i(1'b0), .rst_o(rst));
 
 
 reg  [WIDTH-1:0] cpt_s;
@@ -52,16 +52,19 @@ wire [WIDTH-1:0] cpt_next_s = cpt_s + 1'b1;
 
 // Blink Functionality
 wire end_s = cpt_s == MAX-1;
-/*
+reg button;
+
 always @(posedge clk_i) begin
     cpt_s <= (rst || end_s) ? {WIDTH{1'b0}} : cpt_next_s;
     if (rst) begin
-        led_o <= 1'b0;
+//        led_o <= 1'b0;
+          button <= 1'b1;
     end else if (end_s) begin
-        led_o <= ~led_o;
+//        led_o <= ~led_o;
+          button <= rxd;
     end
 end
-*/
+
 assign eth_rst_n = 1;
 
 (* FREQUENCY_PIN_CLKI="25" *)
@@ -206,6 +209,7 @@ assign eth_mdc = mdc;
 assign mdio_i = eth_mdio;
 assign eth_mdio = mdio_t ? 1'bz : mdio_o;
 
+wire fakeWire;
 fpga_core #(
     .TARGET(TARGET),
     .USE_CLK90("FALSE")
@@ -222,10 +226,10 @@ fpga_core #(
     .spi_flash_miso(spi_flash_miso),
     .spi_flash_cs(spi_flash_cs), 
 
-    .rxd (rxd),			// It is uses as "Start DHCP" trigger
+    .rxd (button/*rxd*/),			// It is uses as "Start DHCP" trigger
 
     .dbg_led (led_o),
-    .dbg_out (dbg_out),
+    .dbg_out ({fakeWire,dbg_out[14:0]}),
 
     .phy0_tx_clk(eth_clocks_tx),
     .phy0_rx_clk(eth_clocks_rx),
@@ -236,5 +240,16 @@ fpga_core #(
     .phy0_mdc(eth_mdc),
     .phy0_mdio(eth_mdio)
 );
+ODDRX1F ODDRX1Fd(
+	.D0(1'd1),
+	.D1(1'd0),
+	.SCLK(clk50),
+	.Q(dbg_out[15])
+);
+
+/*assign dbg_out [0]  = spi_flash_cs;
+assign dbg_out [1]  = spi_flash_sck;
+assign dbg_out [2]  = spi_flash_mosi;
+assign dbg_out [3]  = spi_flash_miso;*/
 
 endmodule

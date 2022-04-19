@@ -4,7 +4,7 @@ module fpga #(
 (
     input              clk_i,
     output             led_o,
-//    output [15:0]            dbg_out,
+    output [15:0]            dbg_out,
 
 
 //    output             spi_flash_sck,
@@ -110,6 +110,8 @@ EHXPLLL #(
         .LOCK()
 	);
 
+wire fakeWire;
+
 fpga_core #(
     .TARGET(TARGET),
     .USE_CLK90("FALSE")
@@ -126,6 +128,7 @@ fpga_core #(
     .spi_flash_cs(spi_flash_cs), 
 
     .dbg_led (led_o),
+    .dbg_out ({fakeWire,dbg_out[14:0]}),
 //    .dbg_out (dbg_out),
 
     .rxd (rxd),			// It is uses as "Start DHCP" trigger
@@ -140,8 +143,11 @@ fpga_core #(
     .phy0_mdio(eth_mdio)
 );
 
-/*assign dbg_out [0]  = spi_flash_cs;
-assign dbg_out [1]  = spi_flash_sck;
-assign dbg_out [2]  = spi_flash_mosi;
-assign dbg_out [3]  = spi_flash_miso;*/
+ODDRX1F ODDRX1Fd(
+	.D0(1'd1),
+	.D1(1'd0),
+	.SCLK(clk50),
+	.Q(dbg_out[15])
+);
+
 endmodule

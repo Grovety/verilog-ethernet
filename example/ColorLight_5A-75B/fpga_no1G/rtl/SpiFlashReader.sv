@@ -28,7 +28,7 @@ module SpiFlashReader
 );
 
 
-    typedef enum {idle,
+    typedef enum /*logic [4:0]*/ {idle,
                   sendByte2,sendByte3,sendByte4,sendByte5,
                   axisTx1,axisTx2,axisTx3,
                   transmitSpi,transmitSpi1,transmitSpi2,

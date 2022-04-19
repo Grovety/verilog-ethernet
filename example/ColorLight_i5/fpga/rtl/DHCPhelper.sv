@@ -283,8 +283,8 @@ begin
              s_eeprom_axis_tready <= 1;
              if (s_eeprom_axis_tvalid)
              begin
-//                  if (TARGET == "GENERIC") 
-                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
+                  if (TARGET == "GENERIC") 
+//                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
                   begin
                    case (filler_ptr[5:0])
                       6'd0: local_mac <= {local_mac[39:0],8'h02};
@@ -307,14 +307,16 @@ begin
                       6'd14: subnet_mask  <= {subnet_mask[23:0],8'd255};
                       6'd15: subnet_mask  <= {subnet_mask[23:0],8'd255};
                       6'd16: subnet_mask  <= {subnet_mask[23:0],8'd255};
-                      6'd17: sName  <= {sName[39:0],8'h41};
-                      6'd18: sName  <= {sName[39:0],8'h42};
-                      6'd19: sName  <= {sName[39:0],8'h43};
-                      6'd20: sName  <= {sName[39:0],8'h44};
-                      6'd21: sName  <= {sName[39:0],8'h45};
-                      6'd22: sName  <= {sName[39:0],8'h46};
-                      6'd23: begin
-                                    subnet_mask  <= {subnet_mask[23:0],8'd0};
+                      6'd17: subnet_mask  <= {subnet_mask[23:0],8'd0};
+
+                      6'd18: sName  <= {sName[39:0],8'h41};
+                      6'd19: sName  <= {sName[39:0],8'h42};
+                      6'd20: sName  <= {sName[39:0],8'h43};
+                      6'd21: sName  <= {sName[39:0],8'h44};
+                      6'd22: sName  <= {sName[39:0],8'h45};
+                      6'd23: sName  <= {sName[39:0],8'h46};
+                      6'd24: begin
+//                                    subnet_mask  <= {subnet_mask[23:0],8'd0};
                                     state_filler <= fillFromEeprom2; 
                                     s_eeprom_process_finished <= 1;
                             end
@@ -341,16 +343,17 @@ begin
                       6'd14: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                       6'd15: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                       6'd16: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
+                      6'd17: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
 
-                      6'd17: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd18: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd19: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd20: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd21: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd22: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd23: sName  <= {sName[39:0],s_eeprom_axis_tdata};
 
-                      6'd23: begin
-                                    subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
+                      6'd24: begin
+//                                    subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                                     state_filler <= fillFromEeprom2; 
                                     s_eeprom_process_finished <= 1;
                             end

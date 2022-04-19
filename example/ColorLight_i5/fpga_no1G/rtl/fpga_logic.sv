@@ -736,6 +736,20 @@ begin
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
                      end
+                     // TODO: Don't forget remopve this branch!
+                     // It is added for debug purposes only
+                     1235: begin
+                         tx_udp_ip_source_ip <= local_ip;
+                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
+                         tx_udp_source_port <= 1235; 
+                         tx_udp_dest_port <= rx_udp_source_port;   
+
+                         spi_start_addr <= 24'h1ff040;
+                         spi_read_strobe <= 1;
+                         spi_m_tready <= 1;
+
+                         answerState <= dbg_string_1;
+                     end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
                          rx_udp_hdr_ready <= 0;
@@ -1072,6 +1086,35 @@ begin
                     answerState <= idle; 
                 end
             end
+        end
+        // For Debug Purposes! Remove in future
+        // (of course, comment only for use as source 
+        // for real production)
+        dbg_string_1: begin
+           if (spi_m_tvalid)
+           begin
+               eeprom_cnt <= spi_m_tdata - 1;
+               answerState <= dbg_string_2;
+           end
+        end
+        dbg_string_2: begin
+           ourData_tdata <= spi_m_tdata;
+           ourData_tvalid <= spi_m_tvalid;
+           if (spi_m_tvalid)
+           begin
+               if (eeprom_cnt == 0)
+               begin
+                   answerState <= idle;
+                   ourData_tlast <= 1;
+	           spi_m_tready <= 0;
+                   tx_udp_hdr_valid <= 1;		// Start send to UDP
+
+               end else
+               begin
+                   eeprom_cnt <= eeprom_cnt - 1;
+                   ourData_tlast <= 0;
+               end
+           end
         end
         endcase
 //     end // mac_matched

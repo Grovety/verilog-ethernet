@@ -41,7 +41,7 @@ wire clk_system;
 
 wire rst;
 // Reset Generator
-rst_gen rst_inst (.clk_i(clk_system), .rst_i(1'b0), .rst_o(rst));
+rst_gen rst_inst (.clk_i(clk125), .rst_i(1'b0), .rst_o(rst));
 
 
 reg  [WIDTH-1:0] cpt_s;

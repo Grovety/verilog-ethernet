@@ -603,6 +603,9 @@ DHCPhelper #(
     .auto_ip_latch(auto_ip_latch),
     .auto_ip_ip(auto_ip_ip[15:0]),
 
+    .dbg_out(dbg_out),
+
+
     .local_mac(local_mac),  
     .local_ip(local_ip),   
     .gateway_ip(gateway_ip), 
@@ -632,11 +635,12 @@ reg [7:0] eeprom_cnt;
 reg [2:0] addr_cnt;
 reg [23:0] eeprom_pwd;
 
-enum {idle,
+typedef enum logic [5:0] {
+       idle,
        init_eeprom_1,
        pre_reflect_1,pre_reflect_2,reflect_1,reflect_2,
        rd_eeprom_addr0,
-       rd_eeprom_process,rd_eeprom_send1,rd_eeprom_send2,
+       rd_eeprom_process,//rd_eeprom_send1,rd_eeprom_send2,
        wr_eeprom_addr0,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,
@@ -644,8 +648,11 @@ enum {idle,
        dhcp_start,dhcp_fill_0,dhcp_fill_1,
        dhcp_offer_processing1,dhcp_offer_processing2,
        autoIp_start,autoIp_wait_cache_busy,autoIp_wait_cache_ready,
-          autoIp_wait_fake_packet_send,autoIp_wait_fake_packet_sent
-     } answerState;
+          autoIp_wait_fake_packet_send,autoIp_wait_fake_packet_sent,
+       dbg_string_1,dbg_string_2
+     } answerStates;
+
+answerStates answerState = idle;
 
 always @(posedge clk)
 begin
@@ -718,12 +725,14 @@ begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
                      68: begin
-                         tx_udp_ip_source_ip <= local_ip;
-                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
-                         tx_udp_source_port <= 68; 
-                         tx_udp_dest_port <= 67;   
-                         rx_udp_hdr_ready <= 0;
-                         s_dhcp_offer_start <= 1;
+//                         tx_udp_ip_source_ip <= local_ip;
+//                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
+//                         tx_udp_source_port <= 68; 
+//                         tx_udp_dest_port <= 67;   
+
+                         rx_udp_hdr_ready <= 0;			// We are not ready to receive any other UDP packets
+
+                         s_dhcp_offer_start <= 1;		// Start transmitting data from UDP FIFO to slow helepr's FIFO
                          answerState <= dhcp_offer_processing1;
                      end
                      // Reflect port (just for test purposes)
@@ -736,6 +745,22 @@ begin
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
                      end
+/*                     // TODO: Don't forget remopve this branch!
+                     // It is added for debug purposes only
+                     1235: begin
+                         tx_udp_ip_source_ip <= local_ip;
+                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
+                         tx_udp_source_port <= 1235; 
+                         tx_udp_dest_port <= rx_udp_source_port;   
+
+                         spi_start_addr <= 24'h1ff040;
+                         spi_read_strobe <= 1;
+                         spi_m_tready <= 1;
+
+                         tx_udp_length <= 8;
+
+                         answerState <= dbg_string_1;
+                     end*/
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
                          rx_udp_hdr_ready <= 0;
@@ -760,13 +785,13 @@ begin
                          answerState <= er_eeprom_addr0;
                      end
                   endcase
-               end /*else if (!rxd)    // Negative logic! DHCP trigger activated
+               end else if (!rxd)    // Negative logic! DHCP trigger activated
                begin
                      answerState <= dhcp_start;
-               end*/ else if (!rxd)    // Negative logic! DHCP trigger activated
+               end /*else if (!rxd)    // Negative logic! DHCP trigger activated
                begin
                      answerState <= autoIp_start;
-               end
+               end   */
 
 
         end
@@ -843,7 +868,7 @@ begin
                end
            end
         end
-        rd_eeprom_send1: begin
+/*        rd_eeprom_send1: begin
                if (udp_tx_busy)
                begin
                    answerState <= rd_eeprom_send2; 
@@ -854,7 +879,7 @@ begin
                begin
                    answerState <= idle; 
                end
-        end
+        end*/
         wr_eeprom_addr0: begin
            if (rx_udp_payload_axis_tvalid)
            begin
@@ -939,42 +964,54 @@ begin
                // negative logic! Wait for release trigger
                if (rxd)
                begin
-                  dbg_led <= 0; 
-                  tx_udp_ip_source_ip <= 32'h00000000;
-                  tx_udp_ip_dest_ip <= 32'hffffffff; 
-                  tx_udp_source_port <= 16'd68; 
-                  tx_udp_dest_port <= 16'd67;   
-                  dhcp_m_dhcp_discover_start <= 1;
+                  dbg_led <= ~dbg_led; 
 
+                  // We are planning to send DHCP_DISCOVERY
+                  // This is a first packet in DHCP processing
                   m_dhcp_discover_step_request <= 1;    // This step is discover
 
-                  rx_udp_hdr_ready <= 0;
-                  answerState <= dhcp_fill_0;
+                  tx_udp_ip_source_ip <= 32'h00000000;     // Broadcasting...
+                  tx_udp_ip_dest_ip <= 32'hffffffff;       // ...
+                  tx_udp_source_port <= 16'd68;            // DHCP ports
+                  tx_udp_dest_port <= 16'd67;              // ...
+
+                  dhcp_m_dhcp_discover_start <= 1;        // Ask for helper to produce data
+                  rx_udp_hdr_ready <= 0;                  // Now we are not ready to receive any data from UDP
+
                   tx_udp_length <= 8;		// Extra length
+
+                  answerState <= dhcp_fill_0;
                end
         end
         dhcp_fill_0: begin
-           dhcp_m_dhcp_discover_tready <= 1;
-           ourData_tdata <= dhcp_m_dhcp_discover_tdata;
-           ourData_tvalid <= dhcp_m_dhcp_discover_tvalid;
-           ourData_tlast <= dhcp_m_dhcp_discover_tlast;
-           if (dhcp_m_dhcp_discover_tvalid)
-           begin 
-                tx_udp_length <= tx_udp_length + 1;
-           end
+           dhcp_m_dhcp_discover_tready <= 1;			// We are ready to receive the data from helper
+           ourData_tdata <= dhcp_m_dhcp_discover_tdata;         // Receive data from DHCP Helper to FIFO if it is present
+           ourData_tvalid <= dhcp_m_dhcp_discover_tvalid;       // ...
+           ourData_tlast <= dhcp_m_dhcp_discover_tlast;         // ...
 
-           if (dhcp_m_dhcp_discover_finished)
+           if (dhcp_m_dhcp_discover_tvalid)			// If really present
+           begin 
+                tx_udp_length <= tx_udp_length + 1;             // Then increase length
+           end
+           if (dhcp_m_dhcp_discover_finished)			// If helper has no any more data
            begin
-                answerState <= dhcp_fill_1; 
+                spi_start_addr <= 24'h1ff040;
+                spi_read_strobe <= 1;
+                spi_m_tready <= 1;
+                answerState <= dbg_string_1;
            end
         end
         dhcp_fill_1: begin
            tx_udp_hdr_valid <= 1;		// Start send to UDP
+           ourData_tvalid <= 0;           
            if (tx_udp_hdr_ready)
            begin
                 answerState <= idle; 
            end
         end   
+        // This state is using for copy incoming FIFO
+        // into internal DHCPO Helper's FIFO for slow processing
+        // inside that module (using slow clock domain)
         dhcp_offer_processing1: begin
             s_dhcp_offer_axis_tdata <= rx_udp_payload_axis_tdata;
             s_dhcp_offer_axis_tvalid <= rx_udp_payload_axis_tvalid;
@@ -989,23 +1026,27 @@ begin
             s_dhcp_offer_axis_tvalid <= 0;
             if (s_dhcp_offer_finished)
             begin
+                 // Let's stop slow State Machine in DHCP helper
                  s_dhcp_offer_start <= 0;
+                 // Are we serving OFFER packet?
                  if (!dhcp_offerIsReceived)  
-                 begin 
+                 begin     // No! This is answer for DHCPACK. No need senb anything
                       answerState <= idle;
-                 end else
+                 end else  // Yes! And we must send DHCPREQUEST
                  begin
+
+                      m_dhcp_discover_step_request <= 0;    
+
                       tx_udp_ip_source_ip <= 32'h00000000;
                       tx_udp_ip_dest_ip <= 32'hffffffff; 
                       tx_udp_source_port <= 16'd68; 
                       tx_udp_dest_port <= 16'd67;   
                       dhcp_m_dhcp_discover_start <= 1;
      
-                      m_dhcp_discover_step_request <= 0;    
-     
                       rx_udp_hdr_ready <= 0;
-                      answerState <= dhcp_fill_0;
                       tx_udp_length <= 8;		// Extra length
+
+                      answerState <= dhcp_fill_0;
                 end
             end
         end
@@ -1073,6 +1114,38 @@ begin
                 end
             end
         end
+        // For Debug Purposes! Remove in future
+        // (of course, comment only for use as source 
+        // for real production)
+        dbg_string_1: begin
+           if (spi_m_tvalid)
+           begin
+               eeprom_cnt <= spi_m_tdata [4:0] - 1;
+               answerState <= dbg_string_2;
+           end
+        end
+        dbg_string_2: begin
+           ourData_tdata <= spi_m_tdata;
+           ourData_tvalid <= spi_m_tvalid;
+           if (spi_m_tvalid)
+           begin
+               tx_udp_length <= tx_udp_length + 1;
+               if (eeprom_cnt == 0)
+               begin
+                   spi_read_strobe <= 0;
+	           spi_m_tready <= 0;
+
+                   answerState <= dhcp_fill_1;
+                   ourData_tlast <= 1;
+               end else
+               begin
+                   eeprom_cnt <= eeprom_cnt - 1;
+                   ourData_tlast <= 0;
+               end
+           end
+        end
+/*        dbg_string_3: begin
+        end*/
         endcase
 //     end // mac_matched
     end 
@@ -1157,5 +1230,11 @@ icmp ICMP (
 
     .local_ip(local_ip)
 );
+
+/*assign dbg_out [7:0] = ourData_tdata;
+assign dbg_out [8] = ourData_tvalid;
+assign dbg_out [9] = ourData_tready;
+assign dbg_out [10] = ourData_tlast;*/
+
 
 endmodule

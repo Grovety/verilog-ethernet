@@ -636,7 +636,7 @@ enum {idle,
        init_eeprom_1,
        pre_reflect_1,pre_reflect_2,reflect_1,reflect_2,
        rd_eeprom_addr0,
-       rd_eeprom_process,rd_eeprom_send1,rd_eeprom_send2,
+       rd_eeprom_process,//rd_eeprom_send1,rd_eeprom_send2,
        wr_eeprom_addr0,
        wr_eeprom_process1,wr_eeprom_process2,wr_eeprom_process3,
        er_eeprom_addr0,
@@ -644,7 +644,8 @@ enum {idle,
        dhcp_start,dhcp_fill_0,dhcp_fill_1,
        dhcp_offer_processing1,dhcp_offer_processing2,
        autoIp_start,autoIp_wait_cache_busy,autoIp_wait_cache_ready,
-          autoIp_wait_fake_packet_send,autoIp_wait_fake_packet_sent
+          autoIp_wait_fake_packet_send,autoIp_wait_fake_packet_sent,
+       dbg_string_1,dbg_string_2,dbg_string_3
      } answerState;
 
 always @(posedge clk)
@@ -735,6 +736,22 @@ begin
                          tx_udp_length <= rx_udp_length;
                          rx_udp_hdr_ready <= 0;
                          answerState <= pre_reflect_1;
+                     end
+                     // TODO: Don't forget remopve this branch!
+                     // It is added for debug purposes only
+                     1235: begin
+                         tx_udp_ip_source_ip <= local_ip;
+                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
+                         tx_udp_source_port <= 1235; 
+                         tx_udp_dest_port <= rx_udp_source_port;   
+
+                         spi_start_addr <= 24'h1ff040;
+                         spi_read_strobe <= 1;
+                         spi_m_tready <= 1;
+
+                         tx_udp_length <= 8;
+
+                         answerState <= dbg_string_1;
                      end
                      // Read EEPROM Port (0xEEE0)
                      16'heee0: begin
@@ -843,7 +860,7 @@ begin
                end
            end
         end
-        rd_eeprom_send1: begin
+/*        rd_eeprom_send1: begin
                if (udp_tx_busy)
                begin
                    answerState <= rd_eeprom_send2; 
@@ -854,7 +871,7 @@ begin
                begin
                    answerState <= idle; 
                end
-        end
+        end*/
         wr_eeprom_addr0: begin
            if (rx_udp_payload_axis_tvalid)
            begin
@@ -1072,6 +1089,41 @@ begin
                     answerState <= idle; 
                 end
             end
+        end
+        // For Debug Purposes! Remove in future
+        // (of course, comment only for use as source 
+        // for real production)
+        dbg_string_1: begin
+           if (spi_m_tvalid)
+           begin
+               eeprom_cnt <= spi_m_tdata - 1;
+               answerState <= dbg_string_2;
+           end
+        end
+        dbg_string_2: begin
+           ourData_tdata <= spi_m_tdata;
+           ourData_tvalid <= spi_m_tvalid;
+           if (spi_m_tvalid)
+           begin
+               tx_udp_length <= tx_udp_length + 1;
+               if (eeprom_cnt == 0)
+               begin
+                   answerState <= idle;
+                   ourData_tlast <= 1;
+	           spi_m_tready <= 0;
+                   tx_udp_hdr_valid <= 1;		// Start send to UDP
+
+               end else
+               begin
+                   eeprom_cnt <= eeprom_cnt - 1;
+                   ourData_tlast <= 0;
+               end
+           end
+        end
+        dbg_string_3: begin
+           spi_read_strobe <= 0;
+           answerState <= idle;
+           tx_udp_hdr_valid <= 1;		// Start send to UDP
         end
         endcase
 //     end // mac_matched

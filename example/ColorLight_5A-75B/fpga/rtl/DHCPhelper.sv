@@ -39,6 +39,9 @@ input                    s_dhcp_offer_axis_tlast,
 
 //output reg [7:0]         dhcp_lastAnswerType,
 
+output [15:0]            dbg_out,
+
+
 output reg  [31:0]       remain_lease_time,
 output reg               halfLeaseTimerIsReached,
 
@@ -53,6 +56,14 @@ output [15:0]            dbg_out
 
 );
 
+/*assign dbg_out [7:0] = dhcp_offer_axis_tdata;
+assign dbg_out [8] = dhcp_offer_axis_tvalid;
+assign dbg_out [9] = dhcp_offer_axis_tready;
+assign dbg_out [11] = s_dhcp_offer_start;
+assign dbg_out [12] = s_dhcp_offer_finished;
+assign dbg_out [13] = dhcp_offerIsReceived;
+assign dbg_out [14] = m_dhcp_discover_start;*/
+
 reg  [7:0] filler_ptr;
 reg  [7:0] parser_ptr;
 reg  [4:0] option_ptr;
@@ -62,7 +73,7 @@ reg  [31:0] option_data;
 wire [31:0] xid_online;
 reg  [31:0] xid;
 
-reg  [47:0] sName;    // 6 symbols only for now
+//Obsolete reg  [47:0] sName;    // 6 symbols only for now
 
 reg  [31:0]       temp_ip;
 reg  [31:0]       online_ip;
@@ -283,8 +294,8 @@ begin
              s_eeprom_axis_tready <= 1;
              if (s_eeprom_axis_tvalid)
              begin
-//                  if (TARGET == "GENERIC") 
-                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
+                  if (TARGET == "GENERIC") 
+//                   if (TARGET == "LATTICE")     // This is emergency line for uncomment it in case of damaged EEPROM content. 
                   begin
                    case (filler_ptr[5:0])
                       6'd0: local_mac <= {local_mac[39:0],8'h02};
@@ -307,13 +318,15 @@ begin
                       6'd14: subnet_mask  <= {subnet_mask[23:0],8'd255};
                       6'd15: subnet_mask  <= {subnet_mask[23:0],8'd255};
                       6'd16: subnet_mask  <= {subnet_mask[23:0],8'd255};
-                      6'd17: sName  <= {sName[39:0],8'h41};
-                      6'd18: sName  <= {sName[39:0],8'h42};
-                      6'd19: sName  <= {sName[39:0],8'h43};
-                      6'd20: sName  <= {sName[39:0],8'h44};
-                      6'd21: sName  <= {sName[39:0],8'h45};
-                      6'd22: sName  <= {sName[39:0],8'h46};
-                      6'd23: begin
+/*                      6'd17: subnet_mask  <= {subnet_mask[23:0],8'd0};
+
+                      6'd18: sName  <= {sName[39:0],8'h41};
+                      6'd19: sName  <= {sName[39:0],8'h42};
+                      6'd20: sName  <= {sName[39:0],8'h43};
+                      6'd21: sName  <= {sName[39:0],8'h44};
+                      6'd22: sName  <= {sName[39:0],8'h45};
+                      6'd23: sName  <= {sName[39:0],8'h46};*/
+                      6'd17: begin
                                     subnet_mask  <= {subnet_mask[23:0],8'd0};
                                     state_filler <= fillFromEeprom2; 
                                     s_eeprom_process_finished <= 1;
@@ -341,15 +354,16 @@ begin
                       6'd14: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                       6'd15: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                       6'd16: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
+ /*                     6'd17: subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
 
-                      6'd17: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd18: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd19: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd20: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd21: sName  <= {sName[39:0],s_eeprom_axis_tdata};
                       6'd22: sName  <= {sName[39:0],s_eeprom_axis_tdata};
+                      6'd23: sName  <= {sName[39:0],s_eeprom_axis_tdata};*/
 
-                      6'd23: begin
+                      6'd17: begin
                                     subnet_mask  <= {subnet_mask[23:0],s_eeprom_axis_tdata};
                                     state_filler <= fillFromEeprom2; 
                                     s_eeprom_process_finished <= 1;
@@ -453,7 +467,7 @@ begin
                   if ((temp_option_54_is_filled) && (!m_dhcp_discover_step_request))
                       state_filler <= fillDiscoverSendOption54;
                   else
-                      state_filler <= fillDiscoverSendOption12;
+                      state_filler <= fillDiscoverFinish;//fillDiscoverSendOption12;
                   filler_ptr <= 0;
                end else
                begin
@@ -471,14 +485,14 @@ begin
                endcase
                if (filler_ptr == 8'h05)
                begin
-                  state_filler <= fillDiscoverSendOption12;
+                  state_filler <= fillDiscoverFinish;//fillDiscoverSendOption12;
                   filler_ptr <= 0;
                end else
                begin
                   filler_ptr <= filler_ptr + 1;
                end
            end
-           fillDiscoverSendOption12: begin
+/*           fillDiscoverSendOption12: begin
                case (filler_ptr) 
                  8'h00: m_dhcp_discover_axis_tdata <= 8'd12;
                  8'h01: m_dhcp_discover_axis_tdata <= 8'h06;
@@ -512,7 +526,7 @@ begin
                begin
                   filler_ptr <= filler_ptr + 1;
                end
-           end
+           end*/
            fillDiscoverFinish: begin
                m_dhcp_discover_axis_last <= 0;
                m_dhcp_discover_axis_tvalid <= 0;
@@ -561,7 +575,7 @@ begin
            end
            parseOfferBlock1: begin
               dhcp_offer_axis_tready <= 1;
-              if (dhcp_offer_axis_tvalid)
+              if (dhcp_offer_axis_tvalid  && dhcp_offer_axis_tready)
               begin
                  case (parser_ptr)
                      8'h00: if (dhcp_offer_axis_tdata != 8'h02) state_parser <= parseOfferWaitFinish;

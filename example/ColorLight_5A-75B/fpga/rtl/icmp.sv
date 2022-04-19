@@ -109,7 +109,7 @@ begin
 end
 
 
-typedef enum {
+typedef enum /*logic [3:0]*/ {
                  idle, checkRequestType,checkRequestCode,
 					  delay1,delay2,
 					  fillLocalStorage,
