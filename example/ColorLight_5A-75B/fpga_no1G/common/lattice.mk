@@ -57,7 +57,7 @@ $(FPGA_TOP).ys:
 	done
 	echo "verilog_defaults -pop" >> $(FPGA_TOP).ys
 	echo "attrmap -tocase keep -imap keep="true" keep=1 -imap keep="false" keep=0 -remove keep=0" >> $(FPGA_TOP).ys
-	echo "synth_ecp5 -top $(FPGA_TOP) -json $(FPGA_TOP).json -abc2" >> $(FPGA_TOP).ys
+	echo "synth_ecp5 -top $(FPGA_TOP) -json $(FPGA_TOP).json -abc9" >> $(FPGA_TOP).ys
 
 $(FPGA_TOP)_out.config: $(FPGA_TOP).json
 	python3 ../common/place_and_route.py $(NEXTPNR_PARAMS)

@@ -708,14 +708,14 @@ begin
      end
 end
 
-assign dbg_out [7:0] = xid [31:24];//dhcp_offer_axis_tdata;
+/*assign dbg_out [7:0] = xid [31:24];//dhcp_offer_axis_tdata;
 assign dbg_out [8] = dhcp_offer_axis_tvalid;
 assign dbg_out [9] = dhcp_offer_axis_tready;
 assign dbg_out [10] = m_dhcp_discover_step_request;//dhcp_offer_axis_tlast;
 assign dbg_out [11] = s_dhcp_offer_start;
 assign dbg_out [12] = s_dhcp_offer_finished;
 assign dbg_out [13] = dhcp_offerIsReceived;
-assign dbg_out [14] = m_dhcp_discover_start;
+assign dbg_out [14] = m_dhcp_discover_start;*/
 
 
 endmodule

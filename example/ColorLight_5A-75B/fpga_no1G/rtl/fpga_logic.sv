@@ -229,6 +229,14 @@ begin
 
 end
 
+   wire mac_is_mdns;
+   mDNShelper inst_mDNShelper
+   (
+     .clk (clk),
+     .rst (rst),
+     .mac (rx_eth_dest_mac),
+     .mac_is_mdns (mac_is_mdns)
+   );
 
    reg auto_ip_prepare;
    reg [31:0] auto_ip_ip;
@@ -603,7 +611,7 @@ DHCPhelper #(
     .auto_ip_latch(auto_ip_latch),
     .auto_ip_ip(auto_ip_ip[15:0]),
 
-    .dbg_out(dbg_out),
+//    .dbg_out(dbg_out),
 
 
     .local_mac(local_mac),  
@@ -635,6 +643,8 @@ reg [7:0] eeprom_cnt;
 reg [2:0] addr_cnt;
 reg [23:0] eeprom_pwd;
 
+reg string_matched;
+
 typedef enum logic [5:0] {
        idle,
        init_eeprom_1,
@@ -649,10 +659,11 @@ typedef enum logic [5:0] {
        dhcp_offer_processing1,dhcp_offer_processing2,
        autoIp_start,autoIp_wait_cache_busy,autoIp_wait_cache_ready,
           autoIp_wait_fake_packet_send,autoIp_wait_fake_packet_sent,
-       dbg_string_1,dbg_string_2
+       dbg_string_1,dbg_string_2,
+       mDNS_cmp,mDNS_fill_1,mDNS_fill_2,mDNS_fill_3
      } answerStates;
 
-answerStates answerState = idle;
+answerStates answerState/* = idle*/;
 
 always @(posedge clk)
 begin
@@ -720,11 +731,29 @@ begin
                      // For correct usage of Broadcast/local pipeline!!!
                      tx_udp_ip_dest_ip <= rx_ip_source_ip;  
                end else
+               // MDNS request
+               if ((rx_udp_hdr_valid)  && (mac_is_mdns))
+               begin                         
+                  case (rx_udp_dest_port)
+                     // Reflect port (just for test purposes)
+                     16'd5353: begin
+                           // We must flush FIFO. That is why we must check full string
+                           // Let's use flag for clear it at first mismatch (but continue checking!!!)
+                           string_matched <= 1;
+
+                           spi_start_addr <= 24'h1ff080;
+                           spi_read_strobe <= 1;
+                           spi_m_tready <= 1;
+                           answerState <= mDNS_cmp;
+                     end
+                 endcase
+               end else
+               // Regular UDP 
                if ((rx_udp_hdr_valid)  && (mac_matched))
                begin
                   case (rx_udp_dest_port)
                      // Reflect port (just for test purposes)
-                     68: begin
+                     16'd68: begin
 //                         tx_udp_ip_source_ip <= local_ip;
 //                         tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
 //                         tx_udp_source_port <= 68; 
@@ -736,7 +765,7 @@ begin
                          answerState <= dhcp_offer_processing1;
                      end
                      // Reflect port (just for test purposes)
-                     1234: begin
+                     16'd1234: begin
                          tx_udp_ip_source_ip <= local_ip;
                          tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;  
                          tx_udp_source_port <= 1234; 
@@ -964,7 +993,6 @@ begin
                // negative logic! Wait for release trigger
                if (rxd)
                begin
-                  dbg_led <= ~dbg_led; 
 
                   // We are planning to send DHCP_DISCOVERY
                   // This is a first packet in DHCP processing
@@ -1108,7 +1136,7 @@ begin
                     answerState <= autoIp_start; 
                 end else
                 begin
-                    dbg_led <= 1'b0;
+//                    dbg_led <= 1'b0;
                     auto_ip_latch <= 1;
                     answerState <= idle; 
                 end
@@ -1120,7 +1148,7 @@ begin
         dbg_string_1: begin
            if (spi_m_tvalid)
            begin
-               eeprom_cnt <= spi_m_tdata [4:0] - 1;
+               eeprom_cnt <= spi_m_tdata - 1;
                answerState <= dbg_string_2;
            end
         end
@@ -1144,8 +1172,95 @@ begin
                end
            end
         end
-/*        dbg_string_3: begin
-        end*/
+        mDNS_cmp: begin
+           rx_udp_payload_axis_tready <= spi_m_tvalid;
+             if (spi_m_tvalid)
+             begin
+                 if (rx_udp_payload_axis_tdata != spi_m_tdata)
+                 begin
+                     string_matched <= 0;
+                 end
+             end
+             if (rx_udp_payload_axis_tlast & rx_udp_payload_axis_tvalid)
+             begin
+                 if (string_matched)
+                 begin
+                       spi_read_strobe <= 0;
+                       eeprom_cnt <= 8'h0;
+                       tx_udp_length <= 8;
+                       tx_udp_ip_source_ip <= local_ip;
+                       tx_udp_ip_dest_ip <= rx_udp_ip_source_ip;    // Maybe will be needed change to 224.0.0.251!!!
+                       tx_udp_source_port <= 16'd5353; 
+                       tx_udp_dest_port <= 16'd5353;   
+                       answerState <= mDNS_fill_1;
+                end else
+                begin
+                      answerState <= idle;
+                end
+             end
+        end
+         mDNS_fill_1: begin
+              ourData_tlast <= 0;
+              ourData_tvalid <= 1;
+              case (eeprom_cnt[3:0])
+                  4'h2 : ourData_tdata <= 8'h84;
+                  4'h7 : ourData_tdata <= 8'h01;
+                  4'hb : begin
+                              spi_start_addr <= 24'h1ff08b;
+                              spi_read_strobe <= 1;
+                              spi_m_tready <= 1;
+                              answerState <= mDNS_fill_2;
+                         end
+                  default:  ourData_tdata <= 8'h00;
+              endcase
+              eeprom_cnt <= eeprom_cnt + 8'd1;
+              tx_udp_length <= tx_udp_length + 1;
+              rx_udp_payload_axis_tready <= 0;
+/*              if (string_matched == 1)
+                   dbg_led <= 0; */
+         end
+         mDNS_fill_2: begin
+           ourData_tdata <= spi_m_tdata;
+           ourData_tvalid <= spi_m_tvalid;
+           if (spi_m_tvalid)
+           begin
+               tx_udp_length <= tx_udp_length + 1;
+               if (spi_m_tdata == 8'd0)
+               begin
+                   spi_read_strobe <= 0;
+	           spi_m_tready <= 0;
+                   eeprom_cnt <= 8'h0;
+                   answerState <= mDNS_fill_3;
+               end 
+           end
+         end
+         mDNS_fill_3: begin
+//              ourData_tlast <= 0;
+//              ourData_tvalid <= 1;
+              case (eeprom_cnt [3:0]) 
+                  4'h1 : ourData_tdata <= 8'h01;
+                  4'h2 : ourData_tdata <= 8'h80;
+                  4'h3 : ourData_tdata <= 8'h01;
+                  4'h7 : ourData_tdata <= 8'h78;
+                  4'h9 : ourData_tdata <= 8'h04;
+
+                  4'ha : ourData_tdata <= local_ip [31:24];
+                  4'hb : ourData_tdata <= local_ip [23:16];
+                  4'hc : ourData_tdata <= local_ip [15:8];
+                  4'hd : begin
+                              ourData_tdata <= local_ip [7:0];
+                              ourData_tlast <= 1;
+                              // Same functionality as we need...
+                              answerState <= dhcp_fill_1;
+                         end
+                  default:  ourData_tdata <= 8'h00;
+              endcase
+              eeprom_cnt <= eeprom_cnt + 8'd1;
+              tx_udp_length <= tx_udp_length + 1;
+              rx_udp_payload_axis_tready <= 0;
+/*              if (string_matched == 1)
+                   dbg_led <= 0; */
+         end
         endcase
 //     end // mac_matched
     end 
@@ -1230,6 +1345,11 @@ icmp ICMP (
 
     .local_ip(local_ip)
 );
+
+assign dbg_out [6:0] = spi_m_tdata [6:0];
+assign dbg_out [7] = spi_m_tvalid;
+assign dbg_out [13:8] = rx_udp_payload_axis_tdata [5:0];
+assign dbg_out [14] = dbg_led;
 
 /*assign dbg_out [7:0] = ourData_tdata;
 assign dbg_out [8] = ourData_tvalid;

@@ -243,7 +243,7 @@ fpga_core #(
 ODDRX1F ODDRX1Fd(
 	.D0(1'd1),
 	.D1(1'd0),
-	.SCLK(clk50),
+	.SCLK(clk_system),
 	.Q(dbg_out[15])
 );
 
