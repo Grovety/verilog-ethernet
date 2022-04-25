@@ -56,14 +56,6 @@ output [15:0]            dbg_out
 
 );
 
-/*assign dbg_out [7:0] = dhcp_offer_axis_tdata;
-assign dbg_out [8] = dhcp_offer_axis_tvalid;
-assign dbg_out [9] = dhcp_offer_axis_tready;
-assign dbg_out [11] = s_dhcp_offer_start;
-assign dbg_out [12] = s_dhcp_offer_finished;
-assign dbg_out [13] = dhcp_offerIsReceived;
-assign dbg_out [14] = m_dhcp_discover_start;*/
-
 reg  [7:0] filler_ptr;
 reg  [7:0] parser_ptr;
 reg  [4:0] option_ptr;
@@ -224,7 +216,6 @@ axis_async_fifo  #(
     .m_axis_tlast(dhcp_offer_axis_tlast)
 );
 
-  
 typedef enum {
                 idle,
                 fillFromEeprom1,fillFromEeprom2,
@@ -571,11 +562,14 @@ begin
                   // those options or not contain
                   temp_gateway_ip_is_filled <= 0;
                   temp_option_54_is_filled <= 0;
+
+                  dhcp_offerIsReceived <= 0;
+
               end
            end
            parseOfferBlock1: begin
               dhcp_offer_axis_tready <= 1;
-              if (dhcp_offer_axis_tvalid  && dhcp_offer_axis_tready)
+              if (dhcp_offer_axis_tvalid && dhcp_offer_axis_tready)
               begin
                  case (parser_ptr)
                      8'h00: if (dhcp_offer_axis_tdata != 8'h02) state_parser <= parseOfferWaitFinish;
@@ -657,8 +651,8 @@ begin
 //                                 dhcp_lastAnswerType <= dhcp_offer_axis_tdata;
                                  if (dhcp_offer_axis_tdata == 8'h02)
                                      dhcp_offerIsReceived <= 1;
-                                 else
-                                     dhcp_offerIsReceived <= 0;
+/*                                 else
+                                     dhcp_offerIsReceived <= 0;*/
 //                                 dhcp_offerIsReceived <= (dhcp_offer_axis_tdata == 8'h02)?1:0; 
                                  state_parser <= parseOfferProcessOption1;
                                end
@@ -713,4 +707,15 @@ begin
        endcase
      end
 end
+
+/*assign dbg_out [7:0] = xid [31:24];//dhcp_offer_axis_tdata;
+assign dbg_out [8] = dhcp_offer_axis_tvalid;
+assign dbg_out [9] = dhcp_offer_axis_tready;
+assign dbg_out [10] = m_dhcp_discover_step_request;//dhcp_offer_axis_tlast;
+assign dbg_out [11] = s_dhcp_offer_start;
+assign dbg_out [12] = s_dhcp_offer_finished;
+assign dbg_out [13] = dhcp_offerIsReceived;
+assign dbg_out [14] = m_dhcp_discover_start;*/
+
+
 endmodule
